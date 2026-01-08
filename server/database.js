@@ -2,20 +2,31 @@ const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs');
 
-// Use Railway volume if mounted, otherwise use local directory
-const dbPath = process.env.RAILWAY_VOLUME_MOUNT_PATH
+// Initial paths
+let dbPath = process.env.RAILWAY_VOLUME_MOUNT_PATH
     ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, 'analytics.db')
     : path.join(__dirname, 'analytics.db');
 
-// Ensure directory exists
+// Ensure directory exists with fallback
 const dbDir = path.dirname(dbPath);
-if (!fs.existsSync(dbDir)) {
-    console.log(`📁 Creating missing directory: ${dbDir}`);
-    fs.mkdirSync(dbDir, { recursive: true });
+try {
+    if (!fs.existsSync(dbDir)) {
+        console.log(`📁 Attempting to create directory: ${dbDir}`);
+        fs.mkdirSync(dbDir, { recursive: true });
+    }
+} catch (error) {
+    console.error(`❌ Permission denied for ${dbDir}. Falling back to project root.`);
+    dbPath = path.join(__dirname, 'analytics.db');
 }
 
 console.log(`📊 Analytics database path: ${dbPath}`);
-const db = new Database(dbPath);
+let db;
+try {
+    db = new Database(dbPath);
+} catch (error) {
+    console.error(`❌ Could not open database at ${dbPath}, trying local fallback...`);
+    db = new Database(path.join(__dirname, 'analytics.db'));
+}
 
 // Initialize analytics table
 db.exec(`
