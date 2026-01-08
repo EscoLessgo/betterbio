@@ -1,7 +1,6 @@
-import React, { useRef } from 'react';
+import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Float, MeshDistortMaterial } from '@react-three/drei';
-import * as THREE from 'three';
 
 const Bug = ({ currentPosition }) => {
     const meshRef = useRef();

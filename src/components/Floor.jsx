@@ -1,7 +1,6 @@
-import React, { useMemo, useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { Float, Sphere, MeshDistortMaterial, MeshReflectorMaterial, Line } from '@react-three/drei';
-import * as THREE from 'three';
 
 const PCB_BASE = "#020406";
 const TRACE_COLOR = "#00ffff";
@@ -16,7 +15,7 @@ const CircuitTraces = () => {
 
             const points = [
                 [startX, startY, -0.95],
-                horizontal ? [startX + length, startY, -0.95] : [startX, startY + length, -0.95]
+                horizontal ? [startX + length, startY, -0.95] : [startX, startY + length, -1]
             ];
             return { points, color: Math.random() > 0.8 ? "#ff0077" : "#00ffff" };
         });
@@ -41,8 +40,10 @@ const CircuitTraces = () => {
 const DataShard = ({ position, color, speed }) => {
     const ref = useRef();
     useFrame((state) => {
-        ref.current.position.y += Math.sin(state.clock.elapsedTime * speed) * 0.01;
-        ref.current.rotation.z += 0.01;
+        if (ref.current) {
+            ref.current.position.y += Math.sin(state.clock.elapsedTime * speed) * 0.01;
+            ref.current.rotation.z += 0.01;
+        }
     });
     return (
         <group position={position} ref={ref}>
