@@ -1,51 +1,33 @@
 const express = require('express');
-const cors = require('cors');
 const path = require('path');
-require('dotenv').config();
+const cors = require('cors');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
-
-// --- EMERGENCY CRASH PROTECTION ---
-process.on('uncaughtException', (err) => {
-    console.error('CRITICAL_UNCAUGHT_ERR:', err);
-});
+const PORT = parseInt(process.env.PORT || '3001', 10);
 
 app.use(cors());
 app.use(express.json());
 
-// Immediate Health Check for Railway Gateway
-app.get('/health', (req, res) => {
-    console.log('--- 🩺 HEALTH_CHECK_RECEIVED ---');
-    res.status(200).send('HEALTHY');
-});
+// Immediate Health Check
+app.get('/health', (req, res) => res.status(200).send('HEALTHY_SYSTEM_V3'));
 
 const distPath = path.join(__dirname, '../dist');
+console.log(`📂 Serving static files from: ${distPath}`);
 app.use(express.static(distPath));
 
-// Simplified tracking to avoid any external network hangs during request
-app.post('/api/collect', (req, res) => {
-    res.status(200).json({ status: 'ok' });
-});
-
-// Admin fallback
-app.get('/admin', (req, res) => res.send('<h1>Admin Panel</h1><p>Active (In-Memory)</p>'));
+// Safety for API requests
+app.post('/api/collect', (req, res) => res.status(200).json({ status: 'ok' }));
 
 // Standard SPA Route
 app.get('*', (req, res) => {
-    res.sendFile(path.join(distPath, 'index.html'), (err) => {
+    const indexPath = path.join(distPath, 'index.html');
+    res.sendFile(indexPath, (err) => {
         if (err) {
-            res.status(200).send('<h1>ESCO.IO</h1><p>Initializing Neural Link... Refresh in 10s.</p>');
+            res.status(200).send('<h1>ESCO.IO</h1><p>Neural link initializing... Refresh in 10 seconds.</p>');
         }
     });
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`
-    ====================================
-    🚀 SERVER_STARTED
-    📍 PORT: ${PORT}
-    🌐 HOST: 0.0.0.0
-    ====================================
-    `);
+    console.log(`🚀 Server listening on port ${PORT} (0.0.0.0)`);
 });
