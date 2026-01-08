@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const DOMAIN_GROUPS = {
     'VELARIXSOLUTIONS.NL': [
@@ -43,10 +43,43 @@ const SafeModeApp = () => {
                 .domain-card:hover { transform: scale(1.02); border-color: #00ffff; box-shadow: 0 0 30px rgba(0, 255, 255, 0.15); z-index: 10; }
                 .link-item { background: #111; border: 1px solid #222; transition: all 0.2s; }
                 .link-item:hover { background: #fff !important; color: #000 !important; transform: translateX(10px); }
+                
+                .key-cap {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-width: 2.5rem;
+                    height: 2.5rem;
+                    padding: 0 0.5rem;
+                    background: #1a1a1a;
+                    border: 1px solid #444;
+                    border-radius: 6px;
+                    color: #fff;
+                    font-family: 'Inter', sans-serif;
+                    font-weight: 700;
+                    font-size: 1rem;
+                    box-shadow: 0 4px 0 #111;
+                    margin: 0 0.25rem;
+                }
+                .control-group {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    background: rgba(255,255,255,0.03);
+                    padding: 1rem 1.5rem;
+                    border-radius: 8px;
+                    border: 1px solid #222;
+                }
+                .control-desc {
+                    font-size: 0.9rem;
+                    color: #888;
+                    font-weight: bold;
+                    letter-spacing: 1px;
+                }
             `}</style>
 
             <div style={{
-                marginBottom: '5rem',
+                marginBottom: '4rem',
                 textAlign: 'center',
                 animation: 'fadeIn 1s ease-out'
             }}>
@@ -60,7 +93,7 @@ const SafeModeApp = () => {
                     ESCO.VEROE.FUN
                 </h1>
 
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2rem' }}>
                     <div style={{
                         border: '2px solid #ff0055',
                         background: 'rgba(255, 0, 85, 0.05)',
@@ -74,6 +107,39 @@ const SafeModeApp = () => {
                         ⚠ 3D_ACCELERATION_OFFLINE
                     </div>
 
+                    {/* OPERATING INSTRUCTIONS */}
+                    <div style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        justifyContent: 'center',
+                        gap: '1.5rem',
+                        marginTop: '1rem'
+                    }}>
+                        <div className="control-group">
+                            <div>
+                                <span className="key-cap">W</span>
+                                <span className="key-cap">A</span>
+                                <span className="key-cap">S</span>
+                                <span className="key-cap">D</span>
+                            </div>
+                            <span className="control-desc">NAVIGATE_NODES</span>
+                        </div>
+
+                        <div className="control-group">
+                            <div>
+                                <span className="key-cap">↵ Enter</span>
+                            </div>
+                            <span className="control-desc">EXECUTE_LINK</span>
+                        </div>
+
+                        <div className="control-group">
+                            <div>
+                                <span className="key-cap">ESC</span>
+                            </div>
+                            <span className="control-desc">BACK_DIRECTORY</span>
+                        </div>
+                    </div>
+
                     <button
                         onClick={() => setShowFix(!showFix)}
                         style={{
@@ -85,10 +151,11 @@ const SafeModeApp = () => {
                             cursor: 'pointer',
                             fontWeight: 'bold',
                             letterSpacing: '1px',
-                            transition: 'all 0.2s'
+                            transition: 'all 0.2s',
+                            marginTop: '1rem'
                         }}
                     >
-                        {showFix ? 'CLOSE_INSTRUCTIONS' : 'HOW TO ENABLE 3D?'}
+                        {showFix ? 'CLOSE_INSTRUCTIONS' : 'ENABLE_3D_GRAPHICS?'}
                     </button>
                 </div>
             </div>
@@ -118,16 +185,16 @@ const SafeModeApp = () => {
 
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', // BIGGER CARDS
+                gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))',
                 gap: '3rem',
                 width: '100%',
-                maxWidth: '1600px', // WIDER CONTAINER
+                maxWidth: '1600px',
                 padding: '0 2rem'
             }}>
                 {Object.entries(DOMAIN_GROUPS).map(([domain, links], idx) => (
                     <div key={domain} className="domain-card" style={{
                         padding: '3rem',
-                        minHeight: '500px', // TALLER CARDS
+                        minHeight: '500px',
                         display: 'flex',
                         flexDirection: 'column',
                         animation: `slideUp 0.6s ease-out ${idx * 0.1}s backwards`
