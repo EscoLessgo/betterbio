@@ -4,6 +4,7 @@ import { OrbitControls } from '@react-three/drei';
 import Experience from './components/Experience';
 import Terminal from './components/Terminal';
 import LoadingScreen from './components/LoadingScreen';
+import RagingSea from './components/RagingSea';
 import { trackPageView } from './utils/analytics';
 import './index.css';
 
@@ -69,6 +70,7 @@ function App() {
           camera={{ position: [0, 0, 35], fov: 40 }}
         >
           <color attach="background" args={['#000103']} />
+          <RagingSea />
 
           {!isLoading && (
             <Suspense fallback={null}>

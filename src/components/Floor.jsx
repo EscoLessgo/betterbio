@@ -68,7 +68,8 @@ const Floor = () => {
     return (
         <group position={[0, 0, 0]}>
             {/* 1. HIGH-END REFLECTIVE OBSIDIAN FLOOR - ULTRA OPTIMIZED */}
-            <mesh position={[0, 0, -1]} rotation={[0, 0, 0]}>
+            {/* 1. HIGH-END REFLECTIVE OBSIDIAN FLOOR - DISABLED FOR RAGING SEA BACKGROUND */}
+            {/* <mesh position={[0, 0, -1]} rotation={[0, 0, 0]}>
                 <planeGeometry args={[200, 200]} />
                 <MeshReflectorMaterial
                     blur={[50, 50]}
@@ -84,7 +85,7 @@ const Floor = () => {
                     transparent
                     opacity={1}
                 />
-            </mesh>
+            </mesh> */}
 
             <CircuitTraces />
 
