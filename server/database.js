@@ -1,7 +1,12 @@
 const Database = require('better-sqlite3');
 const path = require('path');
 
-const dbPath = path.join(__dirname, 'analytics.db');
+// Use Railway volume if mounted, otherwise use local directory
+const dbPath = process.env.RAILWAY_VOLUME_MOUNT_PATH
+    ? path.join(process.env.RAILWAY_VOLUME_MOUNT_PATH, 'analytics.db')
+    : path.join(__dirname, 'analytics.db');
+
+console.log(`📊 Analytics database path: ${dbPath}`);
 const db = new Database(dbPath);
 
 // Initialize analytics table
