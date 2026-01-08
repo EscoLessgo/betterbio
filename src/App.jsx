@@ -66,15 +66,6 @@ function App() {
 
       <div className="canvas-container">
         <Canvas
-          // 🔧 COMPATIBILITY MODE: Using defaults that are most likely to be supported
-          gl={{
-            antialias: true,
-            alpha: true,
-            powerPreference: "high-performance",
-            failIfMajorPerformanceCaveat: false,
-            preserveDrawingBuffer: false
-          }}
-          dpr={[1, 1.5]}
           camera={{ position: [0, 0, 35], fov: 40 }}
         >
           <color attach="background" args={['#000103']} />
