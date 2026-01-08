@@ -1,4 +1,4 @@
-import React, { useRef, useMemo } from 'react';
+import React, { useRef } from 'react';
 import { useFrame, extend } from '@react-three/fiber';
 import { shaderMaterial } from '@react-three/drei';
 import * as THREE from 'three';
@@ -13,9 +13,9 @@ const RagingSeaMaterial = shaderMaterial(
     uSmallWavesFrequency: 3,
     uSmallWavesSpeed: 0.2,
     uSmallIterations: 4,
-    uDepthColor: new THREE.Color('#000103'),
-    uSurfaceColor: new THREE.Color('#0e3645'),
-    uColorOffset: 0.25,
+    uDepthColor: new THREE.Color('#000000'),
+    uSurfaceColor: new THREE.Color('#ffffff'),
+    uColorOffset: 0.08,
     uColorMultiplier: 2
   },
   // Vertex Shader
@@ -105,18 +105,27 @@ const RagingSeaMaterial = shaderMaterial(
     }
 
     void main() {
+      // VERTICAL WALL LOGIC:
+      // We want the plane to stand vertically. 
+      // If we use standard rotation=[0,0,0], the plane is in XY.
+      // We want noise to vary across XY.
+      // Standard shader usually uses XZ (floor).
+      // Here, we adapt it to sample XY for noise, and displace Z.
+
       vec4 modelPosition = modelMatrix * vec4(position, 1.0);
 
-      // Elevation
+      // 1. Calculate Elevation based on XY (since it's a wall)
       float elevation = sin(modelPosition.x * uBigWavesFrequency.x + uTime * uBigWavesSpeed) *
-                        sin(modelPosition.z * uBigWavesFrequency.y + uTime * uBigWavesSpeed) *
+                        sin(modelPosition.y * uBigWavesFrequency.y + uTime * uBigWavesSpeed) *
                         uBigWavesElevation;
 
       for(float i = 1.0; i <= uSmallIterations; i++) {
-        elevation -= abs(cnoise(vec3(modelPosition.xz * uSmallWavesFrequency * i, uTime * uSmallWavesSpeed)) * uSmallWavesElevation / i);
+         // Noise sampled from XY
+         elevation -= abs(cnoise(vec3(modelPosition.xy * uSmallWavesFrequency * i, uTime * uSmallWavesSpeed)) * uSmallWavesElevation / i);
       }
       
-      modelPosition.y += elevation;
+      // 2. Apply elevation to Z (Depth) 
+      modelPosition.z += elevation;
 
       vec4 viewPosition = viewMatrix * modelPosition;
       vec4 projectedPosition = projectionMatrix * viewPosition;
@@ -154,18 +163,18 @@ const RagingSea = () => {
   });
 
   return (
-    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -10, -30]} scale={1.5}>
-      <planeGeometry args={[100, 100, 512, 512]} />
+    <mesh rotation={[0, 0, 0]} position={[0, 0, -30]} scale={1.5}>
+      <planeGeometry args={[100, 80, 512, 512]} />
       <ragingSeaMaterial
         ref={materialRef}
         key={RagingSeaMaterial.key}
         uDepthColor={new THREE.Color('#000c18')}
         uSurfaceColor={new THREE.Color('#0088ff')}
         uBigWavesElevation={0.15}
-        uBigWavesFrequency={new THREE.Vector2(0.5, 0.2)}
-        uBigWavesSpeed={0.8}
-        uColorOffset={0.05}
-        uColorMultiplier={2.5}
+        uBigWavesFrequency={new THREE.Vector2(0.3, 0.2)}
+        uBigWavesSpeed={0.6}
+        uColorOffset={0.08}
+        uColorMultiplier={3}
       />
     </mesh>
   );
