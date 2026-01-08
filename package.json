@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@react-three/drei": "^9.102.6",
-    "@react-three/fiber": "^9.5.0",
+    "@react-three/fiber": "^8.16.8",
     "@types/three": "^0.163.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
