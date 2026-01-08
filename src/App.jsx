@@ -66,6 +66,15 @@ function App() {
 
       <div className="canvas-container">
         <Canvas
+          gl={{
+            antialias: false,
+            powerPreference: "default",
+            alpha: false,
+            depth: true,
+            stencil: false,
+            failIfMajorPerformanceCaveat: false
+          }}
+          dpr={[1, 1.5]} // Cap DPI to ensure stability
           camera={{ position: [0, 0, 35], fov: 40 }}
         >
           <color attach="background" args={['#000103']} />
