@@ -4,22 +4,22 @@ import { shaderMaterial } from '@react-three/drei';
 import * as THREE from 'three';
 
 const RagingSeaMaterial = shaderMaterial(
-    {
-        uTime: 0,
-        uBigWavesElevation: 0.2,
-        uBigWavesFrequency: new THREE.Vector2(4, 1.5),
-        uBigWavesSpeed: 0.75,
-        uSmallWavesElevation: 0.15,
-        uSmallWavesFrequency: 3,
-        uSmallWavesSpeed: 0.2,
-        uSmallIterations: 4,
-        uDepthColor: new THREE.Color('#000103'),
-        uSurfaceColor: new THREE.Color('#0e3645'),
-        uColorOffset: 0.25,
-        uColorMultiplier: 2
-    },
-    // Vertex Shader
-    `
+  {
+    uTime: 0,
+    uBigWavesElevation: 0.2,
+    uBigWavesFrequency: new THREE.Vector2(4, 1.5),
+    uBigWavesSpeed: 0.75,
+    uSmallWavesElevation: 0.15,
+    uSmallWavesFrequency: 3,
+    uSmallWavesSpeed: 0.2,
+    uSmallIterations: 4,
+    uDepthColor: new THREE.Color('#000103'),
+    uSurfaceColor: new THREE.Color('#0e3645'),
+    uColorOffset: 0.25,
+    uColorMultiplier: 2
+  },
+  // Vertex Shader
+  `
     uniform float uTime;
     uniform float uBigWavesElevation;
     uniform vec2 uBigWavesFrequency;
@@ -125,8 +125,8 @@ const RagingSeaMaterial = shaderMaterial(
       vElevation = elevation;
     }
   `,
-    // Fragment Shader
-    `
+  // Fragment Shader
+  `
     uniform vec3 uDepthColor;
     uniform vec3 uSurfaceColor;
     uniform float uColorOffset;
@@ -145,28 +145,30 @@ const RagingSeaMaterial = shaderMaterial(
 extend({ RagingSeaMaterial });
 
 const RagingSea = () => {
-    const materialRef = useRef();
+  const materialRef = useRef();
 
-    useFrame((state, delta) => {
-        if (materialRef.current) {
-            materialRef.current.uTime += delta;
-        }
-    });
+  useFrame((state, delta) => {
+    if (materialRef.current) {
+      materialRef.current.uTime += delta;
+    }
+  });
 
-    return (
-        <mesh rotation={[0, 0, 0]} position={[0, 0, -10]} scale={1.5}>
-            <planeGeometry args={[60, 40, 512, 512]} />
-            <ragingSeaMaterial
-                ref={materialRef}
-                key={RagingSeaMaterial.key}
-                uDepthColor={new THREE.Color('#000103')}
-                uSurfaceColor={new THREE.Color('#0e3645')}
-                uBigWavesElevation={0.15}
-                uBigWavesFrequency={new THREE.Vector2(0.5, 0.4)}
-                uBigWavesSpeed={0.5}
-            />
-        </mesh>
-    );
+  return (
+    <mesh rotation={[0, 0, 0]} position={[0, 0, -15]} scale={1.5}>
+      <planeGeometry args={[80, 60, 512, 512]} />
+      <ragingSeaMaterial
+        ref={materialRef}
+        key={RagingSeaMaterial.key}
+        uDepthColor={new THREE.Color('#001e36')}
+        uSurfaceColor={new THREE.Color('#00ffff')}
+        uBigWavesElevation={0.2}
+        uBigWavesFrequency={new THREE.Vector2(2, 1)}
+        uBigWavesSpeed={0.75}
+        uColorOffset={0.08}
+        uColorMultiplier={3}
+      />
+    </mesh>
+  );
 };
 
 export default RagingSea;
