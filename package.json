@@ -17,7 +17,6 @@
     "@react-three/drei": "^9.102.6",
     "@react-three/fiber": "^9.5.0",
     "@types/three": "^0.163.0",
-    "better-sqlite3": "^12.5.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
