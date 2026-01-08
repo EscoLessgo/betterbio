@@ -3,31 +3,30 @@ const path = require('path');
 const cors = require('cors');
 
 const app = express();
-const PORT = parseInt(process.env.PORT || '3001', 10);
+const PORT = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
 
-// Immediate Health Check
-app.get('/health', (req, res) => res.status(200).send('HEALTHY_SYSTEM_V3'));
+// Immediate health check
+app.get('/health', (req, res) => res.status(200).send('HEALTHY'));
 
-const distPath = path.join(__dirname, '../dist');
-console.log(`📂 Serving static files from: ${distPath}`);
+// Static files
+const distPath = path.resolve(__dirname, '..', 'dist');
 app.use(express.static(distPath));
 
-// Safety for API requests
+// API
 app.post('/api/collect', (req, res) => res.status(200).json({ status: 'ok' }));
 
-// Standard SPA Route
+// SPA fallback
 app.get('*', (req, res) => {
-    const indexPath = path.join(distPath, 'index.html');
-    res.sendFile(indexPath, (err) => {
+    res.sendFile(path.resolve(distPath, 'index.html'), (err) => {
         if (err) {
-            res.status(200).send('<h1>ESCO.IO</h1><p>Neural link initializing... Refresh in 10 seconds.</p>');
+            res.status(200).send('<html><body style="background:#000;color:#0ff;font-family:monospace;display:flex;align-items:center;justify-content:center;height:100vh"><h1>SYSTEM_BOOTING // REFRESH_IN_30S</h1></body></html>');
         }
     });
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server listening on port ${PORT} (0.0.0.0)`);
+    console.log(`🚀 NEURAL_LINK_ACTIVE on port ${PORT}`);
 });
