@@ -36,7 +36,11 @@ app.post('/api/collect', async (req, res) => {
     const browser = ua.toAgent();
     const device = ua.device.toString();
 
-    insertView.run(ip, location, os, browser, device, path, referrer);
+    try {
+        insertView(ip, location, os, browser, device, path, referrer);
+    } catch (e) {
+        console.error('Tracking failed:', e);
+    }
     res.status(200).json({ status: 'tracked' });
 });
 
