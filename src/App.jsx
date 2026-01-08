@@ -66,13 +66,13 @@ function App() {
 
       <div className="canvas-container">
         <Canvas
+          // 🔧 COMPATIBILITY MODE: Using defaults that are most likely to be supported
           gl={{
-            antialias: false,
-            powerPreference: "default",
-            alpha: false,
-            depth: true,
-            stencil: false,
-            failIfMajorPerformanceCaveat: false
+            antialias: true,
+            alpha: true,
+            powerPreference: "high-performance",
+            failIfMajorPerformanceCaveat: false,
+            preserveDrawingBuffer: false
           }}
           dpr={[1, 1.5]}
           camera={{ position: [0, 0, 35], fov: 40 }}
