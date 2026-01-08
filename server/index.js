@@ -2,9 +2,28 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 
+// FAILSAFE: Global Error Handlers to prevent 502 crashes
+process.on('uncaughtException', (err) => {
+    console.error('!!! UNCAUGHT EXCEPTION !!!', err);
+    // Do not exit, keep running if possible
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('!!! UNHANDLED REJECTION !!!', reason);
+});
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Poncholove20!!';
+
+// Explicitly log startup configuration
+console.log('--- SYSTEM STARTING ---');
+console.log(`PORT: ${PORT}`);
+console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
+console.log(`CWD: ${process.cwd()}`);
+
+const distPath = path.join(process.cwd(), 'dist');
+console.log(`DIST_PATH: ${distPath}`);
 
 // In-memory analytics
 const analyticsData = {
@@ -12,16 +31,37 @@ const analyticsData = {
     startTime: new Date().toISOString()
 };
 
-const distPath = path.join(process.cwd(), 'dist');
-console.log(`[SYSTEM] Serving from: ${distPath}`);
-
 app.use(cors());
 app.use(express.json());
 
-// Health check
-app.get('/health', (req, res) => res.status(200).send('OK'));
+// 1. Health check (Highest Priority)
+app.get('/health', (req, res) => {
+    console.log('Health check received');
+    res.status(200).send('OK');
+});
 
-// API stats
+// 2. Static Assets
+app.use(express.static(distPath));
+
+// 3. Simple Analytics (No external deps)
+app.post('/api/collect', (req, res) => {
+    try {
+        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        analyticsData.visits.unshift({
+            timestamp: new Date().toISOString(),
+            ip: ip || 'unknown',
+            path: req.body.path || '/',
+            ua: req.headers['user-agent'] || 'unknown'
+        });
+        // Limit memory usage
+        if (analyticsData.visits.length > 5000) analyticsData.visits.length = 5000;
+        res.status(200).json({ status: 'ok' });
+    } catch (e) {
+        console.error('Analytics Error:', e);
+        res.status(200).json({ status: 'ok' });
+    }
+});
+
 app.get('/api/stats', (req, res) => {
     if (req.headers.authorization === ADMIN_PASSWORD) {
         res.json({
@@ -37,104 +77,40 @@ app.get('/api/stats', (req, res) => {
     }
 });
 
-// Analytics collection
-app.post('/api/collect', (req, res) => {
-    try {
-        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-        analyticsData.visits.unshift({
-            timestamp: new Date().toISOString(),
-            ip,
-            path: req.body.path || '/',
-            os: 'generic'
-        });
-        if (analyticsData.visits.length > 2000) analyticsData.visits.pop();
-        res.status(200).json({ status: 'ok' });
-    } catch (e) {
-        res.status(200).json({ status: 'ok' });
-    }
-});
-
-// Static assets
-app.use(express.static(distPath));
-
-// Admin UI
+// 4. Admin UI (Inline HTML)
 app.get('/admin', (req, res) => {
     res.send(`
         <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <title>ESCO.IO | ANALYTICS_CORE</title>
-            <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
-            <style>
-                :root { --pcb-blue: #00ffff; --pcb-pink: #ff0077; --bg: #050505; }
-                body { background: var(--bg); color: var(--pcb-blue); font-family: 'Roboto Mono', monospace; margin: 0; padding: 2rem; }
-                .container { max-width: 1000px; margin: 0 auto; }
-                .glitch { color: var(--pcb-pink); text-shadow: 2px 2px var(--pcb-blue); font-weight: bold; font-size: 1.8rem; margin-bottom: 2rem; border-bottom: 1px solid #333; padding-bottom: 1rem; }
-                .card { background: #0a0a0f; border: 1px solid #00ffff33; padding: 1.5rem; margin-bottom: 2rem; border-radius: 4px; box-shadow: 0 0 20px rgba(0,255,255,0.05); }
-                .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-                .stat-box { border: 1px solid #ff007733; padding: 1rem; background: #0f0a0a; text-align: center; }
-                .stat-val { font-size: 2rem; color: #fff; text-shadow: 0 0 10px var(--pcb-pink); }
-                input { background: #000; border: 1px solid var(--pcb-pink); color: #fff; padding: 1rem; width: 300px; font-family: inherit; outline: none; }
-                button { background: var(--pcb-pink); color: #fff; border: none; padding: 1rem 2rem; cursor: pointer; font-family: inherit; font-weight: bold; transition: 0.3s; margin-left: 10px; }
-                button:hover { background: #fff; color: #000; box-shadow: 0 0 20px var(--pcb-pink); }
-                table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 1rem; }
-                th { text-align: left; padding: 1rem; color: var(--pcb-pink); border-bottom: 2px solid #333; }
-                td { padding: 0.8rem 1rem; border-bottom: 1px solid #1a1a1a; color: #aaa; }
-                tr:hover td { color: #fff; background: #ffffff05; }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <h1 class="glitch">NEURAL_LINK_ADMIN_v1.8</h1>
-                <div id="auth">
-                    <input type="password" id="pw" placeholder="ENTER_PASSKEY">
-                    <button onclick="go()">ESTABLISH_LINK</button>
-                </div>
-                <div id="dash" style="display:none">
-                    <div class="stats-grid">
-                        <div class="stat-box"><div>TOTAL_HITS</div><div class="stat-val" id="v">0</div></div>
-                        <div class="stat-box"><div>UNIQUE_IPS</div><div class="stat-val" id="i">0</div></div>
-                    </div>
-                    <div class="card">
-                        <h3>ACTIVITY_LOG</h3>
-                        <table id="t">
-                            <thead><tr><th>TIME</th><th>IP_ADDRESS</th><th>PATH_SHARD</th></tr></thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <script>
-                async function go() {
-                    const pass = document.getElementById('pw').value;
-                    const res = await fetch('/api/stats', { headers: { 'Authorization': pass } });
-                    if (res.ok) {
-                        const data = await res.json();
-                        document.getElementById('auth').style.display='none';
-                        document.getElementById('dash').style.display='block';
-                        document.getElementById('v').innerText = data.summary.totalVisits;
-                        document.getElementById('i').innerText = data.summary.uniqueIPs;
-                        document.querySelector('#t tbody').innerHTML = data.visits.map(v => \`
-                            <tr>
-                                <td>\${new Date(v.timestamp).toLocaleTimeString()}</td>
-                                <td>\${v.ip}</td>
-                                <td>\${v.path}</td>
-                            </tr>
-                        \`).join('');
-                    } else alert('ACCESS_DENIED');
-                }
-            </script>
-        </body>
-        </html>
+        <html><head><title>ADMIN</title>
+        <style>body{background:#000;color:#0f0;font-family:monospace;padding:20px}input{background:#111;border:1px solid #0f0;color:#fff;padding:10px}</style>
+        </head><body>
+        <h1>SYSTEM_ADMIN</h1>
+        <input id="p" type="password" placeholder="PASSWORD"><button onclick="go()">LOGIN</button>
+        <div id="d" style="display:none"><pre id="json"></pre></div>
+        <script>
+        async function go(){
+            const h = {Authorization:document.getElementById('p').value};
+            const r = await fetch('/api/stats',{headers:h});
+            if(r.ok){
+                document.getElementById('d').style.display='block';
+                document.getElementById('json').innerText=JSON.stringify(await r.json(),null,2);
+            }
+        }
+        </script></body></html>
     `);
 });
 
-// Final fallback
-app.use((req, res) => {
+// 5. Catch-All for SPA
+// 5. Catch-All for SPA (Middleware)
+app.use((req, res, next) => {
+    // If it's an API route and not handled, sending index can be confusing, but this is standard SPA fallback.
+    // However, let's skip API routes to avoid confusion.
+    if (req.path.startsWith('/api')) {
+        return res.status(404).json({ error: 'Not Found' });
+    }
     res.sendFile(path.join(distPath, 'index.html'));
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`SERVER_RUNNING: ${PORT}`);
+    console.log(`\n>>> SERVER LISTENING ON 0.0.0.0:${PORT} <<<\n`);
 });
