@@ -3,19 +3,21 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
+  define: {
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development')
+  },
   build: {
     outDir: 'dist',
-    minify: 'esbuild',
-    rollupOptions: {
-      output: {
-        // This ensures Three.js is treated as a solid block and not mangled into broken pieces
-        manualChunks: {
-          three: ['three']
-        }
-      }
+    minify: 'terser',
+    terserOptions: {
+      compress: {
+        dead_code: true,
+        unused: true,
+      },
+      mangle: false, // NUCLEAR OPTION: Turn off mangling to stop variable renaming crashes
+    },
+    commonjsOptions: {
+      transformMixedEsModules: true,
     }
-  },
-  optimizeDeps: {
-    include: ['three']
   }
 })
