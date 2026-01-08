@@ -11,13 +11,7 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    minify: 'terser',
-    terserOptions: {
-      compress: {
-        passes: 2,
-      },
-      mangle: false, // Continue to disable mangling for maximum stability
-    },
+    minify: false, // Disabled to resolve Three.js 'bt is undefined' errors caused by mangling
     commonjsOptions: {
       transformMixedEsModules: true,
     }
