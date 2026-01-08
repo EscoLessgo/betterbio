@@ -11,30 +11,28 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Poncholove20!!';
 
-console.log('--- booting esco.io system ---');
-console.log(`> cwd: ${process.cwd()}`);
-console.log(`> port: ${PORT}`);
+// Explicitly log startup configuration
+console.log('--- SYSTEM STARTING ---');
+console.log(`PORT: ${PORT}`);
+console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
+console.log(`CWD: ${process.cwd()}`);
 
-// 📄 PRE-LOAD INDEX.HTML (CRITICAL FIX)
-// Instead of reading it on every request (which can crash), we read it ONCE at startup.
-// If it fails, we serve a backup "Maintenance" page.
-const distPath = path.join(process.cwd(), 'dist');
-let INDEX_HTML = '';
-const BACKUP_HTML = `<!DOCTYPE html><html><body style="background:#000;color:#0ff;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;font-family:monospace"><h1>SYSTEM_REBOOTING...</h1></body></html>`;
-
+// DEBUG: List files in CWD to verify build output
 try {
-    const p = path.join(distPath, 'index.html');
-    if (fs.existsSync(p)) {
-        INDEX_HTML = fs.readFileSync(p, 'utf8');
-        console.log('> index.html loaded successfully');
+    console.log('Directory listing of CWD:');
+    console.log(fs.readdirSync(process.cwd()));
+    const dist = path.join(process.cwd(), 'dist');
+    if (fs.existsSync(dist)) {
+        console.log('Directory listing of ./dist:');
+        console.log(fs.readdirSync(dist));
     } else {
-        console.error('> index.html NOT FOUND at: ' + p);
-        INDEX_HTML = BACKUP_HTML;
+        console.error('!!! ./dist DIRECTORY DOES NOT EXIST !!!');
     }
 } catch (e) {
-    console.error('> Failed to load index.html:', e);
-    INDEX_HTML = BACKUP_HTML;
+    console.error('File listing failed:', e);
 }
+
+const distPath = path.join(process.cwd(), 'dist');
 
 // 🧠 IN-MEMORY ANALYTICS
 const analytics = { visits: [], boot: new Date().toISOString() };
@@ -77,7 +75,9 @@ app.get('/admin', (req, res) => {
 // 🚀 SPA FALLBACK (Zero-Crash Guarantee)
 app.use((req, res) => {
     if (req.path.startsWith('/api')) return res.status(404).send('404');
-    res.send(INDEX_HTML);
+    res.sendFile(path.join(distPath, 'index.html'), (err) => {
+        if (err && !res.headersSent) res.status(500).send('SERVER ERR: ' + err.message);
+    });
 });
 
 app.listen(PORT, '0.0.0.0', () => console.log(`> Ready on 0.0.0.0:${PORT}`));
