@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, PerspectiveCamera, Stars, Html, Preload } from '@react-three/drei';
-import { EffectComposer, Bloom, Noise, Vignette, ChromaticAberration, Glitch } from '@react-three/postprocessing';
-import { BlendFunction } from 'postprocessing';
 import Experience from './components/Experience';
 import Terminal from './components/Terminal';
 import LoadingScreen from './components/LoadingScreen';
