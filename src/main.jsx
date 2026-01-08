@@ -7,7 +7,8 @@ import './index.css'
 // CRITICAL: Ensure THREE is globally available before R3F or Drei components try to access it
 if (typeof window !== 'undefined') {
   window.THREE = THREE;
-  console.log('🌐 Global THREE initialized');
+  // Use a member to ensure THREE is not tree-shaken despite assignment
+  console.log('🌐 Component bridge initialized:', !!THREE.Vector3);
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(

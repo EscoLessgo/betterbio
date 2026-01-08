@@ -2,6 +2,14 @@ import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Text, Line, Float, QuadraticBezierLine, useTexture, useVideoTexture } from '@react-three/drei';
 import * as THREE from 'three';
+
+const {
+    Vector3,
+    MathUtils,
+    CatmullRomCurve3,
+    TextureLoader,
+    SRGBColorSpace
+} = THREE;
 import Bug from './Bug';
 import Floor from './Floor';
 
@@ -31,18 +39,22 @@ const PREVIEW_DATA = {
 
 // Optimized Non-Blocking Texture Loader
 const VideoFeed = ({ url }) => {
-    const videoTexture = useVideoTexture(url, {
-        unsuspended: 'canplay',
-        muted: true,
-        loop: true,
-        start: true
-    });
-    return (
-        <mesh>
-            <planeGeometry args={[13.6, 7]} />
-            <meshBasicMaterial map={videoTexture} transparent={false} />
-        </mesh>
-    );
+    try {
+        const videoTexture = useVideoTexture(url, {
+            unsuspended: 'canplay',
+            muted: true,
+            loop: true,
+            start: true
+        });
+        return (
+            <mesh>
+                <planeGeometry args={[13.6, 7]} />
+                <meshBasicMaterial map={videoTexture} transparent={false} />
+            </mesh>
+        );
+    } catch (e) {
+        return <Text fontSize={0.3} color="#ff3333">VIDEO_SYNC_ERROR</Text>;
+    }
 };
 
 const ImageFeed = ({ url }) => {
@@ -51,10 +63,10 @@ const ImageFeed = ({ url }) => {
 
     useEffect(() => {
         let isMounted = true;
-        const loader = new THREE.TextureLoader();
+        const loader = new TextureLoader();
         loader.load(url, (tex) => {
             if (!isMounted) return;
-            tex.colorSpace = THREE.SRGBColorSpace;
+            tex.colorSpace = SRGBColorSpace;
             setTexture(tex);
         }, undefined, () => { if (isMounted) setError(true); });
         return () => { isMounted = false; if (texture) texture.dispose(); };
@@ -91,10 +103,10 @@ const PreviewWindow = ({ node, isVisible, trunkColor }) => {
 
     useFrame(() => {
         const target = isVisible ? 1 : 0;
-        setScale(THREE.MathUtils.lerp(scale, target, 0.15));
+        setScale(MathUtils.lerp(scale, target, 0.15));
         if (groupRef.current) {
             groupRef.current.scale.setScalar(scale);
-            groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, isVisible ? 10 : 0, 0.15);
+            groupRef.current.position.z = MathUtils.lerp(groupRef.current.position.z, isVisible ? 10 : 0, 0.15);
         }
     });
 
@@ -152,12 +164,12 @@ const PreviewWindow = ({ node, isVisible, trunkColor }) => {
 
 const LaserPulse = ({ points, color }) => {
     const meshRef = useRef();
-    const [curve] = useState(() => new THREE.CatmullRomCurve3(points.map(p => new THREE.Vector3(...p))));
+    const [curve] = useState(() => new CatmullRomCurve3(points.map(p => new Vector3(...p))));
 
     useFrame((state) => {
         const t = (state.clock.elapsedTime * 0.5) % 1;
         const pos = curve.getPointAt(t);
-        meshRef.current.position.copy(pos);
+        if (meshRef.current) meshRef.current.position.copy(pos);
     });
 
     return (
@@ -176,9 +188,9 @@ const NodeElement = ({ node, isActive, isDimmed, isDeploying, onVisit }) => {
         if (groupRef.current) {
             const time = state.clock.elapsedTime;
             const targetScale = isDeploying ? 1 : 0;
-            groupRef.current.scale.lerp(new THREE.Vector3().setScalar(targetScale), 0.1);
+            groupRef.current.scale.lerp(new Vector3().setScalar(targetScale), 0.1);
             const zTarget = isActive ? 5 : 0;
-            groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, zTarget, 0.15);
+            groupRef.current.position.z = MathUtils.lerp(groupRef.current.position.z, zTarget, 0.15);
 
             if (isActive) {
                 const s = 1 + Math.sin(time * 4) * 0.05;
@@ -274,7 +286,7 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
     const [previewActive, setPreviewActive] = useState(false);
 
     const activeNodes = TREE_DATA[currentMenu];
-    const bugCurrentPos = useRef(new THREE.Vector3(...activeNodes[0].position));
+    const bugCurrentPos = useRef(new Vector3(...activeNodes[0].position));
 
     useEffect(() => {
         if (onNodeActive && activeNodes[0]) onNodeActive(activeNodes[0]);
@@ -283,22 +295,22 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
     useFrame((state) => {
         if (!activeNodes || !activeNodes[currentNodeIdx]) return;
         const targetNode = activeNodes[currentNodeIdx];
-        bugCurrentPos.current.lerp(new THREE.Vector3(...targetNode.position), 0.2);
+        bugCurrentPos.current.lerp(new Vector3(...targetNode.position), 0.2);
 
         // Smooth camera flow - pull back more when preview is active
         let camTargetZ = currentMenu === 'root' ? 45 : 35;
         if (previewActive) camTargetZ = 50;
 
-        let camTargetX = currentMenu === 'root' ? 0 : targetNode.position[0] * 0.5;
-        if (previewActive) camTargetX = targetNode.position[0] + 4; // Shift camera to see preview better
+        let camTargetX = currentMenu === 'root' ? 0 : (targetNode.position[0] || 0) * 0.5;
+        if (previewActive) camTargetX = (targetNode.position[0] || 0) + 4; // Shift camera to see preview better
 
-        const camTargetY = currentMenu === 'root' ? 0 : targetNode.position[1];
+        const camTargetY = currentMenu === 'root' ? 0 : (targetNode.position[1] || 0);
 
-        state.camera.position.lerp(new THREE.Vector3(camTargetX, camTargetY, camTargetZ), 0.08);
+        state.camera.position.lerp(new Vector3(camTargetX, camTargetY, camTargetZ), 0.08);
         state.camera.lookAt(bugCurrentPos.current.x * 0.2, bugCurrentPos.current.y * 0.2, 0);
 
         if (isCentering) {
-            state.camera.position.lerp(new THREE.Vector3(0, 0, 45), 0.1);
+            state.camera.position.lerp(new Vector3(0, 0, 45), 0.1);
             if (state.camera.position.z >= 44.9) onCenterComplete();
         }
     });
