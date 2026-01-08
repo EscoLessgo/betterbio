@@ -49,9 +49,10 @@ function App() {
   }, []);
 
   const handleNodeActive = (node) => {
+    if (!node) return;
     setActiveView(node);
     setShowTerminal(true);
-    trackPageView(`/node/${node.id}`);
+    trackPageView(`/node/${node.id || 'unknown'}`);
   };
 
   const closeTerminal = () => setShowTerminal(false);
@@ -77,12 +78,14 @@ function App() {
           <color attach="background" args={['#000103']} />
 
           {!isLoading && (
-            <Experience
-              onNodeActive={handleNodeActive}
-              activeView={activeView}
-              isCentering={isCentering}
-              onCenterComplete={() => setIsCentering(false)}
-            />
+            <Suspense fallback={null}>
+              <Experience
+                onNodeActive={handleNodeActive}
+                activeView={activeView}
+                isCentering={isCentering}
+                onCenterComplete={() => setIsCentering(false)}
+              />
+            </Suspense>
           )}
 
           <OrbitControls
@@ -95,10 +98,10 @@ function App() {
             enableDamping
           />
 
-          <ambientLight intensity={0.1} />
-          <spotLight position={[20, 30, 20]} angle={0.2} penumbra={1} intensity={10} color="#00ffff" castShadow />
-          <pointLight position={[-20, 20, 10]} intensity={15} color="#ff0077" />
-          <pointLight position={[20, -20, 10]} intensity={10} color="#00ffff" />
+          <ambientLight intensity={1} />
+          <spotLight position={[20, 30, 20]} angle={0.2} penumbra={1} intensity={100} color="#00ffff" castShadow decay={0} />
+          <pointLight position={[-20, 20, 10]} intensity={50} color="#ff0077" decay={0} />
+          <pointLight position={[20, -20, 10]} intensity={50} color="#00ffff" decay={0} />
 
           <Stars radius={150} depth={50} count={3000} factor={4} saturation={1} fade speed={1} />
 

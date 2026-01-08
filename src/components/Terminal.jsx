@@ -49,7 +49,8 @@ const CONTENT = {
 
 const Terminal = ({ isOpen, onClose, view }) => {
     if (!view) return null;
-    const data = CONTENT[view];
+    const viewId = typeof view === 'string' ? view : view.id;
+    const data = CONTENT[viewId] || CONTENT['home'];
 
     return (
         <div className={`terminal-window ${isOpen ? 'active' : ''}`}>

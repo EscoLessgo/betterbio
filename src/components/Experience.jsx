@@ -131,7 +131,7 @@ const PreviewWindow = ({ node, isVisible, trunkColor }) => {
                 <meshBasicMaterial color="#000" />
             </mesh>
             <Text position={[-6.5, 3.6, 0.17]} fontSize={0.18} color={trunkColor} anchorX="left">
-                LINK_FEED: {node.url.replace('https://', '')}
+                LINK_FEED: {(node?.url || 'system_node').replace('https://', '')}
             </Text>
 
             {hasMedia ? (
@@ -276,6 +276,10 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
     const activeNodes = TREE_DATA[currentMenu];
     const bugCurrentPos = useRef(new THREE.Vector3(...activeNodes[0].position));
 
+    useEffect(() => {
+        if (onNodeActive && activeNodes[0]) onNodeActive(activeNodes[0]);
+    }, []);
+
     useFrame((state) => {
         if (!activeNodes || !activeNodes[currentNodeIdx]) return;
         const targetNode = activeNodes[currentNodeIdx];
@@ -352,7 +356,10 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
                 }
             }
 
-            if (nextIdx !== currentNodeIdx) setCurrentNodeIdx(nextIdx);
+            if (nextIdx !== currentNodeIdx) {
+                setCurrentNodeIdx(nextIdx);
+                if (onNodeActive) onNodeActive(activeNodes[nextIdx]);
+            }
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
@@ -393,13 +400,12 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
                                 isDimmed={!matchesActiveMenu && !isRoot}
                                 isDeploying={isVisibleChild || isRoot}
                                 onVisit={() => {
-                                    if (node.url) {
-                                        if (isSelected && !previewActive) setPreviewActive(true);
-                                        else if (isSelected && previewActive) handleVisit(node.url);
-                                        else if (!isSelected) {
-                                            setCurrentNodeIdx(i);
-                                            setPreviewActive(true);
-                                        }
+                                    if (isSelected && !previewActive) setPreviewActive(true);
+                                    else if (isSelected && previewActive) handleVisit(node.url);
+                                    else if (!isSelected) {
+                                        setCurrentNodeIdx(i);
+                                        setPreviewActive(true);
+                                        if (onNodeActive) onNodeActive(node);
                                     }
                                 }}
                             />
