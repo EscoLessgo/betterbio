@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>SYSTEM_ANALYTICS // VELARIX_CORE</title>
+    <style>
+        body {
+            background: #050505;
+            color: #00ffff;
+            font-family: 'Courier New', monospace;
+            margin: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            border: 1px solid #00ffff;
+            padding: 1rem;
+            background: #0a0a0a;
+            box-shadow: 0 0 10px rgba(0, 255, 255, 0.1);
+        }
+
+        .label {
+            font-size: 0.7rem;
+            color: #ff0077;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+        }
+
+        .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.8rem;
+        }
+
+        th,
+        td {
+            border: 1px solid #111;
+            padding: 0.8rem;
+            text-align: left;
+        }
+
+        th {
+            background: #111;
+            color: #ff0077;
+            text-transform: uppercase;
+        }
+
+        tr:hover {
+            background: #111;
+        }
+
+        .login-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 80vh;
+        }
+
+        input {
+            background: #000;
+            border: 1px solid #00ffff;
+            color: #00ffff;
+            padding: 0.8rem;
+            width: 300px;
+            margin-bottom: 1rem;
+        }
+
+        button {
+            background: #00ffff;
+            color: #000;
+            border: none;
+            padding: 0.8rem 2rem;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        #dashboard {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="login" class="login-container">
+        <h1 style="color: #ff0077">CORE_ACCESS_REQUIRED</h1>
+        <input type="password" id="pass" placeholder="ENTER_SYSTEM_PASS">
+        <button onclick="loadStats()">INITIALIZE_SYNC</button>
+    </div>
+
+    <div id="dashboard">
+        <h1>NEURAL_TRAFFIC_ANALYSIS</h1>
+        <div class="grid">
+            <div class="card">
+                <div class="label">Total Views</div>
+                <div class="value" id="v-total">-</div>
+            </div>
+            <div class="card">
+                <div class="label">Unique Assets</div>
+                <div class="value" id="v-unique">-</div>
+            </div>
+            <div class="card">
+                <div class="label">Active OS</div>
+                <div class="value" id="v-os">-</div>
+            </div>
+            <div class="card">
+                <div class="label">Primary Loc</div>
+                <div class="value" id="v-loc">-</div>
+            </div>
+        </div>
+        <h3>RECENT_PINGS</h3>
+        <table id="recent-list">
+            <thead>
+                <tr>
+                    <th>TIMESTAMP</th>
+                    <th>IP_ADDRESS</th>
+                    <th>LOCATION</th>
+                    <th>DEVICE/OS</th>
+                    <th>BROWSER</th>
+                    <th>PATH</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <script>
+        async function loadStats() {
+            const pass = document.getElementById('pass').value;
+            try {
+                const res = await fetch(`/api/admin/stats?pass=${encodeURIComponent(pass)}`);
+                if (!res.ok) throw new Error('FORBIDDEN');
+                const data = await res.json();
+
+                document.getElementById('login').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+
+                document.getElementById('v-total').innerText = data.stats.totalViews;
+                document.getElementById('v-unique').innerText = data.stats.uniqueIps;
+                document.getElementById('v-os').innerText = data.stats.browsers[0]?.browser || 'N/A';
+                document.getElementById('v-loc').innerText = data.stats.locations[0]?.location || 'N/A';
+
+                const tbody = document.querySelector('#recent-list tbody');
+                tbody.innerHTML = data.recent.map(r => `
+                    <tr>
+                        <td>${new Date(r.timestamp).toLocaleString()}</td>
+                        <td>${r.ip}</td>
+                        <td>${r.location}</td>
+                        <td>${r.device} (${r.os})</td>
+                        <td>${r.browser}</td>
+                        <td>${r.path}</td>
+                    </tr>
+                `).join('');
+
+            } catch (e) {
+                alert('ACCESS_DENIED: INVALID_CLEARANCE_CODE');
+            }
+        }
+    </script>
+</body>
+
+</html>
