@@ -1,0 +1,8 @@
+ Volume in drive C has no label.
+ Volume Serial Number is 3C50-8AD3
+
+ Directory of C:\Users\voee1\.gemini\antigravity\brain\38e32e19-8786-4ad2-9d89-493424ef7e05
+
+01/08/2026  05:58 AM            52,305 uploaded_image_4_1767873499613.png
+               1 File(s)         52,305 bytes
+               0 Dir(s)  110,846,861,312 bytes free
