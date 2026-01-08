@@ -6,6 +6,7 @@ import { BlendFunction } from 'postprocessing';
 import Experience from './components/Experience';
 import Terminal from './components/Terminal';
 import LoadingScreen from './components/LoadingScreen';
+import { trackPageView } from './utils/analytics';
 import './index.css';
 
 const Header = () => (
@@ -45,9 +46,14 @@ function App() {
   const [isCentering, setIsCentering] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  useEffect(() => {
+    trackPageView();
+  }, []);
+
   const handleNodeActive = (node) => {
     setActiveView(node);
     setShowTerminal(true);
+    trackPageView(`/node/${node.id}`);
   };
 
   const closeTerminal = () => setShowTerminal(false);
