@@ -154,18 +154,18 @@ const RagingSea = () => {
   });
 
   return (
-    <mesh rotation={[0, 0, 0]} position={[0, 0, -15]} scale={1.5}>
-      <planeGeometry args={[80, 60, 512, 512]} />
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -10, -30]} scale={1.5}>
+      <planeGeometry args={[100, 100, 512, 512]} />
       <ragingSeaMaterial
         ref={materialRef}
         key={RagingSeaMaterial.key}
-        uDepthColor={new THREE.Color('#001e36')}
-        uSurfaceColor={new THREE.Color('#00ffff')}
-        uBigWavesElevation={0.2}
-        uBigWavesFrequency={new THREE.Vector2(2, 1)}
-        uBigWavesSpeed={0.75}
-        uColorOffset={0.08}
-        uColorMultiplier={3}
+        uDepthColor={new THREE.Color('#000c18')}
+        uSurfaceColor={new THREE.Color('#0088ff')}
+        uBigWavesElevation={0.15}
+        uBigWavesFrequency={new THREE.Vector2(0.5, 0.2)}
+        uBigWavesSpeed={0.8}
+        uColorOffset={0.05}
+        uColorMultiplier={2.5}
       />
     </mesh>
   );
