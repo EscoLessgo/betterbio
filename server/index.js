@@ -44,3 +44,11 @@ app.use((req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`SERVER_ONLINE_PORT_${PORT}`);
 });
+
+// Graceful Shutdown
+const shutdown = () => {
+    console.log('Shutting down...');
+    process.exit(0);
+};
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
