@@ -102,10 +102,6 @@ function App() {
           <spotLight position={[20, 30, 20]} angle={0.2} penumbra={1} intensity={100} color="#00ffff" castShadow decay={0} />
           <pointLight position={[-20, 20, 10]} intensity={50} color="#ff0077" decay={0} />
           <pointLight position={[20, -20, 10]} intensity={50} color="#00ffff" decay={0} />
-
-          <Stars radius={150} depth={50} count={3000} factor={4} saturation={1} fade speed={1} />
-
-          <Preload all />
         </Canvas>
       </div>
 
