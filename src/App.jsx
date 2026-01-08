@@ -66,13 +66,6 @@ function App() {
 
       <div className="canvas-container">
         <Canvas
-          gl={{
-            antialias: false,
-            powerPreference: "high-performance",
-            alpha: false,
-            stencil: false,
-            depth: true
-          }}
           camera={{ position: [0, 0, 35], fov: 40 }}
         >
           <color attach="background" args={['#000103']} />
