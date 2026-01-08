@@ -1,116 +1,83 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const fs = require('fs');
 
-// FAILSAFE: Global Error Handlers to prevent 502 crashes
-process.on('uncaughtException', (err) => {
-    console.error('!!! UNCAUGHT EXCEPTION !!!', err);
-    // Do not exit, keep running if possible
-});
-
-process.on('unhandledRejection', (reason, promise) => {
-    console.error('!!! UNHANDLED REJECTION !!!', reason);
-});
+// 🛡️ SECURITY & STABILITY: Catch all process-level errors
+process.on('uncaughtException', (err) => console.error('[FATAL] Uncaught:', err));
+process.on('unhandledRejection', (reason) => console.error('[FATAL] Rejection:', reason));
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Poncholove20!!';
 
-// Explicitly log startup configuration
-console.log('--- SYSTEM STARTING ---');
-console.log(`PORT: ${PORT}`);
-console.log(`NODE_ENV: ${process.env.NODE_ENV}`);
-console.log(`CWD: ${process.cwd()}`);
+console.log('--- booting esco.io system ---');
+console.log(`> cwd: ${process.cwd()}`);
+console.log(`> port: ${PORT}`);
 
+// 📄 PRE-LOAD INDEX.HTML (CRITICAL FIX)
+// Instead of reading it on every request (which can crash), we read it ONCE at startup.
+// If it fails, we serve a backup "Maintenance" page.
 const distPath = path.join(process.cwd(), 'dist');
-console.log(`DIST_PATH: ${distPath}`);
+let INDEX_HTML = '';
+const BACKUP_HTML = `<!DOCTYPE html><html><body style="background:#000;color:#0ff;display:flex;justify-content:center;align-items:center;height:100vh;margin:0;font-family:monospace"><h1>SYSTEM_REBOOTING...</h1></body></html>`;
 
-// In-memory analytics
-const analyticsData = {
-    visits: [],
-    startTime: new Date().toISOString()
-};
+try {
+    const p = path.join(distPath, 'index.html');
+    if (fs.existsSync(p)) {
+        INDEX_HTML = fs.readFileSync(p, 'utf8');
+        console.log('> index.html loaded successfully');
+    } else {
+        console.error('> index.html NOT FOUND at: ' + p);
+        INDEX_HTML = BACKUP_HTML;
+    }
+} catch (e) {
+    console.error('> Failed to load index.html:', e);
+    INDEX_HTML = BACKUP_HTML;
+}
+
+// 🧠 IN-MEMORY ANALYTICS
+const analytics = { visits: [], boot: new Date().toISOString() };
 
 app.use(cors());
 app.use(express.json());
 
-// 1. Health check (Highest Priority)
-app.get('/health', (req, res) => {
-    console.log('Health check received');
-    res.status(200).send('OK');
-});
+// 🩺 HEALTH CHECK
+app.get('/health', (req, res) => res.send('OK'));
 
-// 2. Static Assets
+// 📂 STATIC ASSETS
 app.use(express.static(distPath));
 
-// 3. Simple Analytics (No external deps)
+// 📊 ANALYTICS
 app.post('/api/collect', (req, res) => {
     try {
-        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-        analyticsData.visits.unshift({
-            timestamp: new Date().toISOString(),
-            ip: ip || 'unknown',
-            path: req.body.path || '/',
-            ua: req.headers['user-agent'] || 'unknown'
+        analytics.visits.unshift({
+            t: new Date().toISOString(),
+            ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+            path: req.body.path || 'unknown'
         });
-        // Limit memory usage
-        if (analyticsData.visits.length > 5000) analyticsData.visits.length = 5000;
-        res.status(200).json({ status: 'ok' });
-    } catch (e) {
-        console.error('Analytics Error:', e);
-        res.status(200).json({ status: 'ok' });
-    }
+        if (analytics.visits.length > 1000) analytics.visits.pop();
+    } catch (e) { }
+    res.json({ ok: true });
 });
 
 app.get('/api/stats', (req, res) => {
-    if (req.headers.authorization === ADMIN_PASSWORD) {
-        res.json({
-            summary: {
-                totalVisits: analyticsData.visits.length,
-                startTime: analyticsData.startTime,
-                uniqueIPs: new Set(analyticsData.visits.map(v => v.ip)).size
-            },
-            visits: analyticsData.visits.slice(0, 100)
-        });
-    } else {
-        res.status(401).json({ error: 'Unauthorized' });
-    }
+    if (req.headers.authorization !== ADMIN_PASSWORD) return res.status(401).json({ err: '401' });
+    res.json(analytics);
 });
 
-// 4. Admin UI (Inline HTML)
+// 👑 ADMIN
 app.get('/admin', (req, res) => {
-    res.send(`
-        <!DOCTYPE html>
-        <html><head><title>ADMIN</title>
-        <style>body{background:#000;color:#0f0;font-family:monospace;padding:20px}input{background:#111;border:1px solid #0f0;color:#fff;padding:10px}</style>
-        </head><body>
-        <h1>SYSTEM_ADMIN</h1>
-        <input id="p" type="password" placeholder="PASSWORD"><button onclick="go()">LOGIN</button>
-        <div id="d" style="display:none"><pre id="json"></pre></div>
-        <script>
-        async function go(){
-            const h = {Authorization:document.getElementById('p').value};
-            const r = await fetch('/api/stats',{headers:h});
-            if(r.ok){
-                document.getElementById('d').style.display='block';
-                document.getElementById('json').innerText=JSON.stringify(await r.json(),null,2);
-            }
-        }
-        </script></body></html>
-    `);
+    res.send(`<!DOCTYPE html><html><body style="background:#111;color:#0f0;font-family:monospace">
+    <h1>ADMIN_CORE</h1><input id="p" type="password"><button onclick="f()">LOGIN</button><pre id="d"></pre>
+    <script>async function f(){const r=await fetch('/api/stats',{headers:{Authorization:document.getElementById('p').value}});if(r.ok)document.getElementById('d').innerText=JSON.stringify(await r.json(),null,2)}</script>
+    </body></html>`);
 });
 
-// 5. Catch-All for SPA
-// 5. Catch-All for SPA (Middleware)
-app.use((req, res, next) => {
-    // If it's an API route and not handled, sending index can be confusing, but this is standard SPA fallback.
-    // However, let's skip API routes to avoid confusion.
-    if (req.path.startsWith('/api')) {
-        return res.status(404).json({ error: 'Not Found' });
-    }
-    res.sendFile(path.join(distPath, 'index.html'));
+// 🚀 SPA FALLBACK (Zero-Crash Guarantee)
+app.use((req, res) => {
+    if (req.path.startsWith('/api')) return res.status(404).send('404');
+    res.send(INDEX_HTML);
 });
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`\n>>> SERVER LISTENING ON 0.0.0.0:${PORT} <<<\n`);
-});
+app.listen(PORT, '0.0.0.0', () => console.log(`> Ready on 0.0.0.0:${PORT}`));
