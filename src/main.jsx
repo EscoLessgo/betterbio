@@ -4,6 +4,8 @@ import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
 import './index.css'
 
+import SafeModeApp from './components/SafeModeApp';
+
 // CRITICAL PRODUCTION FIX: Ensure THREE is global before ANY component loads
 if (typeof window !== 'undefined') {
   window.THREE = THREE;
@@ -23,13 +25,8 @@ class ErrorBoundary extends React.Component {
   }
   render() {
     if (this.state.hasError) {
-      return (
-        <div style={{ padding: '20px', color: 'red', background: '#000', height: '100vh' }}>
-          <h1>System Crash Detected</h1>
-          <p>{this.state.error?.toString()}</p>
-          <button onClick={() => window.location.reload()}>REBOOT_SYSTEM</button>
-        </div>
-      );
+      // 🛡️ FAILOVER: Render 2D Safe Mode instead of crash screen
+      return <SafeModeApp />;
     }
     return this.props.children;
   }
