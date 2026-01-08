@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 const DOMAIN_GROUPS = {
     'VELARIXSOLUTIONS.NL': [
@@ -24,58 +24,10 @@ const SafeModeApp = () => {
     const [showFix, setShowFix] = useState(false);
 
     return (
-        <div style={{
-            background: '#050505',
-            minHeight: '100vh',
-            fontFamily: "'Courier New', monospace",
-            padding: '4rem 2rem',
-            color: '#e0e0e0',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            overflowY: 'auto'
-        }}>
+        <div className="safe-mode-container">
             <style>{`
                 @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
                 @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
-                @keyframes neonPulse { 0% { text-shadow: 0 0 10px #0ff, 0 0 20px #0ff; } 100% { text-shadow: 0 0 20px #0ff, 0 0 40px #0ff, 0 0 60px #0ff; } }
-                .domain-card { background: #0a0a0a; border: 1px solid #333; transition: all 0.3s ease; }
-                .domain-card:hover { transform: scale(1.02); border-color: #00ffff; box-shadow: 0 0 30px rgba(0, 255, 255, 0.15); z-index: 10; }
-                .link-item { background: #111; border: 1px solid #222; transition: all 0.2s; }
-                .link-item:hover { background: #fff !important; color: #000 !important; transform: translateX(10px); }
-                
-                .key-cap {
-                    display: inline-flex;
-                    align-items: center;
-                    justify-content: center;
-                    min-width: 2.5rem;
-                    height: 2.5rem;
-                    padding: 0 0.5rem;
-                    background: #1a1a1a;
-                    border: 1px solid #444;
-                    border-radius: 6px;
-                    color: #fff;
-                    font-family: 'Inter', sans-serif;
-                    font-weight: 700;
-                    font-size: 1rem;
-                    box-shadow: 0 4px 0 #111;
-                    margin: 0 0.25rem;
-                }
-                .control-group {
-                    display: flex;
-                    align-items: center;
-                    gap: 1rem;
-                    background: rgba(255,255,255,0.03);
-                    padding: 1rem 1.5rem;
-                    border-radius: 8px;
-                    border: 1px solid #222;
-                }
-                .control-desc {
-                    font-size: 0.9rem;
-                    color: #888;
-                    font-weight: bold;
-                    letter-spacing: 1px;
-                }
             `}</style>
 
             <div style={{
@@ -193,10 +145,6 @@ const SafeModeApp = () => {
             }}>
                 {Object.entries(DOMAIN_GROUPS).map(([domain, links], idx) => (
                     <div key={domain} className="domain-card" style={{
-                        padding: '3rem',
-                        minHeight: '500px',
-                        display: 'flex',
-                        flexDirection: 'column',
                         animation: `slideUp 0.6s ease-out ${idx * 0.1}s backwards`
                     }}>
                         <h2 style={{
@@ -219,17 +167,6 @@ const SafeModeApp = () => {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="link-item"
-                                    style={{
-                                        display: 'flex',
-                                        justifyContent: 'space-between',
-                                        alignItems: 'center',
-                                        padding: '1.5rem 2rem',
-                                        color: '#bbb',
-                                        textDecoration: 'none',
-                                        fontSize: '1.2rem',
-                                        letterSpacing: '1px',
-                                        fontFamily: 'Inter, sans-serif'
-                                    }}
                                 >
                                     <span>{link.label}</span>
                                     <span style={{ fontSize: '1.5em', opacity: 0.5 }}>↗</span>
