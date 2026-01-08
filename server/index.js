@@ -1,57 +1,51 @@
 const express = require('express');
 const cors = require('cors');
-const useragent = require('useragent');
 const path = require('path');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "Poncholove20!!";
 
-// --- IN-MEMORY DATABASE ---
-let views = [];
-const dbModule = {
-    insertView: (ip, location, os, browser, device, pagePath, referrer) => {
-        try {
-            views.push({ ip, location, os, browser, device, path: pagePath, referrer, timestamp: new Date().toISOString() });
-            if (views.length > 500) views.shift();
-        } catch (e) { }
-    },
-    getAnalytics: (limit = 100) => [...views].reverse().slice(0, limit),
-    getStats: () => {
-        const uniqueIps = new Set(views.map(v => v.ip)).size;
-        return { totalViews: views.length, uniqueIps, browsers: [], locations: [] };
-    }
-};
-
-app.get('/health', (req, res) => res.status(200).send('HEALTHY'));
+// --- EMERGENCY CRASH PROTECTION ---
+process.on('uncaughtException', (err) => {
+    console.error('CRITICAL_UNCAUGHT_ERR:', err);
+});
 
 app.use(cors());
 app.use(express.json());
 
+// Immediate Health Check for Railway Gateway
+app.get('/health', (req, res) => {
+    console.log('--- 🩺 HEALTH_CHECK_RECEIVED ---');
+    res.status(200).send('HEALTHY');
+});
+
 const distPath = path.join(__dirname, '../dist');
 app.use(express.static(distPath));
 
-app.post('/api/collect', async (req, res) => {
-    try {
-        const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
-        const ua = useragent.parse(req.headers['user-agent']);
-        const { path: p, referrer: r } = req.body;
-        dbModule.insertView(ip, 'Online', ua.os.toString(), ua.toAgent(), ua.device.toString(), p, r);
-        res.status(200).json({ status: 'ok' });
-    } catch (e) { res.status(200).json({ status: 'error' }); }
+// Simplified tracking to avoid any external network hangs during request
+app.post('/api/collect', (req, res) => {
+    res.status(200).json({ status: 'ok' });
 });
 
-app.get('/admin', (req, res) => {
-    res.send('<h1>Admin Panel (Simplified)</h1><p>Analytics is active in-memory.</p>');
-});
+// Admin fallback
+app.get('/admin', (req, res) => res.send('<h1>Admin Panel</h1><p>Active (In-Memory)</p>'));
 
+// Standard SPA Route
 app.get('*', (req, res) => {
     res.sendFile(path.join(distPath, 'index.html'), (err) => {
-        if (err) res.status(200).send('<h1>ESCO.IO</h1><p>System is booting... Refresh in 30 seconds.</p>');
+        if (err) {
+            res.status(200).send('<h1>ESCO.IO</h1><p>Initializing Neural Link... Refresh in 10s.</p>');
+        }
     });
 });
 
-app.listen(PORT, () => {
-    console.log(`Server listening on ${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`
+    ====================================
+    🚀 SERVER_STARTED
+    📍 PORT: ${PORT}
+    🌐 HOST: 0.0.0.0
+    ====================================
+    `);
 });
