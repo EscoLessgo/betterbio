@@ -25,7 +25,7 @@ const SafeModeApp = () => {
 
     return (
         <div style={{
-            background: '#020202',
+            background: '#050505',
             minHeight: '100vh',
             fontFamily: "'Courier New', monospace",
             padding: '4rem 2rem',
@@ -35,173 +35,143 @@ const SafeModeApp = () => {
             alignItems: 'center',
             overflowY: 'auto'
         }}>
+            <style>{`
+                @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+                @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+                @keyframes neonPulse { 0% { text-shadow: 0 0 10px #0ff, 0 0 20px #0ff; } 100% { text-shadow: 0 0 20px #0ff, 0 0 40px #0ff, 0 0 60px #0ff; } }
+                .domain-card { background: #0a0a0a; border: 1px solid #333; transition: all 0.3s ease; }
+                .domain-card:hover { transform: scale(1.02); border-color: #00ffff; box-shadow: 0 0 30px rgba(0, 255, 255, 0.15); z-index: 10; }
+                .link-item { background: #111; border: 1px solid #222; transition: all 0.2s; }
+                .link-item:hover { background: #fff !important; color: #000 !important; transform: translateX(10px); }
+            `}</style>
+
             <div style={{
-                marginBottom: '3rem',
+                marginBottom: '5rem',
                 textAlign: 'center',
                 animation: 'fadeIn 1s ease-out'
             }}>
                 <h1 style={{
-                    fontSize: 'clamp(2rem, 5vw, 4rem)',
-                    margin: '0 0 1rem 0',
+                    fontSize: 'clamp(3rem, 6vw, 6rem)',
+                    margin: '0 0 1.5rem 0',
                     color: '#fff',
                     letterSpacing: '-2px',
-                    textShadow: '0 0 30px rgba(0, 255, 255, 0.5)',
-                    animation: 'glowPulse 3s infinite alternate'
+                    animation: 'neonPulse 3s infinite alternate'
                 }}>
                     ESCO.VEROE.FUN
                 </h1>
 
-                <div style={{
-                    display: 'inline-flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: '1rem'
-                }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}>
                     <div style={{
-                        border: '1px solid #333',
-                        background: '#0a0a0a',
-                        padding: '0.5rem 1.5rem',
-                        borderRadius: '20px',
-                        fontSize: '0.8rem',
-                        color: '#ff4444',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '0.5rem'
+                        border: '2px solid #ff0055',
+                        background: 'rgba(255, 0, 85, 0.05)',
+                        padding: '1rem 3rem',
+                        borderRadius: '4px',
+                        fontSize: '1rem',
+                        fontWeight: 'bold',
+                        color: '#ff4488',
+                        letterSpacing: '1px'
                     }}>
-                        <span style={{ animation: 'blink 1s infinite' }}>●</span>
-                        3D_CONTEXT_FAILURE // FALLBACK_ACTIVE
+                        ⚠ 3D_ACCELERATION_OFFLINE
                     </div>
 
                     <button
                         onClick={() => setShowFix(!showFix)}
                         style={{
-                            background: 'transparent',
-                            border: '1px solid #444',
-                            color: '#888',
-                            padding: '0.5rem 1rem',
-                            fontSize: '0.75rem',
+                            background: showFix ? '#fff' : 'transparent',
+                            border: '1px solid #666',
+                            color: showFix ? '#000' : '#888',
+                            padding: '1rem 2rem',
+                            fontSize: '1rem',
                             cursor: 'pointer',
-                            borderRadius: '4px',
+                            fontWeight: 'bold',
+                            letterSpacing: '1px',
                             transition: 'all 0.2s'
                         }}
-                        onMouseEnter={e => {
-                            e.currentTarget.style.borderColor = '#fff';
-                            e.currentTarget.style.color = '#fff';
-                        }}
-                        onMouseLeave={e => {
-                            e.currentTarget.style.borderColor = '#444';
-                            e.currentTarget.style.color = '#888';
-                        }}
                     >
-                        {showFix ? 'HIDE_FIX_INSTRUCTIONS' : 'HOW_TO_ENABLE_WEBGL?'}
+                        {showFix ? 'CLOSE_INSTRUCTIONS' : 'HOW TO ENABLE 3D?'}
                     </button>
                 </div>
             </div>
 
             {showFix && (
                 <div style={{
-                    maxWidth: '600px',
+                    maxWidth: '800px',
                     width: '100%',
                     background: '#111',
-                    border: '1px solid #333',
-                    padding: '1.5rem',
-                    borderRadius: '8px',
-                    marginBottom: '3rem',
-                    animation: 'slideUp 0.3s ease-out'
+                    border: '2px solid #fff',
+                    padding: '3rem',
+                    marginBottom: '5rem',
+                    animation: 'slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
                 }}>
-                    <h3 style={{ margin: '0 0 1rem 0', color: '#fff' }}>🦊 Firefox WebGL Core Fix</h3>
-                    <ol style={{ margin: 0, paddingLeft: '1.5rem', color: '#ccc', lineHeight: '1.6' }}>
-                        <li>Type <code style={{ color: '#00ffff', background: '#000', padding: '2px 6px' }}>about:config</code> in your address bar and press Enter.</li>
-                        <li>Click <strong>"Accept the Risk and Continue"</strong>.</li>
-                        <li>Search for <code style={{ color: '#00ffff', background: '#000', padding: '2px 6px' }}>webgl.force-enabled</code>.</li>
-                        <li>Double-click it to set it to <strong>true</strong>.</li>
-                        <li>Restart Firefox and refresh this page.</li>
+                    <h2 style={{ margin: '0 0 2rem 0', color: '#fff', borderBottom: '1px solid #333', paddingBottom: '1rem' }}>
+                        FIREFOX CONFIGURATION
+                    </h2>
+                    <ol style={{ margin: 0, paddingLeft: '2rem', color: '#ccc', lineHeight: '2', fontSize: '1.2rem' }}>
+                        <li>Type <code style={{ color: '#00ffff', background: '#000', padding: '4px 10px', fontSize: '1.1em' }}>about:config</code> in the address bar.</li>
+                        <li>Click <strong>"Accept the Risk"</strong>.</li>
+                        <li>Search for <code style={{ color: '#00ffff', background: '#000', padding: '4px 10px', fontSize: '1.1em' }}>webgl.force-enabled</code>.</li>
+                        <li>Double-click to set: <strong>TRUE</strong>.</li>
+                        <li>Refresh this page.</li>
                     </ol>
                 </div>
             )}
 
             <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                gap: '2rem',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(450px, 1fr))', // BIGGER CARDS
+                gap: '3rem',
                 width: '100%',
-                maxWidth: '1200px'
+                maxWidth: '1600px', // WIDER CONTAINER
+                padding: '0 2rem'
             }}>
                 {Object.entries(DOMAIN_GROUPS).map(([domain, links], idx) => (
-                    <div key={domain} style={{
-                        background: '#080808',
-                        border: '1px solid #222',
-                        borderRadius: '12px',
-                        padding: '2rem',
-                        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                        animation: `slideUp 0.5s ease-out ${idx * 0.1 + 0.2}s backwards`
-                    }}
-                        onMouseEnter={e => {
-                            e.currentTarget.style.transform = 'translateY(-5px)';
-                            e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
-                            e.currentTarget.style.borderColor = '#444';
-                        }}
-                        onMouseLeave={e => {
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = 'none';
-                            e.currentTarget.style.borderColor = '#222';
-                        }}
-                    >
+                    <div key={domain} className="domain-card" style={{
+                        padding: '3rem',
+                        minHeight: '500px', // TALLER CARDS
+                        display: 'flex',
+                        flexDirection: 'column',
+                        animation: `slideUp 0.6s ease-out ${idx * 0.1}s backwards`
+                    }}>
                         <h2 style={{
-                            fontSize: '1rem',
-                            color: '#666',
-                            borderBottom: '1px solid #222',
-                            paddingBottom: '1rem',
-                            marginBottom: '1.5rem',
+                            fontSize: '2rem',
+                            color: domain.includes('VEROE') ? '#ff0077' : domain.includes('VELARIX') ? '#00ffff' : '#ffd700',
+                            borderBottom: '2px solid #333',
+                            paddingBottom: '2rem',
+                            marginBottom: '3rem',
                             letterSpacing: '2px',
-                            fontWeight: 'normal'
+                            textAlign: 'center'
                         }}>
                             {domain}
                         </h2>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', flex: 1 }}>
                             {links.map(link => (
                                 <a
                                     key={link.url}
                                     href={link.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
+                                    className="link-item"
                                     style={{
-                                        display: 'block',
-                                        padding: '1rem',
-                                        background: '#111',
-                                        color: '#ccc',
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        padding: '1.5rem 2rem',
+                                        color: '#bbb',
                                         textDecoration: 'none',
-                                        borderRadius: '6px',
-                                        fontSize: '0.9rem',
-                                        transition: '0.2s',
-                                        border: '1px solid transparent',
+                                        fontSize: '1.2rem',
+                                        letterSpacing: '1px',
                                         fontFamily: 'Inter, sans-serif'
                                     }}
-                                    onMouseEnter={e => {
-                                        e.currentTarget.style.background = '#eee';
-                                        e.currentTarget.style.color = '#000';
-                                        e.currentTarget.style.fontWeight = 'bold';
-                                    }}
-                                    onMouseLeave={e => {
-                                        e.currentTarget.style.background = '#111';
-                                        e.currentTarget.style.color = '#ccc';
-                                        e.currentTarget.style.fontWeight = 'normal';
-                                    }}
                                 >
-                                    {link.label} ↗
+                                    <span>{link.label}</span>
+                                    <span style={{ fontSize: '1.5em', opacity: 0.5 }}>↗</span>
                                 </a>
                             ))}
                         </div>
                     </div>
                 ))}
             </div>
-
-            <style>{`
-                @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-                @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-                @keyframes glowPulse { from { text-shadow: 0 0 20px rgba(0, 255, 255, 0.1); } to { text-shadow: 0 0 40px rgba(0, 255, 255, 0.4); } }
-                @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
-            `}</style>
         </div>
     );
 };
