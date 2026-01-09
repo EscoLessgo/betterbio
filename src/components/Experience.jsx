@@ -94,12 +94,17 @@ const PreviewWindow = ({ node, isVisible, trunkColor }) => {
     const [scale, setScale] = useState(0);
     const hasMedia = !!PREVIEW_DATA[node.id];
 
-    useFrame(() => {
+    useFrame((state, delta) => {
         const target = isVisible ? 1 : 0;
-        setScale(MathUtils.lerp(scale, target, 0.15));
+        // Smoother, fluid expansion using delta
+        const lerpSpeed = 4.0 * delta;
+        setScale(MathUtils.lerp(scale, target, lerpSpeed));
+
         if (groupRef.current) {
             groupRef.current.scale.setScalar(scale);
-            groupRef.current.position.z = MathUtils.lerp(groupRef.current.position.z, isVisible ? 10 : 0, 0.15);
+            // Add a slight tilt when appearing for style
+            groupRef.current.rotation.x = MathUtils.lerp(groupRef.current.rotation.x, isVisible ? 0 : 0.2, lerpSpeed);
+            groupRef.current.position.z = MathUtils.lerp(groupRef.current.position.z, isVisible ? 10 : 0, lerpSpeed);
         }
     });
 
@@ -178,26 +183,29 @@ const NodeElement = ({ node, isActive, isDimmed, isDeploying, onVisit }) => {
     const groupRef = useRef();
     const [hovered, setHovered] = useState(false);
 
-    useFrame((state) => {
+    useFrame((state, delta) => {
         if (groupRef.current) {
             const time = state.clock.elapsedTime;
             const targetScale = isDeploying ? 1 : 0;
-            const hoverScale = hovered ? 1.1 : 1.0;
+            const hoverScale = hovered ? 1.15 : 1.0;
 
-            // Smooth deployment and hover scaling
-            groupRef.current.scale.lerp(new Vector3().setScalar(targetScale * hoverScale), 0.1);
+            // Smooth scaling with delta
+            const lerpSpeed = 5.0 * delta;
+            groupRef.current.scale.lerp(new Vector3().setScalar(targetScale * hoverScale), lerpSpeed);
 
-            const zTarget = isActive ? 8 : 0; // Pop out more when active
-            groupRef.current.position.z = MathUtils.lerp(groupRef.current.position.z, zTarget, 0.1);
+            const zTarget = isActive ? 8 : 0;
+            groupRef.current.position.z = MathUtils.lerp(groupRef.current.position.z, zTarget, lerpSpeed);
 
             if (isActive || hovered) {
-                // Subtle breathing
-                groupRef.current.rotation.y = Math.sin(time * 0.5) * 0.05;
-                groupRef.current.rotation.x = Math.cos(time * 0.5) * 0.05;
+                // Premium organic floating motion
+                groupRef.current.rotation.y = Math.sin(time * 0.8) * 0.08;
+                groupRef.current.rotation.x = Math.cos(time * 0.7) * 0.05;
+                groupRef.current.position.y = node.position[1] + Math.sin(time * 1.5) * 0.1; // Bobbing
             } else {
-                // Reset rotation
-                groupRef.current.rotation.y = MathUtils.lerp(groupRef.current.rotation.y, 0, 0.1);
-                groupRef.current.rotation.x = MathUtils.lerp(groupRef.current.rotation.x, 0, 0.1);
+                // Return to rest
+                groupRef.current.rotation.y = MathUtils.lerp(groupRef.current.rotation.y, 0, lerpSpeed);
+                groupRef.current.rotation.x = MathUtils.lerp(groupRef.current.rotation.x, 0, lerpSpeed);
+                groupRef.current.position.y = MathUtils.lerp(groupRef.current.position.y, node.position[1], lerpSpeed);
             }
         }
     });
@@ -350,18 +358,23 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
         if (isPreview) targetX += 8;
 
         // 2. Smoothly Interpolate Rig State (The "Cinematic" feel)
-        // Lower factor = smoother, heavier feel. Delta ensures framerate independence.
-        const dampFactor = 2.0 * delta;
+        // Adjusted for smoother, weightier drift
+        const dampFactor = 3.0 * delta;
 
-        camRig.current.pos.lerp(new Vector3(targetX, targetY, targetZ), dampFactor);
+        // Add subtle procedural sway to targetX/Y for "handheld" feel
+        const time = state.clock.elapsedTime;
+        const swayX = Math.sin(time * 0.5) * 0.5;
+        const swayY = Math.cos(time * 0.4) * 0.5;
 
-        // Look Target Logic
+        camRig.current.pos.lerp(new Vector3(targetX + swayX * 0.5, targetY + swayY * 0.5, targetZ), dampFactor);
+
+        // Look Target Logic with slight lag/drag
         let lookX = targetX;
         let lookY = targetY;
         // If preview, look slightly between node and panel
         if (isPreview) lookX -= 4;
 
-        camRig.current.target.lerp(new Vector3(lookX, lookY, 0), dampFactor);
+        camRig.current.target.lerp(new Vector3(lookX, lookY, 0), dampFactor * 1.2);
 
         // 3. Apply to Camera
         if (isCentering) {
@@ -372,10 +385,15 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
         } else {
             state.camera.position.copy(camRig.current.pos);
             state.camera.lookAt(camRig.current.target);
+
+            // Add tiny micro-roll for kinetic realism
+            state.camera.rotation.z = Math.sin(time * 0.2) * 0.005;
         }
 
-        // Update Bug separately
-        bugCurrentPos.current.lerp(new Vector3(...targetNode.position), dampFactor * 2);
+        // Update Bug
+        if (bugCurrentPos.current) {
+            bugCurrentPos.current.lerp(new Vector3(...targetNode.position), dampFactor * 2);
+        }
     });
 
     const handleVisit = (url) => { window.open(url, '_blank'); };

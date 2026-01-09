@@ -1,10 +1,8 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
 import Experience from './components/Experience';
 import Terminal from './components/Terminal';
 import LoadingScreen from './components/LoadingScreen';
-import RagingSea from './components/RagingSea';
 import { trackPageView } from './utils/analytics';
 import './index.css';
 
@@ -35,6 +33,19 @@ const NavHint = () => (
     <div className="hint-pill">
       <span className="hint-icon">ESC</span>
       <span className="hint-label">BACK_DIR</span>
+    </div>
+  </div>
+);
+
+const KeybindOverlay = () => (
+  <div className="keybind-overlay" style={{ pointerEvents: 'auto' }}>
+    <div className="instruction-box">
+      <img
+        src="/esco_keybind_instructions_1767870360807.png"
+        alt="Keybinds"
+        className="keybind-img"
+      />
+      <div className="instruction-text">CONTROLS_OVERLAY</div>
     </div>
   </div>
 );
@@ -73,15 +84,10 @@ function App() {
     let frame = 0;
 
     const interval = setInterval(() => {
-      // 1. HYPER GLITCH TITLE
-      // We can't use color, so we use chaos.
-      // 30% chance to show a corrupted version, 70% chance to show mostly normal but shaky
-      if (Math.random() > 0.3) {
-        document.title = glitchedTitles[Math.floor(Math.random() * glitchedTitles.length)];
-      } else {
-        // Random case
-        document.title = baseTitle.split('').map(c => Math.random() > 0.5 ? c.toUpperCase() : c).join('');
-      }
+      // Terminal Cursor Blink Effect
+      const titles = ["esco.io", "esco.io_"];
+      const titleIndex = Math.floor(Date.now() / 800) % 2; // Blink every 800ms
+      document.title = titles[titleIndex];
 
       // 2. Color Pulse Favicon
       ctx.clearRect(0, 0, 32, 32);
@@ -97,7 +103,7 @@ function App() {
       link.href = canvas.toDataURL('image/png');
 
       frame++;
-    }, 80); // 12FPS - Very fast
+    }, 100); // Slower interval for favicon animation, title handles its own timing via Date.now()
 
     return () => clearInterval(interval);
   }, []);
@@ -123,7 +129,6 @@ function App() {
           camera={{ position: [0, 0, 35], fov: 40 }}
         >
           <color attach="background" args={['#000103']} />
-          <RagingSea />
 
           {!isLoading && (
             <Suspense fallback={null}>
@@ -135,16 +140,6 @@ function App() {
               />
             </Suspense>
           )}
-
-          <OrbitControls
-            enablePan={false}
-            maxPolarAngle={Math.PI / 1.5}
-            minPolarAngle={Math.PI / 4}
-            minDistance={15}
-            maxDistance={60}
-            dampingFactor={0.05}
-            enableDamping
-          />
 
           <ambientLight intensity={1} />
           <spotLight position={[20, 30, 20]} angle={0.2} penumbra={1} intensity={100} color="#00ffff" castShadow decay={0} />
@@ -167,6 +162,7 @@ function App() {
         </div>
 
         <NavHint />
+        <KeybindOverlay />
       </div>
     </div>
   );
