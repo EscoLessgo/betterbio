@@ -603,10 +603,10 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
             <EsconeonPopup />
 
             {/* DEMO HARDWARE */}
-            <ServerBlade position={[20, 5, -10]} rotation={[0.5, 0.5, 0]} delay={0.5} /> {/* Right (Quietbin) */}
-            <ServerBlade position={[-20, 8, -15]} rotation={[0.2, -0.5, 0.2]} delay={0.8} /> {/* Left (Velarix) */}
-            <ServerBlade position={[0, -3.5, -10]} rotation={[-0.1, 0, 0.1]} delay={1.2} /> {/* Bottom (Discord) - Lifted UP to avoid UI */}
-            <ServerBlade position={[0, 16, -12]} rotation={[0.3, 0, -0.1]} delay={1.4} /> {/* Top (Esco) - Added for Symmetry */}
+            <ServerBlade position={[22, 2, -10]} rotation={[0.5, 0.5, 0]} delay={0.5} /> {/* Right (Quietbin) - Adjusted for spacing */}
+            <ServerBlade position={[-22, 2, -15]} rotation={[0.2, -0.5, 0.2]} delay={0.8} /> {/* Left (Velarix) - Adjusted for spacing */}
+            <ServerBlade position={[0, -6.5, -8]} rotation={[-0.1, 0, 0.1]} delay={1.2} /> {/* Bottom (Discord) - Just ABOVE node (-10), clears UI */}
+            <ServerBlade position={[0, 13.5, -8]} rotation={[0.3, 0, -0.1]} delay={1.4} /> {/* Top (Esco) - Just ABOVE node (10), fully visible */}
 
             {/* Render Static Layout Connections */}
             {TREE_DATA.root.map(rootNode => {
