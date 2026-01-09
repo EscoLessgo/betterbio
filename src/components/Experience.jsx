@@ -605,7 +605,7 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
             {/* DEMO HARDWARE - User requested "Real 3D pieces of hardware" + "Fly-in" + 10s Refresh Interval */}
             <ServerBlade position={[20, 5, -10]} rotation={[0.5, 0.5, 0]} delay={0.5} /> {/* Near Quietbin */}
             <ServerBlade position={[-20, 8, -15]} rotation={[0.2, -0.5, 0.2]} delay={0.8} /> {/* Near Velarix */}
-            <ServerBlade position={[0, -5, -8]} rotation={[-0.2, 0, 0.1]} delay={1.2} /> {/* ABOVE/NEAR Discord Node */}
+            <ServerBlade position={[0, -15, -10]} rotation={[-0.2, 0, 0.1]} delay={1.2} /> {/* BELOW Discord Node */}
 
             {/* Render Static Layout Connections */}
             {TREE_DATA.root.map(rootNode => {
