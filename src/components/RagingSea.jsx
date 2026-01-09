@@ -163,22 +163,22 @@ const RagingSea = () => {
   });
 
   return (
-    <mesh rotation={[0, 0, 0]} position={[0, 0, -30]} scale={1.5}>
+    <mesh rotation={[0, 0, 0]} position={[0, 0, -30]} scale={2.5}>
       <planeGeometry args={[100, 80, 512, 512]} />
       <ragingSeaMaterial
         ref={materialRef}
         key={RagingSeaMaterial.key}
-        uDepthColor={new THREE.Color('#000205')}
-        uSurfaceColor={new THREE.Color('#106090')}
-        uBigWavesElevation={0.15}
-        uBigWavesFrequency={new THREE.Vector2(1.5, 0.4)}
-        uBigWavesSpeed={0.5}
+        uDepthColor={new THREE.Color('#000000')} // Pure Black Depth
+        uSurfaceColor={new THREE.Color('#001830')} // Deep Midnight Blue
+        uBigWavesElevation={0.3} // Large Swells
+        uBigWavesFrequency={new THREE.Vector2(0.8, 0.4)} // Flowing liquid freq
+        uBigWavesSpeed={0.4} // Slow heavy movement
         uSmallWavesElevation={0.15}
-        uSmallWavesFrequency={2.5}
+        uSmallWavesFrequency={1.5}
         uSmallWavesSpeed={0.2}
-        uSmallIterations={5.0} // Increased detail
-        uColorOffset={0.08}
-        uColorMultiplier={3.5}
+        uSmallIterations={3.0} // Smooth detail
+        uColorOffset={0.1}
+        uColorMultiplier={4.5} // High Contrast
       />
     </mesh>
   );
