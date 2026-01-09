@@ -222,7 +222,7 @@ const EsconeonPopup = () => {
     }, [video]);
 
     return (
-        <group position={[-18, 2, 0.5]} ref={groupRef} scale={[0, 0, 0]}>
+        <group position={[0, 12, 0]} ref={groupRef} scale={[0, 0, 0]}>
             {/* Slightly offset Z to pop over the node */}
             <mesh>
                 <planeGeometry args={[14, 8]} />

@@ -73,6 +73,17 @@ function App() {
   const [activeView, setActiveView] = useState(null);
   const [isCentering, setIsCentering] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(window.location.hash === '#admin');
+
+  useEffect(() => {
+    const handleHashChange = () => {
+      setIsAdmin(window.location.hash === '#admin');
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    // Also check on mount in case of navigation
+    handleHashChange();
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
 
   useEffect(() => {
     trackPageView();
@@ -173,7 +184,7 @@ function App() {
 
   return (
     <div className="app-container">
-      {window.location.hash === '#admin' ? (
+      {isAdmin ? (
         <React.Suspense fallback={null}>
           <Dashboard />
         </React.Suspense>
