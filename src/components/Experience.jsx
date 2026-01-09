@@ -21,10 +21,6 @@ const PCB_GOLD = "#e8f080";
 // Consolidated Neural Preview Database
 const PREVIEW_DATA = {
     // VEROE.FUN CLUSTER
-    'f_escosigns': '/uploaded_image_0_1767873499613.png',
-    'f_spoti': '/uploaded_image_1_1767873499613.png',
-    'f_tnt': '/uploaded_image_2_1767873499613.png',
-    'f_fight': '/uploaded_image_3_1767873499613.png',
     'f_more': '/uploaded_image_4_1767873499613.png',
 
     // VELARIXSOLUTIONS.NL CLUSTER
@@ -35,7 +31,12 @@ const PREVIEW_DATA = {
     'v_inlet': '/uploaded_image_4_1767876226767.png',
 
     // DATA SHARDS
-    's_root': '/quietembed.mp4'
+    's_root': '/quietembed.mp4',
+
+    // DISCORD GAMES
+    'd_tenk': '/uploaded_image_0_1767980870604.jpg',
+    'd_square': '/uploaded_image_1_1767980870604.png',
+    'd_spell': '/uploaded_image_2_1767980870604.jpg'
 };
 
 // Robust Video Feed using manual element
@@ -352,6 +353,7 @@ const TREE_DATA = {
         { id: 'velarix', position: [-18, 2, 0], label: 'VELARIX', sub: 'SOLUTIONS', color: PCB_BLUE, scale: 1 },
         { id: 'veroe_fun', position: [0, 4, 2], label: 'ESCO.IO', sub: 'MAIN_HUB', color: PCB_PINK, scale: 1.5 }, // HERO NODE
         { id: 'veroe_space', position: [18, 2, 0], label: 'QUIETBIN', sub: 'ARCHIVE', color: PCB_GOLD, scale: 1 },
+        { id: 'discord_games', position: [36, 2, 0], label: 'DISCORD', sub: 'GAMES_LAB', color: "#7289da", scale: 1 },
     ],
     velarix: [
         { id: 'v_root', position: [-18, -3, 0], label: 'MAIN SITE', sub: 'velarixsolutions.nl', url: 'https://velarixsolutions.nl', trunkId: 'velarix' },
@@ -366,12 +368,15 @@ const TREE_DATA = {
     ],
     veroe_space: [
         { id: 's_root', position: [18, -3, 0], label: 'DATA_SHARD', sub: 'veroe.space', url: 'https://veroe.space', trunkId: 'veroe_space' },
+    ],
+    discord_games: [
+        { id: 'd_tenk', position: [36, -3, 0], label: 'TENK', sub: 'DICE_GAME', url: 'https://discord.com/oauth2/authorize?client_id=1455067365694771364', trunkId: 'discord_games' },
+        { id: 'd_square', position: [36, -6, 0], label: 'SQUARE_UP', sub: 'PUZZLE_LOGIC', url: 'https://discord.com/oauth2/authorize?client_id=1455077926273028258', trunkId: 'discord_games' },
+        { id: 'd_spell', position: [36, -9, 0], label: 'SPELL_OR_FAIL', sub: 'WORD_GAME', url: 'https://discord.com/oauth2/authorize?client_id=1455079703940694081', trunkId: 'discord_games' },
     ]
 };
 
-const RootCable = ({ start, end, color }) => {
-    // Calculate control points for a heavy "slack" cable look or tensioned curve
-    // We want a nice "S" or "Bridge" curve between the nodes
+const ElectricCable = ({ start, end, color }) => {
     const mid1 = [
         start[0] + (end[0] - start[0]) * 0.3,
         start[1],
@@ -383,52 +388,118 @@ const RootCable = ({ start, end, color }) => {
         end[2] + (end[2] - start[2]) * 0.7
     ];
 
+    // Points for the surge curve calculation
+    // Using simple interpolation for the Surge, or distinct beziers
+
+    // We render the Physical Wire + a Surge that travels it
+    // To make sure surge follows the wire, we need points. 
+    // CubicBezierLine uses a curve internally, let's approximate simply for the pulse visual or just overlay.
+
     return (
         <group>
+            {/* 1. The Physical Dark Wire */}
             <CubicBezierLine
                 start={start}
                 end={end}
                 midA={mid1}
                 midB={mid2}
-                color={color} // Red/Pink from image
-                lineWidth={4}
+                color="#111" // Dark rubber/tech casing
+                lineWidth={6}
                 transparent
-                opacity={0.8}
+                opacity={1}
             />
-            {/* Connection Joint Dots */}
+
+            {/* 2. The Inner Core Wire (Thin colored line) */}
+            <CubicBezierLine
+                start={start}
+                end={end}
+                midA={mid1}
+                midB={mid2}
+                color={color}
+                lineWidth={1}
+                transparent
+                opacity={0.3}
+            />
+
+            {/* 3. The Surge Pulse */}
+            <SurgePulse
+                points={[start, mid1, mid2, end]}
+                color={color}
+                speed={1.5}
+            />
+
+            {/* Joint Nodes */}
             <mesh position={start}>
                 <sphereGeometry args={[0.3]} />
-                <meshBasicMaterial color={color} />
+                <meshStandardMaterial color="#222" roughness={0.4} />
             </mesh>
             <mesh position={end}>
                 <sphereGeometry args={[0.3]} />
-                <meshBasicMaterial color={color} />
+                <meshStandardMaterial color="#222" roughness={0.4} />
             </mesh>
         </group>
     );
 };
 
-const ConnectionRail = ({ start, end, color }) => {
-    // Pure Vertical Drop for children as seen in image
-    // The image shows a straight line going down through the nodes
-
+const ElectricDrop = ({ start, end, color }) => {
     return (
         <group>
-            {/* Simple Straight Line */}
+            {/* Physical Vertical Wire */}
+            <Line
+                points={[start, end]}
+                color="#111"
+                lineWidth={4}
+            />
+            {/* Vibrancy Core */}
             <Line
                 points={[start, end]}
                 color={color}
-                lineWidth={2}
+                lineWidth={1}
                 transparent
-                opacity={0.6}
+                opacity={0.4}
             />
-            {/* Glowing Emitter at Start (Node Connection Point) */}
+
+            {/* Vertical Surge */}
+            <SurgePulse
+                points={[start, [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2, (start[2] + end[2]) / 2], end]}
+                color={color}
+                speed={2.0}
+            />
+
             <mesh position={start}>
-                <sphereGeometry args={[0.15]} />
-                <meshBasicMaterial color="#ff0055" /> {/* Hot Pink Dot */}
-                <pointLight distance={3} intensity={5} color="#ff0055" />
+                <sphereGeometry args={[0.2]} />
+                <meshBasicMaterial color={color} />
+                <pointLight distance={3} intensity={3} color={color} />
             </mesh>
         </group>
+    );
+};
+
+// Reused pulse logic but refined for arbitrary points (Cubic approx or straight)
+const SurgePulse = ({ points, color, speed = 1 }) => {
+    const meshRef = useRef();
+    // Create curve from points
+    const [curve] = useState(() => new CatmullRomCurve3(points.map(p => new Vector3(...p))));
+
+    useFrame((state) => {
+        // Surge creates a "zap" effect
+        const t = (state.clock.elapsedTime * speed) % 1;
+        const pos = curve.getPointAt(t);
+        if (meshRef.current) {
+            meshRef.current.position.copy(pos);
+            // Flickering intensity
+            meshRef.current.material.opacity = 0.8 + Math.random() * 0.2;
+            const scale = 1 + Math.random() * 0.5;
+            meshRef.current.scale.setScalar(scale);
+        }
+    });
+
+    return (
+        <mesh ref={meshRef}>
+            <sphereGeometry args={[0.2, 8, 8]} />
+            <meshBasicMaterial color={color} transparent />
+            <pointLight distance={5} intensity={8} color={color} decay={2} />
+        </mesh>
     );
 };
 
@@ -643,32 +714,33 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
                 if (!children) return null;
                 return children.map(child => (
                     <group key={`${rootNode.id}-${child.id}`} >
-                        <ConnectionRail
+                        <ElectricDrop
                             start={rootNode.position}
                             end={child.position}
-                            color={rootNode.color}
-                        />
-                        {/* Extra Electric Surge Line */}
-                        <LaserPulse
-                            points={[rootNode.position, [rootNode.position[0], (rootNode.position[1] + child.position[1]) / 2, 2], child.position]}
                             color={rootNode.color}
                         />
                     </group>
                 ));
             })}
 
-            {/* NEW: ROOT CABLES (The Red Curves connecting the main headers) */}
-            {/* Velarix (Left) -> Esco (Center) */}
-            <RootCable
+            {/* ELECTRICAL MAINS */}
+            {/* Velarix -> Esco */}
+            <ElectricCable
                 start={[-15, 2, 0]}
                 end={[-3, 4, 2]}
                 color="#d00040"
             />
-            {/* Esco (Center) -> Quietbin (Right) */}
-            <RootCable
+            {/* Esco -> Quietbin */}
+            <ElectricCable
                 start={[3, 4, 2]}
                 end={[15, 2, 0]}
                 color="#d00040"
+            />
+            {/* Quietbin -> Discord Games */}
+            <ElectricCable
+                start={[21, 2, 0]}
+                end={[33, 2, 0]}
+                color="#e8f080"
             />
 
             {/* Render Nodes */}

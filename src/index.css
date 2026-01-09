@@ -641,51 +641,125 @@ body {
 }
 
 /* Loading Screen Enhancements */
-.cinema-bar {
+.loader-logo-container {
+  margin-bottom: 2rem;
+  width: 300px;
+  max-width: 80%;
+  display: flex;
+  justify-content: center;
+}
+
+.dripping-logo {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 0 20px rgba(45, 252, 204, 0.4));
+  border-radius: 8px;
+  mix-blend-mode: screen;
+  /* Helps blend black background video */
+}
+
+.entry-controls-grid {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.option-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  width: 200px;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  /* Fluid bounce */
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.option-card::before {
+  content: '';
   position: absolute;
+  top: 0;
   left: 0;
   width: 100%;
-  height: 10vh;
-  background: black;
-  z-index: 10;
+  height: 100%;
+  background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s;
 }
 
-.cinema-bar.top {
-  top: 0;
+.option-card:hover::before {
+  transform: translateX(100%);
 }
 
-.cinema-bar.bottom {
-  bottom: 0;
+.option-card:hover {
+  transform: translateY(-10px) scale(1.05);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--accent-cyan);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(45, 252, 204, 0.2);
 }
 
-.enter-btn {
-  margin-top: 2rem;
-  background: transparent;
-  border: 1px solid var(--accent-cyan);
+.option-card.sound-on .card-icon {
   color: var(--accent-cyan);
-  padding: 1rem 2rem;
-  font-family: inherit;
+}
+
+.option-card.sound-off .card-icon {
+  color: var(--accent-pink);
+}
+
+.option-card.sound-off:hover {
+  border-color: var(--accent-pink);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(217, 43, 107, 0.2);
+}
+
+.card-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  transition: transform 0.3s;
+}
+
+.option-card:hover .card-icon {
+  transform: scale(1.2);
+}
+
+.card-label {
+  color: #fff;
+  font-family: 'Roboto Mono', monospace;
   font-weight: bold;
-  cursor: pointer;
-  font-size: 1.2rem;
   letter-spacing: 2px;
-  animation: flash-btn 2s infinite;
-  text-transform: uppercase;
+  font-size: 0.9rem;
 }
 
-.enter-btn:hover {
-  background: var(--accent-cyan);
-  color: #000;
+.card-sub {
+  color: #667788;
+  font-size: 0.6rem;
+  letter-spacing: 1px;
 }
 
-@keyframes flash-btn {
-
-  0%,
-  100% {
-    opacity: 1;
+@media (max-width: 768px) {
+  .entry-controls-grid {
+    flex-direction: column;
+    gap: 1rem;
   }
 
-  50% {
-    opacity: 0.5;
+  .option-card {
+    width: 100%;
+    flex-direction: row;
+    padding: 1rem;
+    justify-content: flex-start;
+  }
+
+  .card-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0;
+  }
+
+  .card-sub {
+    display: none;
   }
 }

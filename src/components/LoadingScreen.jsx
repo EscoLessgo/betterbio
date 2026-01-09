@@ -13,12 +13,13 @@ const LoadingScreen = ({ onComplete }) => {
         const tl = gsap.timeline();
 
         // 1. Initial Blackout & Logo Reveal
-        tl.to('.loader-logo', {
+        tl.to('.loader-logo-container', {
             opacity: 1,
             duration: 2,
             ease: "power2.inOut",
             filter: "blur(0px)",
-            scale: 1
+            scale: 1,
+            rotate: 0
         })
             .to('.loader-bar-container', {
                 width: '300px',
@@ -70,8 +71,15 @@ const LoadingScreen = ({ onComplete }) => {
             <div className="cinema-bar bottom"></div>
 
             <div className="loader-content">
-                <div className="loader-logo" style={{ opacity: 0, transform: 'scale(1.2)', filter: 'blur(10px)' }}>
-                    ESCO.IO
+                <div className="loader-logo-container" style={{ opacity: 0, scale: 0.8, filter: 'blur(10px)' }}>
+                    <video
+                        className="dripping-logo"
+                        src="/esconeon.mp4"
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                    />
                 </div>
 
                 {!isReady ? (
@@ -85,12 +93,16 @@ const LoadingScreen = ({ onComplete }) => {
                         </div>
                     </>
                 ) : (
-                    <div className="entry-controls">
-                        <button className="enter-btn" onClick={() => handleEnter(false)}>
-                            [ INITIALIZE_LINK ]
+                    <div className="entry-controls-grid">
+                        <button className="option-card sound-on" onClick={() => handleEnter(false)}>
+                            <div className="card-icon">🔊</div>
+                            <div className="card-label">SYSTEM_AUDIO</div>
+                            <div className="card-sub">IMMERSIVE EXPERIENCE</div>
                         </button>
-                        <button className="enter-btn muted-btn" onClick={() => handleEnter(true)} style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '1rem' }}>
-                            [ ENTER_SILENT ]
+                        <button className="option-card sound-off" onClick={() => handleEnter(true)}>
+                            <div className="card-icon">🔇</div>
+                            <div className="card-label">SILENT_MODE</div>
+                            <div className="card-sub">STEALTH ENTRY</div>
                         </button>
                     </div>
                 )}
