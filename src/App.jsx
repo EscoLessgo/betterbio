@@ -2,6 +2,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import Experience from './components/Experience';
 import LoadingScreen from './components/LoadingScreen';
+const Dashboard = React.lazy(() => import('./components/Dashboard'));
 import { trackPageView } from './utils/analytics';
 import './index.css';
 
@@ -172,44 +173,52 @@ function App() {
 
   return (
     <div className="app-container">
-      {isLoading && <LoadingScreen onComplete={() => setIsLoading(false)} />}
+      {window.location.hash === '#admin' ? (
+        <React.Suspense fallback={null}>
+          <Dashboard />
+        </React.Suspense>
+      ) : (
+        <>
+          {isLoading && <LoadingScreen onComplete={() => setIsLoading(false)} />}
 
-      <BottomTag />
+          <BottomTag />
 
-      <div className="canvas-container">
-        <Canvas
-          camera={{ position: [0, 0, 35], fov: 40 }}
-        >
-          <color attach="background" args={['#030508']} />
+          <div className="canvas-container">
+            <Canvas
+              camera={{ position: [0, 0, 35], fov: 40 }}
+            >
+              <color attach="background" args={['#030508']} />
 
-          {!isLoading && (
-            <Suspense fallback={null}>
-              <Experience
-                onNodeActive={handleNodeActive}
-                activeView={activeView}
-                isCentering={isCentering}
-                onCenterComplete={() => setIsCentering(false)}
-              />
-            </Suspense>
-          )}
+              {!isLoading && (
+                <Suspense fallback={null}>
+                  <Experience
+                    onNodeActive={handleNodeActive}
+                    activeView={activeView}
+                    isCentering={isCentering}
+                    onCenterComplete={() => setIsCentering(false)}
+                  />
+                </Suspense>
+              )}
 
-          <ambientLight intensity={1} />
-          <spotLight position={[20, 30, 20]} angle={0.2} penumbra={1} intensity={100} color="#2dfccc" castShadow decay={0} />
-          <pointLight position={[-20, 20, 10]} intensity={50} color="#d92b6b" decay={0} />
-          <pointLight position={[20, -20, 10]} intensity={50} color="#2dfccc" decay={0} />
-        </Canvas>
-      </div>
+              <ambientLight intensity={1} />
+              <spotLight position={[20, 30, 20]} angle={0.2} penumbra={1} intensity={100} color="#2dfccc" castShadow decay={0} />
+              <pointLight position={[-20, 20, 10]} intensity={50} color="#d92b6b" decay={0} />
+              <pointLight position={[20, -20, 10]} intensity={50} color="#2dfccc" decay={0} />
+            </Canvas>
+          </div>
 
-      <div className="ui-layer">
-        <div className="top-tools">
-          <button className="recenter-btn" onClick={handleRecenter}>
-            SYNC_VIEW
-          </button>
-        </div>
+          <div className="ui-layer">
+            <div className="top-tools">
+              <button className="recenter-btn" onClick={handleRecenter}>
+                SYNC_VIEW
+              </button>
+            </div>
 
-        <NavHint />
-        <KeybindOverlay />
-      </div>
+            <NavHint />
+            <KeybindOverlay />
+          </div>
+        </>
+      )}
     </div>
   );
 }

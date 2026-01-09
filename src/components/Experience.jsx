@@ -160,6 +160,86 @@ const PreviewWindow = ({ node, isVisible, trunkColor }) => {
     );
 };
 
+const EsconeonPopup = () => {
+    const groupRef = useRef();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        const timer = setTimeout(() => setMounted(true), 100);
+        return () => clearTimeout(timer);
+    }, []);
+
+    useFrame((state, delta) => {
+        if (groupRef.current) {
+            const target = mounted ? 1 : 0;
+            const lerpSpeed = 3.0 * delta;
+
+            groupRef.current.scale.lerp(new Vector3().setScalar(target), lerpSpeed);
+
+            groupRef.current.children.forEach(child => {
+                if (child.material) {
+                    child.material.transparent = true;
+                    // Check if it's the main video mesh map or just material
+                    // We just lerp global opacity
+                    child.material.opacity = MathUtils.lerp(child.material.opacity, target, lerpSpeed);
+                }
+            });
+        }
+    });
+
+    const [video] = useState(() => {
+        const vid = document.createElement('video');
+        vid.src = '/esconeon.mp4';
+        vid.crossOrigin = 'Anonymous';
+        vid.loop = true;
+        vid.muted = true;
+        vid.playsInline = true;
+        vid.autoplay = true;
+        return vid;
+    });
+
+    useEffect(() => {
+        const attemptPlay = () => {
+            if (video.paused) {
+                video.play().catch(e => console.warn("Video play failed", e));
+            }
+        };
+        attemptPlay();
+        // Fallback for browser autoplay policies
+        const onInteraction = () => {
+            attemptPlay();
+            window.removeEventListener('click', onInteraction);
+            window.removeEventListener('keydown', onInteraction);
+        };
+        window.addEventListener('click', onInteraction);
+        window.addEventListener('keydown', onInteraction);
+
+        return () => {
+            window.removeEventListener('click', onInteraction);
+            window.removeEventListener('keydown', onInteraction);
+            video.pause();
+        };
+    }, [video]);
+
+    return (
+        <group position={[-18, 2, 0.5]} ref={groupRef} scale={[0, 0, 0]}>
+            {/* Slightly offset Z to pop over the node */}
+            <mesh>
+                <planeGeometry args={[14, 8]} />
+                <meshBasicMaterial side={THREE.DoubleSide} transparent opacity={0}>
+                    <videoTexture attach="map" args={[video]} colorSpace={THREE.SRGBColorSpace} />
+                </meshBasicMaterial>
+            </mesh>
+
+            {/* Optional Glow/Border for integration */}
+            <mesh position={[0, 0, -0.1]}>
+                <planeGeometry args={[14.2, 8.2]} />
+                <meshBasicMaterial color="#00ffff" transparent opacity={0} />
+            </mesh>
+        </group>
+    );
+};
+
 const LaserPulse = ({ points, color }) => {
     const meshRef = useRef();
     const [curve] = useState(() => new CatmullRomCurve3(points.map(p => new Vector3(...p))));
@@ -485,6 +565,7 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
     return (
         <group>
             <Floor />
+            <EsconeonPopup />
 
             {/* Render Static Layout Connections */}
             {TREE_DATA.root.map(rootNode => {

@@ -29,8 +29,9 @@ A high-performance 3D portfolio built with React Three Fiber and integrated anal
 
 ### Admin Portal
 
-Access analytics at: `https://your-railway-url.app/admin`
-- **Password**: `Poncholove20!!`
+Access analytics dashboard by appending `#admin` to your URL:
+- **URL**: `https://your-railway-url.app/#admin`
+- **Note**: No password required for view-only dashboard (secured by obfuscated URL hash for now).
 
 ### Local Development
 
@@ -54,9 +55,7 @@ npm start
 ├── /src                 # React frontend (3D Portfolio)
 │   ├── /components      # React Three Fiber components
 │   └── /utils           # Analytics tracking
-├── /server              # Express backend
-│   ├── index.js         # API routes & admin portal
-│   └── database.js      # SQLite analytics DB
+├── /server.js           # Express backend (Postgres Analytics)
 └── /public              # Static assets (screenshots, videos)
 ```
 
