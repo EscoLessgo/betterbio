@@ -9,7 +9,7 @@ const DOMAIN_GROUPS = {
         { label: 'INLET', url: 'https://inlet.velarixsolutions.nl' },
     ],
     'VEROE.FUN': [
-        { label: 'ESCOSIGNS', url: 'https://escosigns.veroe.fun' },
+        { label: 'ESCO', url: 'https://esco.veroe.fun' },
         { label: 'SPOTI', url: 'https://spoti.veroe.fun' },
         { label: 'TNT_CORE', url: 'https://tnt.veroe.fun' },
         { label: 'FIGHT_ROOM', url: 'https://fight.veroe.fun' },

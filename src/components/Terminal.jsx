@@ -1,47 +1,49 @@
 import React from 'react';
 
 const CONTENT = {
-    home: {
-        title: "root@esco: ~/home",
+    // ROOT NODES
+    velarix: {
+        title: "root@velarix: ~/solutions",
         content: (
             <>
-                <h1>Esco.io Interface</h1>
-                <p>I am a creative developer specializing in 3D web experiences, digital architecture, and interactive design.</p>
-                <p>This environment is a technical showcase of React Three Fiber and precision WebGL interactivity.</p>
+                <h1>VELARIX SOLUTIONS</h1>
+                <p>Enterprise-grade digital infrastructure and crypto-native web systems.</p>
+                <div className="terminal-data-grid">
+                    <div className="data-row"><span>STATUS:</span> <span className="text-green">ONLINE</span></div>
+                    <div className="data-row"><span>NODES:</span> <span>3</span></div>
+                    <div className="data-row"><span>UPTIME:</span> <span>99.98%</span></div>
+                </div>
             </>
         )
     },
-    projects: {
-        title: "root@esco: ~/projects",
+    veroe_fun: {
+        title: "root@esco: ~/main_hub",
         content: (
             <>
-                <h1>Development log</h1>
-                <ul>
-                    <li><strong>Neural Grid:</strong> A real-time data visualization engine.</li>
-                    <li><strong>Ghost Shell:</strong> Advanced GLSL shader experimentation.</li>
-                    <li><strong>Vector Flow:</strong> Kinetic typography and motion systems.</li>
-                </ul>
+                <h1>ESCO.IO HUB</h1>
+                <p>Central nexus for creative experiments, interactive portfolios, and 3D web experiences.</p>
+                <p>Navigate sub-nodes to access specific project builds.</p>
             </>
         )
     },
-    about: {
-        title: "root@esco: ~/about",
+    veroe_space: {
+        title: "root@quietbin: ~/archive",
         content: (
             <>
-                <h1>Identity Profile</h1>
-                <p>Obsessed with the synthesis of raw technology and aesthetic minimalism.</p>
-                <p>Stack: React, Three.js, GLSL, WebAssembly, and Systems Architecture.</p>
+                <h1>QUIETBIN ARCHIVE</h1>
+                <p>Secure data storage and legacy artifact repository.</p>
+                <p>Access restricted to authorized personnel only.</p>
             </>
         )
     },
-    contact: {
-        title: "root@esco: ~/contact",
+    // DEFAULT GENERIC
+    default: {
+        title: "root@system: ~/observing",
         content: (
             <>
-                <h1>Establish Connection</h1>
-                <p>Email: admin@esco.io</p>
-                <p>GitHub: @esco_dev</p>
-                <p>Network: Encrypted_Node_01</p>
+                <h1>NODE_SELECTED</h1>
+                <p>Awaiting interaction...</p>
+                <p>Press [ENTER] to access node or [SPACE] to visit link.</p>
             </>
         )
     }
@@ -50,7 +52,25 @@ const CONTENT = {
 const Terminal = ({ isOpen, onClose, view }) => {
     if (!view) return null;
     const viewId = typeof view === 'string' ? view : view.id;
-    const data = CONTENT[viewId] || CONTENT['home'];
+    // Map children to their parent generic content if specific content missing, or default
+    let data = CONTENT[viewId];
+
+    if (!data) {
+        // Fallback logic
+        data = CONTENT['default'];
+        if (view.label) {
+            data = {
+                title: `root@node: ~/${view.label.toLowerCase()}`,
+                content: (
+                    <>
+                        <h1>{view.label}</h1>
+                        <p>{view.sub || 'System Node'}</p>
+                        {view.url && <p className="url-link">LINK: {view.url}</p>}
+                    </>
+                )
+            };
+        }
+    }
 
     return (
         <div className={`terminal-window ${isOpen ? 'active' : ''}`}>
