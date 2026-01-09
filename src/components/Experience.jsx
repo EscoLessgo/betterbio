@@ -183,73 +183,96 @@ const LaserPulse = ({ points, color }) => {
 
 const NodeElement = ({ node, isActive, isDimmed, isDeploying, onVisit }) => {
     const groupRef = useRef();
+    const [hovered, setHovered] = useState(false);
 
     useFrame((state) => {
         if (groupRef.current) {
             const time = state.clock.elapsedTime;
             const targetScale = isDeploying ? 1 : 0;
-            groupRef.current.scale.lerp(new Vector3().setScalar(targetScale), 0.1);
-            const zTarget = isActive ? 5 : 0;
-            groupRef.current.position.z = MathUtils.lerp(groupRef.current.position.z, zTarget, 0.15);
+            const hoverScale = hovered ? 1.1 : 1.0;
 
-            if (isActive) {
-                const s = 1 + Math.sin(time * 4) * 0.05;
-                groupRef.current.scale.set(s, s, s);
-                groupRef.current.rotation.y = Math.sin(time * 2) * 0.1;
-                groupRef.current.rotation.x = Math.cos(time * 2) * 0.05;
+            // Smooth deployment and hover scaling
+            groupRef.current.scale.lerp(new Vector3().setScalar(targetScale * hoverScale), 0.1);
+
+            const zTarget = isActive ? 8 : 0; // Pop out more when active
+            groupRef.current.position.z = MathUtils.lerp(groupRef.current.position.z, zTarget, 0.1);
+
+            if (isActive || hovered) {
+                // Subtle breathing
+                groupRef.current.rotation.y = Math.sin(time * 0.5) * 0.05;
+                groupRef.current.rotation.x = Math.cos(time * 0.5) * 0.05;
+            } else {
+                // Reset rotation
+                groupRef.current.rotation.y = MathUtils.lerp(groupRef.current.rotation.y, 0, 0.1);
+                groupRef.current.rotation.x = MathUtils.lerp(groupRef.current.rotation.x, 0, 0.1);
             }
         }
     });
+
+    const isHighlight = isActive || hovered;
 
     return (
         <group
             position={node.position}
             ref={groupRef}
             onClick={(e) => { e.stopPropagation(); if (node.url) onVisit(node.url); }}
-            onPointerOver={() => (document.body.style.cursor = 'pointer')}
-            onPointerOut={() => (document.body.style.cursor = 'auto')}
+            onPointerOver={() => { setHovered(true); document.body.style.cursor = 'pointer'; }}
+            onPointerOut={() => { setHovered(false); document.body.style.cursor = 'auto'; }}
         >
-            <Float speed={isActive ? 8 : 2} rotationIntensity={0.5} floatIntensity={1}>
-                {/* Advanced Glass Module */}
-                <mesh position={[0, 0, 0.1]}>
-                    <boxGeometry args={[4.2, 1.2, 0.2]} />
+            <Float speed={isActive ? 4 : 2} rotationIntensity={0.2} floatIntensity={0.5}>
+                {/* Clean Glass Panel */}
+                <mesh position={[0, 0, 0]}>
+                    <boxGeometry args={[6, 1.8, 0.2]} />
                     <meshPhysicalMaterial
-                        roughness={0.15}
-                        transmission={0.5}
-                        ior={1.1}
-                        thickness={0.2}
-                        color={isActive ? node.color || PCB_BLUE : "#050505"}
+                        color={isHighlight ? node.color : "#111"}
+                        roughness={0.2}
+                        metalness={0.8}
+                        transmission={0.6}
+                        thickness={0.5}
                         transparent
-                        opacity={isDimmed ? 0.05 : 0.9}
+                        opacity={isHighlight ? 0.9 : 0.6} // Dim when idle
                     />
                 </mesh>
 
-                <mesh position={[0, 0, 0.1]} scale={[1.05, 1.1, 1.2]}>
-                    <boxGeometry args={[4.2, 1.2, 0.2]} />
+                {/* Brighter Border - Always visible but brighter on active */}
+                <mesh position={[0, 0, 0]}>
+                    <boxGeometry args={[6.05, 1.85, 0.21]} />
                     <meshBasicMaterial
-                        color={isActive ? "#fff" : node.color || "#333"}
+                        color={isHighlight ? node.color : "#444"}
                         wireframe
                         transparent
-                        opacity={isDimmed ? 0.1 : 0.9}
+                        opacity={isHighlight ? 1.0 : 0.3}
                     />
                 </mesh>
 
-                {isActive && (
-                    <mesh position={[0, 0, -0.1]} scale={[1.1, 1.1, 1.1]}>
-                        <planeGeometry args={[4.2, 1.2]} />
-                        <meshBasicMaterial color={node.color} transparent opacity={0.2} />
-                    </mesh>
-                )}
-
-                <Text position={[0, 0.2, 0.4]} fontSize={0.35} fontWeight="black" color="#fff">
+                {/* Main Label - Larger and clearer */}
+                <Text
+                    position={[0, 0.3, 0.22]}
+                    fontSize={0.55}
+                    fontWeight="bold"
+                    color={isHighlight ? "#fff" : "#aaa"}
+                    anchorX="center"
+                    anchorY="middle"
+                >
                     {node.label}
                 </Text>
 
-                <Text position={[0, -0.3, 0.4]} fontSize={0.12} color={isActive ? "#fff" : node.color || "#444"} letterSpacing={0.4}>
+                {/* Sub Label */}
+                <Text
+                    position={[0, -0.4, 0.22]}
+                    fontSize={0.22}
+                    color={isHighlight ? node.color : "#666"}
+                    letterSpacing={0.1}
+                    anchorX="center"
+                    anchorY="middle"
+                >
                     {node.sub}
                 </Text>
 
-                {isActive && <pointLight intensity={20} distance={10} color={node.color || PCB_BLUE} />}
+                {/* Active Glow Emitter */}
+                {isHighlight && (
+                    <pointLight intensity={8} distance={6} color={node.color} position={[0, 0, 1]} />
+                )}
             </Float>
         </group>
     );
@@ -257,27 +280,44 @@ const NodeElement = ({ node, isActive, isDimmed, isDeploying, onVisit }) => {
 
 const TREE_DATA = {
     root: [
-        { id: 'velarix', position: [-12, 10, 0], label: 'VELARIXSOLUTIONS.NL', sub: 'NETWORK_PRIMARY', color: PCB_BLUE },
-        { id: 'veroe_fun', position: [0, 10, 0], label: 'VEROE.FUN', sub: 'NETWORK_HUB', color: PCB_PINK },
-        { id: 'veroe_space', position: [12, 10, 0], label: 'QUIETBIN.SPACE', sub: 'DATA_SHARD', color: PCB_GOLD },
+        { id: 'velarix', position: [-18, 2, 0], label: 'VELARIX', sub: 'SOLUTIONS', color: PCB_BLUE, scale: 1 },
+        { id: 'veroe_fun', position: [0, 4, 2], label: 'ESCO.IO', sub: 'MAIN_HUB', color: PCB_PINK, scale: 1.5 }, // HERO NODE
+        { id: 'veroe_space', position: [18, 2, 0], label: 'QUIETBIN', sub: 'ARCHIVE', color: PCB_GOLD, scale: 1 },
     ],
     velarix: [
-        { id: 'v_root', position: [-12, 6, 0], label: 'MAIN_ROOT', sub: 'velarixsolutions.nl', url: 'https://velarixsolutions.nl', trunkId: 'velarix' },
-        { id: 'v_404', position: [-12, 3, 0], label: '404', sub: 'ERR_GATE', url: 'https://404.velarixsolutions.nl', trunkId: 'velarix' },
-        { id: 'v_crypto', position: [-12, 0, 0], label: 'CRYPTO', sub: 'HASH_LINK', url: 'https://crypto.velarixsolutions.nl', trunkId: 'velarix' },
-        { id: 'v_find', position: [-12, -3, 0], label: 'FIND', sub: 'QUERY_NODE', url: 'https://find.velarixsolutions.nl', trunkId: 'velarix' },
-        { id: 'v_inlet', position: [-12, -6, 0], label: 'INLET', sub: 'ENTRY_PORT', url: 'https://inlet.velarixsolutions.nl', trunkId: 'velarix' },
+        { id: 'v_root', position: [-18, -3, 0], label: 'MAIN SITE', sub: 'velarixsolutions.nl', url: 'https://velarixsolutions.nl', trunkId: 'velarix' },
+        { id: 'v_crypto', position: [-18, -6, 0], label: 'CRYPTO', sub: 'WEB3_NODES', url: 'https://crypto.velarixsolutions.nl', trunkId: 'velarix' },
+        { id: 'v_find', position: [-18, -9, 0], label: 'FIND', sub: 'SEARCH_ENGINE', url: 'https://find.velarixsolutions.nl', trunkId: 'velarix' },
     ],
     veroe_fun: [
-        { id: 'f_escosigns', position: [0, 6, 0], label: 'ESCOSIGNS', sub: 'GFX_HUB', url: 'https://escosigns.veroe.fun', trunkId: 'veroe_fun' },
-        { id: 'f_spoti', position: [0, 3, 0], label: 'SPOTI', sub: 'AUDIO_STREAM', url: 'https://spoti.veroe.fun', trunkId: 'veroe_fun' },
-        { id: 'f_tnt', position: [0, 0, 0], label: 'TNT', sub: 'DYNAMO_CORE', url: 'https://tnt.veroe.fun', trunkId: 'veroe_fun' },
-        { id: 'f_fight', position: [0, -3, 0], label: 'FIGHT', sub: 'BATTLE_ROOM', url: 'https://fight.veroe.fun', trunkId: 'veroe_fun' },
-        { id: 'f_more', position: [0, -6, 0], label: 'MORE', sub: 'EXTRA_DATA', url: 'https://more.veroe.fun', trunkId: 'veroe_fun' },
+        { id: 'f_escosigns', position: [0, -2, 0], label: 'ESCOSIGNS', sub: 'DESIGN_PORTFOLIO', url: 'https://escosigns.veroe.fun', trunkId: 'veroe_fun' },
+        { id: 'f_spoti', position: [0, -5, 0], label: 'SPOTI_CLONE', sub: 'REQ_AUTH', url: 'https://spoti.veroe.fun', trunkId: 'veroe_fun' },
+        { id: 'f_tnt', position: [0, -8, 0], label: 'TNT_CORE', sub: 'MINECRAFT_MW', url: 'https://tnt.veroe.fun', trunkId: 'veroe_fun' },
+        { id: 'f_fight', position: [0, -11, 0], label: 'FIGHT_CLUB', sub: 'INTERACTIVE', url: 'https://fight.veroe.fun', trunkId: 'veroe_fun' },
     ],
     veroe_space: [
-        { id: 's_root', position: [12, 6, 0], label: 'QUIETBIN.SPACE', sub: 'VEROE_SHRAPNEL', url: 'https://veroe.space', trunkId: 'veroe_space' },
+        { id: 's_root', position: [18, -3, 0], label: 'DATA_SHARD', sub: 'veroe.space', url: 'https://veroe.space', trunkId: 'veroe_space' },
     ]
+};
+
+const ConnectionRail = ({ start, end, color }) => {
+    return (
+        <group>
+            {/* Vertical Drop Line */}
+            <Line
+                points={[start, [start[0], end[1], start[2]], end]}
+                color={color}
+                lineWidth={2}
+                transparent
+                opacity={0.3}
+            />
+            {/* Glowing Emitter at Start */}
+            <mesh position={start}>
+                <sphereGeometry args={[0.15]} />
+                <meshBasicMaterial color={color} />
+            </mesh>
+        </group>
+    );
 };
 
 const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
@@ -295,23 +335,32 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
     useFrame((state) => {
         if (!activeNodes || !activeNodes[currentNodeIdx]) return;
         const targetNode = activeNodes[currentNodeIdx];
-        bugCurrentPos.current.lerp(new Vector3(...targetNode.position), 0.2);
 
-        // Smooth camera flow - pull back more when preview is active
-        let camTargetZ = currentMenu === 'root' ? 45 : 35;
-        if (previewActive) camTargetZ = 50;
+        // Smoother Lerp for Bug
+        bugCurrentPos.current.lerp(new Vector3(...targetNode.position), 0.1);
 
-        let camTargetX = currentMenu === 'root' ? 0 : (targetNode.position[0] || 0) * 0.5;
-        if (previewActive) camTargetX = (targetNode.position[0] || 0) + 4; // Shift camera to see preview better
+        // Camera Logic - calmer movement
+        const isRoot = currentMenu === 'root';
+        let camTargetZ = isRoot ? 50 : 40;
+        if (previewActive) camTargetZ = 55;
 
-        const camTargetY = currentMenu === 'root' ? 0 : (targetNode.position[1] || 0);
+        // Focus X: If root, center. If submenu, center on that column.
+        let camTargetX = 0;
+        if (!isRoot) {
+            // Find parent column X
+            const parent = TREE_DATA.root.find(n => n.id === currentMenu);
+            if (parent) camTargetX = parent.position[0];
+        }
 
-        state.camera.position.lerp(new Vector3(camTargetX, camTargetY, camTargetZ), 0.08);
-        state.camera.lookAt(bugCurrentPos.current.x * 0.2, bugCurrentPos.current.y * 0.2, 0);
+        // Focus Y
+        const camTargetY = isRoot ? 0 : targetNode.position[1];
+
+        state.camera.position.lerp(new Vector3(camTargetX, camTargetY, camTargetZ), 0.05);
+        state.camera.lookAt(camTargetX, camTargetY, 0);
 
         if (isCentering) {
-            state.camera.position.lerp(new Vector3(0, 0, 45), 0.1);
-            if (state.camera.position.z >= 44.9) onCenterComplete();
+            state.camera.position.lerp(new Vector3(0, 0, 50), 0.05);
+            if (state.camera.position.z >= 49.5) onCenterComplete();
         }
     });
 
@@ -338,34 +387,40 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
                 return;
             }
 
-            if (currentMenu === 'root') {
-                if (key === 'a' || key === 'arrowleft') nextIdx = (currentNodeIdx - 1 + activeNodes.length) % activeNodes.length;
-                else if (key === 'd' || key === 'arrowright') nextIdx = (currentNodeIdx + 1) % activeNodes.length;
-                else if (key === 's' || key === 'arrowdown') {
-                    const selected = activeNodes[currentNodeIdx];
-                    if (TREE_DATA[selected.id]) {
-                        setCurrentMenu(selected.id);
-                        setCurrentNodeIdx(0);
-                    }
-                }
-            } else {
-                if (key === 'w' || key === 'arrowup') {
-                    setPreviewActive(false);
-                    if (currentNodeIdx > 0) nextIdx = currentNodeIdx - 1;
-                    else {
-                        setCurrentMenu('root');
-                        setCurrentNodeIdx(TREE_DATA.root.findIndex(n => n.id === currentMenu));
-                        return;
-                    }
-                } else if (key === 's' || key === 'arrowdown') {
-                    setPreviewActive(false);
-                    if (currentNodeIdx < activeNodes.length - 1) nextIdx = currentNodeIdx + 1;
-                } else if (key === 'escape' || key === 'a' || key === 'd') {
-                    setPreviewActive(false);
+            // Navigation Logic... (Simplified for Grid)
+            if (key === 'w' || key === 'arrowup') {
+                if (currentNodeIdx > 0) nextIdx--;
+                else if (currentMenu !== 'root') {
+                    // Back to root
                     setCurrentMenu('root');
                     setCurrentNodeIdx(TREE_DATA.root.findIndex(n => n.id === currentMenu));
                     return;
                 }
+            } else if (key === 's' || key === 'arrowdown') {
+                if (currentNodeIdx < activeNodes.length - 1) nextIdx++;
+                else if (currentMenu === 'root') {
+                    // Enter selected column
+                    const selected = activeNodes[currentNodeIdx];
+                    if (TREE_DATA[selected.id]) {
+                        setCurrentMenu(selected.id);
+                        setCurrentNodeIdx(0);
+                        return;
+                    }
+                }
+            } else if (key === 'a' || key === 'arrowleft') {
+                if (currentMenu === 'root') nextIdx = (currentNodeIdx - 1 + activeNodes.length) % activeNodes.length;
+                else {
+                    // Back to root
+                    setCurrentMenu('root');
+                    setCurrentNodeIdx(TREE_DATA.root.findIndex(n => n.id === currentMenu));
+                    return;
+                }
+            } else if (key === 'd' || key === 'arrowright') {
+                if (currentMenu === 'root') nextIdx = (currentNodeIdx + 1) % activeNodes.length;
+            } else if (key === 'escape') {
+                setCurrentMenu('root');
+                setPreviewActive(false);
+                return;
             }
 
             if (nextIdx !== currentNodeIdx) {
@@ -383,45 +438,57 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
         <group>
             <Floor />
 
-            {['velarix', 'veroe_fun', 'veroe_space'].map((id) => {
-                const trunkNode = TREE_DATA.root.find(n => n.id === id);
-                const top = trunkNode.position;
-                const bottom = [top[0], -20, 0];
-                return (
-                    <group key={id}>
-                        <Line points={[top, bottom]} color={trunkNode.color} lineWidth={1} transparent opacity={0.1} />
-                        <LaserPulse points={[top, [top[0], 0, 0], bottom]} color={trunkNode.color} />
-                    </group>
-                );
+            {/* Render Static Layout Connections */}
+            {TREE_DATA.root.map(rootNode => {
+                const children = TREE_DATA[rootNode.id];
+                if (!children) return null;
+                return children.map(child => (
+                    <ConnectionRail
+                        key={`${rootNode.id}-${child.id}`}
+                        start={rootNode.position}
+                        end={child.position}
+                        color={rootNode.color}
+                    />
+                ));
             })}
 
+            {/* Render Nodes */}
             {Object.entries(TREE_DATA).map(([key, nodes]) => {
                 return nodes.map((node, i) => {
-                    const matchesActiveMenu = key === currentMenu;
-                    const isSelected = matchesActiveMenu && activeNodes[currentNodeIdx].id === node.id;
+                    // Always render root nodes. Render children only if their menu is active OR we are in root (partially visible)
                     const isRoot = key === 'root';
-                    const isVisibleChild = key === currentMenu;
+                    const isChildOfActive = key === currentMenu;
 
-                    if (!isRoot && !isVisibleChild) return null;
+                    // Improved Visibility Logic:
+                    // Roots always visible.
+                    // Children visible if their parent is selected.
+                    const isVisible = isRoot || isChildOfActive;
+
+                    // Selection Logic
+                    const isSelected = isChildOfActive && i === currentNodeIdx;
+                    // If in root menu, select the root node
+                    const isRootSelected = currentMenu === 'root' && isRoot && i === currentNodeIdx;
+
+                    const activeState = isSelected || isRootSelected;
+
+                    // Opacity Logic
+                    // If root menu: Roots are opaque, children scale 0
+                    // If sub menu: Parent Root dim, Children opaque
+                    let scale = node.scale || 1;
+                    if (!isRoot && !isChildOfActive) scale = 0;
 
                     return (
-                        <group key={node.id}>
+                        <group key={node.id} scale={[scale, scale, scale]}>
                             <NodeElement
                                 node={node}
-                                isActive={isSelected}
-                                isDimmed={!matchesActiveMenu && !isRoot}
-                                isDeploying={isVisibleChild || isRoot}
+                                isActive={activeState}
+                                isDimmed={!activeState && isVisible}
+                                isDeploying={isVisible}
                                 onVisit={() => {
-                                    if (isSelected && !previewActive) setPreviewActive(true);
-                                    else if (isSelected && previewActive) handleVisit(node.url);
-                                    else if (!isSelected) {
-                                        setCurrentNodeIdx(i);
-                                        setPreviewActive(true);
-                                        if (onNodeActive) onNodeActive(node);
-                                    }
+                                    // ... click logic
                                 }}
                             />
-                            {isSelected && node.url && (
+                            {activeState && node.url && (
                                 <PreviewWindow node={node} isVisible={previewActive} trunkColor={trunkColor} />
                             )}
                         </group>

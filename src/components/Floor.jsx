@@ -6,35 +6,8 @@ const PCB_BASE = "#020406";
 const TRACE_COLOR = "#00ffff";
 
 const CircuitTraces = () => {
-    const traces = useMemo(() => {
-        return Array.from({ length: 30 }).map(() => {
-            const startX = (Math.random() - 0.5) * 60;
-            const startY = (Math.random() - 0.5) * 60;
-            const length = 5 + Math.random() * 15;
-            const horizontal = Math.random() > 0.5;
-
-            const points = [
-                [startX, startY, -0.95],
-                horizontal ? [startX + length, startY, -0.95] : [startX, startY + length, -1]
-            ];
-            return { points, color: Math.random() > 0.8 ? "#ff0077" : "#00ffff" };
-        });
-    }, []);
-
-    return (
-        <group>
-            {traces.map((t, i) => (
-                <Line
-                    key={i}
-                    points={t.points}
-                    color={t.color}
-                    lineWidth={1}
-                    transparent
-                    opacity={0.1}
-                />
-            ))}
-        </group>
-    );
+    // Disabled traces for cleaner UI
+    return null;
 };
 
 const DataShard = ({ position, color, speed }) => {
@@ -57,13 +30,8 @@ const DataShard = ({ position, color, speed }) => {
 };
 
 const Floor = () => {
-    const shrapnel = useMemo(() => {
-        return Array.from({ length: 15 }).map((_, i) => ({
-            pos: [(Math.random() - 0.5) * 60, (Math.random() - 0.5) * 60, Math.random() * 5],
-            color: Math.random() > 0.5 ? "#00ffff" : "#ff0077",
-            speed: 0.5 + Math.random()
-        }));
-    }, []);
+    // Disabled random shrapnel for cleaner UI
+    const shrapnel = [];
 
     return (
         <group position={[0, 0, 0]}>
