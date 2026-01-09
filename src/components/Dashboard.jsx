@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
+import { ComposableMap, Geographies, Geography, Marker, ZoomableGroup } from "react-simple-maps";
 import { scaleLinear } from "d3-scale";
 import { Tooltip } from 'react-tooltip';
 
@@ -13,6 +13,7 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(false);
     const [filter, setFilter] = useState('');
     const [selectedLogs, setSelectedLogs] = useState([]);
+    const [zoom, setZoom] = useState(1);
 
     // Auth & Fetch
     const login = async () => {
@@ -138,39 +139,56 @@ const Dashboard = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
 
                     {/* MAP VISUALIZER */}
-                    <div style={{ background: '#0a0a12', border: '1px solid #333', borderRadius: '8px', padding: '1rem', height: '400px', position: 'relative' }}>
-                        <h3 style={{ position: 'absolute', top: '1rem', left: '1rem', color: '#666', fontSize: '0.8rem', margin: 0 }}>GLOBAL_HEATMAP</h3>
+                    <div style={{ background: '#0a0a12', border: '1px solid #333', borderRadius: '8px', padding: '1rem', height: '400px', position: 'relative', overflow: 'hidden' }}>
+                        <h3 style={{ position: 'absolute', top: '1rem', left: '1rem', color: '#666', fontSize: '0.8rem', margin: 0, zIndex: 10 }}>GLOBAL_HEATMAP (SCROLL TO ZOOM)</h3>
                         <ComposableMap projectionConfig={{ scale: 140 }} style={{ width: '100%', height: '100%' }}>
-                            <Geographies geography={GEO_URL}>
-                                {({ geographies }) =>
-                                    geographies.map((geo) => (
-                                        <Geography
-                                            key={geo.rsmKey}
-                                            geography={geo}
-                                            fill="#1a1a24"
-                                            stroke="#000"
-                                            strokeWidth={0.5}
-                                            data-tooltip-id="geo-tooltip"
-                                            data-tooltip-content={geo.properties.name}
-                                            style={{
-                                                default: { outline: "none" },
-                                                hover: { fill: "#2a2a35", outline: "none" },
-                                                pressed: { outline: "none" },
-                                            }}
+                            <ZoomableGroup zoom={1} minZoom={0.5} maxZoom={10} onMove={({ k }) => setZoom(k)}>
+                                <Geographies geography={GEO_URL}>
+                                    {({ geographies }) =>
+                                        geographies.map((geo) => (
+                                            <Geography
+                                                key={geo.rsmKey}
+                                                geography={geo}
+                                                fill="#1a1a24"
+                                                stroke="#000"
+                                                strokeWidth={0.5}
+                                                data-tooltip-id="geo-tooltip"
+                                                data-tooltip-content={geo.properties.name}
+                                                style={{
+                                                    default: { outline: "none" },
+                                                    hover: { fill: "#2a2a35", outline: "none" },
+                                                    pressed: { outline: "none" },
+                                                }}
+                                            />
+                                        ))
+                                    }
+                                </Geographies>
+                                {data?.map_points?.map((point, i) => (
+                                    <Marker
+                                        key={i}
+                                        coordinates={[point.lon, point.lat]}
+                                        data-tooltip-id="geo-tooltip"
+                                        data-tooltip-content={`${point.city}, ${point.country} (${point.count} Hits)`}
+                                    >
+                                        <circle
+                                            r={popScale(point.count) / Math.sqrt(Math.max(1, zoom))}
+                                            fill="#d92b6b"
+                                            stroke="#fff"
+                                            strokeWidth={1 / zoom}
+                                            style={{ opacity: 0.8, cursor: 'pointer' }}
                                         />
-                                    ))
-                                }
-                            </Geographies>
-                            {data?.map_points?.map((point, i) => (
-                                <Marker
-                                    key={i}
-                                    coordinates={[point.lon, point.lat]}
-                                    data-tooltip-id="geo-tooltip"
-                                    data-tooltip-content={`${point.city}, ${point.country} (${point.count} Hits)`}
-                                >
-                                    <circle r={popScale(point.count)} fill="#d92b6b" stroke="#fff" strokeWidth={1} style={{ opacity: 0.8, cursor: 'pointer' }} />
-                                </Marker>
-                            ))}
+                                        {zoom > 2 && (
+                                            <text
+                                                textAnchor="middle"
+                                                y={-10 / zoom}
+                                                style={{ fontFamily: "Arial", fill: "#fff", fontSize: Math.max(4, 10 / zoom), pointerEvents: 'none' }}
+                                            >
+                                                {point.city}
+                                            </text>
+                                        )}
+                                    </Marker>
+                                ))}
+                            </ZoomableGroup>
                         </ComposableMap>
                     </div>
 
