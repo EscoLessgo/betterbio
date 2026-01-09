@@ -13,7 +13,7 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(false);
     const [filter, setFilter] = useState('');
     const [selectedLogs, setSelectedLogs] = useState([]);
-    const [zoom, setZoom] = useState(1);
+    const [mapState, setMapState] = useState({ coordinates: [0, 0], zoom: 1 });
 
     // Auth & Fetch
     const login = async () => {
@@ -142,7 +142,13 @@ const Dashboard = () => {
                     <div style={{ background: '#0a0a12', border: '1px solid #333', borderRadius: '8px', padding: '1rem', height: '400px', position: 'relative', overflow: 'hidden' }}>
                         <h3 style={{ position: 'absolute', top: '1rem', left: '1rem', color: '#666', fontSize: '0.8rem', margin: 0, zIndex: 10 }}>GLOBAL_HEATMAP (SCROLL TO ZOOM)</h3>
                         <ComposableMap projectionConfig={{ scale: 140 }} style={{ width: '100%', height: '100%' }}>
-                            <ZoomableGroup zoom={1} minZoom={0.5} maxZoom={10} onMove={({ k }) => setZoom(k)}>
+                            <ZoomableGroup
+                                zoom={mapState.zoom}
+                                center={mapState.coordinates}
+                                minZoom={1}
+                                maxZoom={10}
+                                onMove={({ zoom, coordinates }) => setMapState({ zoom, coordinates })}
+                            >
                                 <Geographies geography={GEO_URL}>
                                     {({ geographies }) =>
                                         geographies.map((geo) => (
@@ -171,17 +177,17 @@ const Dashboard = () => {
                                         data-tooltip-content={`${point.city}, ${point.country} (${point.count} Hits)`}
                                     >
                                         <circle
-                                            r={popScale(point.count) / Math.sqrt(Math.max(1, zoom))}
+                                            r={popScale(point.count) / Math.sqrt(Math.max(1, mapState.zoom))}
                                             fill="#d92b6b"
                                             stroke="#fff"
-                                            strokeWidth={1 / zoom}
+                                            strokeWidth={1 / mapState.zoom}
                                             style={{ opacity: 0.8, cursor: 'pointer' }}
                                         />
-                                        {zoom > 2 && (
+                                        {mapState.zoom > 2 && (
                                             <text
                                                 textAnchor="middle"
-                                                y={-10 / zoom}
-                                                style={{ fontFamily: "Arial", fill: "#fff", fontSize: Math.max(4, 10 / zoom), pointerEvents: 'none' }}
+                                                y={-10 / mapState.zoom}
+                                                style={{ fontFamily: "Arial", fill: "#fff", fontSize: Math.max(4, 10 / mapState.zoom), pointerEvents: 'none' }}
                                             >
                                                 {point.city}
                                             </text>
