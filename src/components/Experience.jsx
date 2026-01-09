@@ -227,19 +227,13 @@ const EsconeonPopup = () => {
     }, [video]);
 
     return (
-        <group position={[0, 12, 0]} ref={groupRef} scale={[0, 0, 0]}>
+        <group position={[0, 16, 0]} ref={groupRef} scale={[0, 0, 0]}> {/* Shifted up from 12 to 16 */}
             {/* Slightly offset Z to pop over the node */}
             <mesh>
                 <planeGeometry args={[14, 8]} />
                 <meshBasicMaterial side={THREE.DoubleSide} transparent opacity={0}>
                     <videoTexture attach="map" args={[video]} colorSpace={THREE.SRGBColorSpace} />
                 </meshBasicMaterial>
-            </mesh>
-
-            {/* Optional Glow/Border for integration */}
-            <mesh position={[0, 0, -0.1]}>
-                <planeGeometry args={[14.2, 8.2]} />
-                <meshBasicMaterial color="#00ffff" transparent opacity={0} />
             </mesh>
         </group>
     );
@@ -599,12 +593,19 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
                 const children = TREE_DATA[rootNode.id];
                 if (!children) return null;
                 return children.map(child => (
-                    <ConnectionRail
-                        key={`${rootNode.id}-${child.id}`}
-                        start={rootNode.position}
-                        end={child.position}
-                        color={rootNode.color}
-                    />
+                    <group key={`${rootNode.id}-${child.id}`} >
+                        <ConnectionRail
+                            start={rootNode.position}
+                            end={child.position}
+                            color={rootNode.color}
+                            isActive={currentMenu === rootNode.id}
+                        />
+                        {/* Extra Electric Surge Line */}
+                        <LaserPulse
+                            points={[rootNode.position, [rootNode.position[0], (rootNode.position[1] + child.position[1]) / 2, 2], child.position]}
+                            color={rootNode.color}
+                        />
+                    </group>
                 ));
             })}
 
