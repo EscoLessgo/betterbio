@@ -590,9 +590,10 @@ body {
     letter-spacing: 8px;
   }
 
-  /* Hide Desktop Hints */
+  /* Hide Desktop Hints & Old Overlays */
   .nav-hints-bar,
-  .keybind-overlay {
+  .keybind-overlay,
+  .instruction-text {
     display: none !important;
   }
 

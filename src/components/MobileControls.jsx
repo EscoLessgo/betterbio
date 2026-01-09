@@ -7,24 +7,44 @@ const MobileControls = () => {
 
     return (
         <div className="mobile-controls">
-            <div className="d-pad">
-                <button className="d-btn up" onClick={() => dispatchKey('ArrowUp')}>▲</button>
-                <div className="d-row">
-                    <button className="d-btn left" onClick={() => dispatchKey('ArrowLeft')}>◀</button>
-                    <button className="d-btn enter" onClick={() => dispatchKey('Enter')}>●</button>
-                    <button className="d-btn right" onClick={() => dispatchKey('ArrowRight')}>▶</button>
+            {/* Directional Pad */}
+            <div className="d-pad-container">
+                <div className="d-pad-row">
+                    <button className="d-btn up" onPointerDown={() => dispatchKey('ArrowUp')}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M7 14l5-5 5 5H7z" /></svg>
+                    </button>
                 </div>
-                <button className="d-btn down" onClick={() => dispatchKey('ArrowDown')}>▼</button>
+                <div className="d-pad-row mid">
+                    <button className="d-btn left" onPointerDown={() => dispatchKey('ArrowLeft')}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M14 7l-5 5 5 5V7z" /></svg>
+                    </button>
+                    <div className="d-spacer"></div>
+                    <button className="d-btn right" onPointerDown={() => dispatchKey('ArrowRight')}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M10 17l5-5-5-5v10z" /></svg>
+                    </button>
+                </div>
+                <div className="d-pad-row">
+                    <button className="d-btn down" onPointerDown={() => dispatchKey('ArrowDown')}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5H7z" /></svg>
+                    </button>
+                </div>
             </div>
+
+            {/* Action Button (Separate) */}
+            <button className="action-btn" onPointerDown={() => dispatchKey('Enter')}>
+                ENTER
+            </button>
 
             <style jsx>{`
                 .mobile-controls {
                     position: fixed;
-                    bottom: 2rem;
-                    right: 2rem;
-                    z-index: 10000;
-                    display: none; /* Hidden by default, shown via media query in index.css */
-                    pointer-events: auto;
+                    bottom: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    pointer-events: none;
+                    z-index: 10001;
+                    display: none;
                 }
 
                 @media (max-width: 768px) {
@@ -33,51 +53,81 @@ const MobileControls = () => {
                     }
                 }
 
-                .d-pad {
+                /* Layout Grid for Controls */
+                .d-pad-container {
+                    position: absolute;
+                    bottom: 2rem;
+                    left: 2rem;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
-                    gap: 10px;
+                    gap: 5px;
+                    pointer-events: auto;
                 }
 
-                .d-row {
+                .d-pad-row {
                     display: flex;
-                    gap: 10px;
+                    gap: 5px;
+                }
+                
+                .d-pad-row.mid {
+                    gap: 5px;
+                }
+
+                .d-spacer {
+                    width: 60px;
+                    height: 60px;
                 }
 
                 .d-btn {
-                    width: 50px;
-                    height: 50px;
-                    background: rgba(0, 0, 0, 0.5);
-                    border: 1px solid #2dfccc;
-                    color: #2dfccc;
+                    width: 60px;
+                    height: 60px;
+                    background: rgba(10, 15, 20, 0.4);
+                    border: 1px solid rgba(45, 252, 204, 0.3);
+                    color: rgba(45, 252, 204, 0.8);
                     border-radius: 12px;
-                    font-size: 1.2rem;
                     display: flex;
                     justify-content: center;
                     align-items: center;
-                    cursor: pointer;
-                    backdrop-filter: blur(10px);
-                    box-shadow: 0 0 10px rgba(45, 252, 204, 0.2);
-                    transition: all 0.2s;
-                    user-select: none;
+                    backdrop-filter: blur(5px);
+                    transition: all 0.1s;
+                    touch-action: manipulation;
                 }
 
                 .d-btn:active {
-                    background: #2dfccc;
-                    color: #000;
+                    background: rgba(45, 252, 204, 0.2);
                     transform: scale(0.95);
-                }
-
-                .d-btn.enter {
-                    border-color: #d92b6b;
-                    color: #d92b6b;
-                    box-shadow: 0 0 10px rgba(217, 43, 107, 0.2);
-                }
-
-                .d-btn.enter:active {
-                    background: #d92b6b;
                     color: #fff;
+                }
+
+                /* Action Button - Big and Bottom Right */
+                .action-btn {
+                    position: absolute;
+                    bottom: 3rem;
+                    right: 2rem;
+                    width: 90px;
+                    height: 90px;
+                    background: rgba(217, 43, 107, 0.2);
+                    border: 2px solid rgba(217, 43, 107, 0.5);
+                    color: #fff;
+                    border-radius: 50%;
+                    font-weight: 900;
+                    font-family: 'Roboto Mono', monospace;
+                    font-size: 0.9rem;
+                    letter-spacing: 1px;
+                    pointer-events: auto;
+                    backdrop-filter: blur(5px);
+                    box-shadow: 0 0 20px rgba(217, 43, 107, 0.2);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    touch-action: manipulation;
+                }
+
+                .action-btn:active {
+                    background: rgba(217, 43, 107, 0.6);
+                    transform: scale(0.95);
+                    box-shadow: 0 0 30px rgba(217, 43, 107, 0.5);
                 }
             `}</style>
         </div>

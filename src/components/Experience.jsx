@@ -435,12 +435,12 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
         // Base Z depth
         let targetZ = isRoot ? 55 : 40;
 
-        // Mobile Calibration
+        // Mobile Calibration: ZOOM IN (Lower Z) instead of out
         if (isMobile) {
-            targetZ = isRoot ? 90 : 60; // Pull way back on mobile to fit width
+            targetZ = isRoot ? 65 : 45; // Closer, tighter framing
         }
 
-        if (isPreview) targetZ = isMobile ? 50 : 30; // Closer for preview
+        if (isPreview) targetZ = isMobile ? 35 : 30; // Close inspection for preview
 
         // X/Y follows the node slightly, but mostly stays centered on the column/row
         let targetX = 0;
@@ -448,23 +448,26 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
 
         if (isRoot) {
             targetX = 0;
-            targetY = isMobile ? 10 : 0; // Shift up slightly on mobile
+            targetY = isMobile ? 0 : 0; // Tighter center
         } else {
             // If in submenu, center on the column parent
             const parent = TREE_DATA.root.find(n => n.id === currentMenu);
             if (parent) targetX = parent.position[0];
             targetY = targetNode.position[1];
 
-            // On mobile, center strictly on the node we are looking at to key it in view
-            if (isMobile) targetX = parent ? parent.position[0] : 0; // Keep column X alignment
+            // On mobile, force-lock to the exact node center to keep "orb on screen"
+            if (isMobile) {
+                targetX = targetNode.position[0]; // Strict X Lock
+                targetY = targetNode.position[1]; // Strict Y Lock
+            }
         }
 
         // Shift for Preview Panel
         if (isPreview) {
             if (isMobile) {
-                targetX = targetNode.position[0]; // Center on node X
-                targetY = targetNode.position[1] + 6; // Look AT the panel (which is at Y+6)
-                targetZ = 55; // Ensure we are far back enough to see it
+                targetX = targetNode.position[0];
+                targetY = targetNode.position[1] + 3; // Slight look up, but keep node in lower view
+                // targetZ is already set to 35 above
             } else {
                 targetX += 8;
             }
