@@ -37,44 +37,37 @@ const PREVIEW_DATA = {
     's_root': '/quietembed.mp4'
 };
 
-// Optimized Non-Blocking Texture Loader
+// Robust Video Feed using manual element
 const VideoFeed = ({ url }) => {
-    try {
-        const videoTexture = useVideoTexture(url, {
-            unsuspended: 'canplay',
-            muted: true,
-            loop: true,
-            start: true
-        });
-        return (
-            <mesh>
-                <planeGeometry args={[13.6, 7]} />
-                <meshBasicMaterial map={videoTexture} transparent={false} />
-            </mesh>
-        );
-    } catch (e) {
-        return <Text fontSize={0.3} color="#ff3333">VIDEO_SYNC_ERROR</Text>;
-    }
+    const [video] = useState(() => {
+        const vid = document.createElement('video');
+        vid.src = url;
+        vid.crossOrigin = 'Anonymous';
+        vid.loop = true;
+        vid.muted = true;
+        vid.playsInline = true;
+        vid.autoplay = true;
+        return vid;
+    });
+
+    useEffect(() => {
+        video.play().catch(e => console.warn("Autoplay failed", e));
+        return () => video.pause();
+    }, [video]);
+
+    return (
+        <mesh scale={[1, -1, 1]}> {/* Fix texture flip */}
+            <planeGeometry args={[13.6, 7]} />
+            <meshBasicMaterial>
+                <videoTexture attach="map" args={[video]} encoding={THREE.SRGBColorSpace} />
+            </meshBasicMaterial>
+        </mesh>
+    );
 };
 
 const ImageFeed = ({ url }) => {
-    const [texture, setTexture] = useState(null);
-    const [error, setError] = useState(false);
-
-    useEffect(() => {
-        let isMounted = true;
-        const loader = new TextureLoader();
-        loader.load(url, (tex) => {
-            if (!isMounted) return;
-            tex.colorSpace = SRGBColorSpace;
-            setTexture(tex);
-        }, undefined, () => { if (isMounted) setError(true); });
-        return () => { isMounted = false; if (texture) texture.dispose(); };
-    }, [url]);
-
-    if (error) return <Text fontSize={0.3} color="#ff3333">FEED_SYNC_ERROR</Text>;
-    if (!texture) return <Text fontSize={0.3} color="#00ffff" opacity={0.6}>SYNCING_FEED...</Text>;
-
+    const texture = useTexture(url);
+    texture.colorSpace = SRGBColorSpace;
     return (
         <mesh>
             <planeGeometry args={[13.6, 7]} />
@@ -245,28 +238,16 @@ const NodeElement = ({ node, isActive, isDimmed, isDeploying, onVisit }) => {
                     />
                 </mesh>
 
-                {/* Main Label - Larger and clearer */}
+                {/* Main Label - Lowercase & Minimal */}
                 <Text
-                    position={[0, 0.3, 0.22]}
+                    position={[0, 0, 0.22]}
                     fontSize={0.55}
                     fontWeight="bold"
                     color={isHighlight ? "#fff" : "#aaa"}
                     anchorX="center"
                     anchorY="middle"
                 >
-                    {node.label}
-                </Text>
-
-                {/* Sub Label */}
-                <Text
-                    position={[0, -0.4, 0.22]}
-                    fontSize={0.22}
-                    color={isHighlight ? node.color : "#666"}
-                    letterSpacing={0.1}
-                    anchorX="center"
-                    anchorY="middle"
-                >
-                    {node.sub}
+                    {node.label.toLowerCase()}
                 </Text>
 
                 {/* Active Glow Emitter */}

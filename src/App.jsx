@@ -8,14 +8,14 @@ import RagingSea from './components/RagingSea';
 import { trackPageView } from './utils/analytics';
 import './index.css';
 
-const Header = () => (
-  <header className="site-header">
-    <div className="logo glitch-text" data-text="ESCO.IO">ESCO.IO</div>
-    <div className="system-status">
-      <span className="status-bit pulse">NEURAL_LINK_ESTABLISHED</span>
-      <span className="status-bit">CORE_v1.8.0</span>
+const BottomTag = () => (
+  <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', textAlign: 'right', pointerEvents: 'none', zIndex: 10 }}>
+    <div className="logo glitch-text" data-text="esco.io" style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-2px' }}>esco.io</div>
+    <div className="system-status" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginTop: '0.5rem', gap: '0.2rem' }}>
+      <span className="status-bit pulse" style={{ fontSize: '0.8rem', opacity: 0.7 }}>neural_link_established</span>
+      <span className="status-bit" style={{ fontSize: '0.8rem', opacity: 0.5 }}>core_v1.8.0</span>
     </div>
-  </header>
+  </div>
 );
 
 const NavHint = () => (
@@ -63,7 +63,7 @@ function App() {
     <div className="app-container">
       {isLoading && <LoadingScreen onComplete={() => setIsLoading(false)} />}
 
-      <Header />
+      <BottomTag />
 
       <div className="canvas-container">
         <Canvas
