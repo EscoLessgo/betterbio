@@ -79,29 +79,66 @@ function App() {
       document.getElementsByTagName('head')[0].appendChild(link);
     }
 
+    // Meta Theme Color Setup
+    let metaTheme = document.querySelector("meta[name='theme-color']");
+    if (!metaTheme) {
+      metaTheme = document.createElement('meta');
+      metaTheme.name = 'theme-color';
+      document.head.appendChild(metaTheme);
+    }
+
     let frame = 0;
+    let titleSwapTimer = 0;
+    let useCrazyTitle = false;
 
     const interval = setInterval(() => {
-      // Terminal Cursor Blink Effect
-      const titles = ["esco.io", "esco.io_"];
-      const titleIndex = Math.floor(Date.now() / 800) % 2; // Blink every 800ms
-      document.title = titles[titleIndex];
+      frame++;
+      titleSwapTimer++;
 
-      // 2. Color Pulse Favicon
+      // 1. FLASHING RAINBOW BROWSER THEME
+      // Cycle through HSL for smooth but fast rainbow effect
+      // speed: 10 degrees per frame
+      const hue = (frame * 15) % 360;
+      const rainbowColor = `hsl(${hue}, 100%, 50%)`;
+      metaTheme.content = rainbowColor;
+
+      // 2. HYPER GLITCH TITLE
+      if (titleSwapTimer > 30) { // Every ~2.4s (30 * 80ms)
+        useCrazyTitle = !useCrazyTitle;
+        titleSwapTimer = 0;
+      }
+
+      const currentBase = useCrazyTitle ? "ESCO IS CRAZY" : "ESCO.IO";
+
+      // Glitch Intensity: 40% chance of full chaos, otherwise just shaky case
+      if (Math.random() > 0.6) {
+        // CHAOS MODE
+        const glitchChars = "$%#@&!*?^~";
+        const glitched = currentBase.split('').map(c => {
+          if (c === ' ') return ' '; // preserve spaces essentially
+          return Math.random() > 0.5 ? glitchChars[Math.floor(Math.random() * glitchChars.length)] : c;
+        }).join('');
+        document.title = glitched;
+      } else {
+        // SHAKY CASE MODE
+        const shaky = currentBase.split('').map(c => Math.random() > 0.5 ? c.toLowerCase() : c.toUpperCase()).join('');
+        document.title = shaky;
+      }
+
+      // 3. Color Pulse Favicon (Synced with Rainbow)
       ctx.clearRect(0, 0, 32, 32);
-      ctx.fillStyle = '#000000';
+      ctx.fillStyle = rainbowColor; // Sync favicon background with theme color
       ctx.fillRect(0, 0, 32, 32);
 
       ctx.font = 'bold 20px "Courier New"';
-      ctx.fillStyle = colors[frame % colors.length];
+      ctx.fillStyle = '#000000'; // Text black for contrast
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillText(baseTitle[frame % baseTitle.length].toUpperCase(), 16, 16);
+      ctx.fillText(currentBase[0], 16, 16);
 
       link.href = canvas.toDataURL('image/png');
 
-      frame++;
-    }, 100); // Slower interval for favicon animation, title handles its own timing via Date.now()
+    }, 80); // 12.5 FPS for that rugged retro feel
 
     return () => clearInterval(interval);
   }, []);
