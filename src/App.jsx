@@ -48,13 +48,42 @@ function App() {
   useEffect(() => {
     trackPageView();
 
-    // Terminal Title Blinker
-    const titles = ['esco.io', 'esco.io_'];
+    // Dynamic Tab System
+    const sequence = [
+      { text: 'esco.io', color: '#00ccff' },
+      { text: 'velarix', color: '#00ffff' },
+      { text: 'quietbin', color: '#ffcc00' },
+      { text: 'veroe.fun', color: '#ff0077' }
+    ];
+
     let i = 0;
+
+    // Create consistent favicon link
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.getElementsByTagName('head')[0].appendChild(link);
+    }
+
     const interval = setInterval(() => {
-      document.title = titles[i % titles.length];
+      const item = sequence[i % sequence.length];
+
+      // 1. Update Title
+      document.title = item.text;
+
+      // 2. Update Favicon Color (The only way to add color to a tab!)
+      // Simple circle SVG with the current color
+      const svg = `
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="50" fill="${encodeURIComponent(item.color)}" />
+            </svg>
+        `;
+      link.href = `data:image/svg+xml,${svg}`;
+
       i++;
-    }, 800);
+    }, 2000); // Rotate every 2s
+
     return () => clearInterval(interval);
   }, []);
 
