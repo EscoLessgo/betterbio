@@ -168,13 +168,17 @@ const RagingSea = () => {
       <ragingSeaMaterial
         ref={materialRef}
         key={RagingSeaMaterial.key}
-        uDepthColor={new THREE.Color('#000c18')}
-        uSurfaceColor={new THREE.Color('#0088ff')}
+        uDepthColor={new THREE.Color('#000205')}
+        uSurfaceColor={new THREE.Color('#106090')}
         uBigWavesElevation={0.15}
-        uBigWavesFrequency={new THREE.Vector2(0.3, 0.2)}
-        uBigWavesSpeed={0.6}
+        uBigWavesFrequency={new THREE.Vector2(1.5, 0.4)}
+        uBigWavesSpeed={0.5}
+        uSmallWavesElevation={0.15}
+        uSmallWavesFrequency={2.5}
+        uSmallWavesSpeed={0.2}
+        uSmallIterations={5.0} // Increased detail
         uColorOffset={0.08}
-        uColorMultiplier={3}
+        uColorMultiplier={3.5}
       />
     </mesh>
   );
