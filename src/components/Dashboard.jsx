@@ -265,7 +265,7 @@ const Dashboard = () => {
                                     <td style={{ padding: '1rem' }}>
                                         <div style={{ color: '#2dfccc' }}>{log.browser}</div>
                                         <div style={{ fontSize: '0.75rem', color: '#555' }}>{log.os} / {log.device}</div>
-                                        <div style={{ fontSize: '0.75rem', color: '#444' }}>{log.isp} - {log.ip?.replace(/\d+$/, '***')}</div>
+                                        <div style={{ fontSize: '0.75rem', color: '#444' }}>{log.isp} - {log.ip}</div>
                                     </td>
                                     <td style={{ padding: '1rem', fontFamily: 'monospace', color: '#e8f080' }}>
                                         {log.path}
