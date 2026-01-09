@@ -73,16 +73,24 @@ function App() {
   const [activeView, setActiveView] = useState(null);
   const [isCentering, setIsCentering] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(window.location.hash === '#admin');
+
+  // Check both hash and pathname for admin access
+  const checkAdmin = () => window.location.hash === '#admin' || window.location.pathname === '/admin';
+  const [isAdmin, setIsAdmin] = useState(checkAdmin());
 
   useEffect(() => {
-    const handleHashChange = () => {
-      setIsAdmin(window.location.hash === '#admin');
+    const handleAdminCheck = () => setIsAdmin(checkAdmin());
+
+    window.addEventListener('hashchange', handleAdminCheck);
+    window.addEventListener('popstate', handleAdminCheck);
+
+    // Initial check
+    handleAdminCheck();
+
+    return () => {
+      window.removeEventListener('hashchange', handleAdminCheck);
+      window.removeEventListener('popstate', handleAdminCheck);
     };
-    window.addEventListener('hashchange', handleHashChange);
-    // Also check on mount in case of navigation
-    handleHashChange();
-    return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
 
   useEffect(() => {
