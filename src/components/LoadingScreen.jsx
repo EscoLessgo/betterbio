@@ -1,57 +1,23 @@
 import React, { useEffect, useState, useRef } from 'react';
 import gsap from 'gsap';
-import { Hatch } from 'ldrs/react'; // Import Hatch
 
 const LoadingScreen = ({ onComplete }) => {
-    const [progress, setProgress] = useState(0);
     const containerRef = useRef(null);
     const textRef = useRef(null);
-    const [isReady, setIsReady] = useState(false);
+    const [hasAcknowledged, setHasAcknowledged] = useState(false);
 
     useEffect(() => {
-        // Cinematic Sequence
-        const tl = gsap.timeline();
-
-        // 1. Initial Blackout & Logo Reveal
-        tl.to('.loader-logo-container', {
+        // Simple entry fade-in for the logo/bg
+        gsap.to('.loader-logo-container', {
             opacity: 1,
             duration: 2,
             ease: "power2.inOut",
-            filter: "blur(0px)",
-            scale: 1,
-            rotate: 0
-        })
-            .to('.loader-hatch-container', { // Animate the container of the hatch instead
-                opacity: 1,
-                duration: 1
-            }, "-=1")
-
-            // 2. Simulated Loading Progress (Logic only, no bar width)
-            .to({}, { // Animate dummy object for timing
-                duration: 3.5,
-                ease: "expo.out",
-                onUpdate: function () {
-                    // Approximate progress for number display
-                    setProgress(Math.round(this.progress() * 100));
-                }
-            })
-
-            // 3. Text Cycle
-            .to(textRef.current, {
-                text: "SYSTEM_READY",
-                duration: 0.5,
-                onStart: () => {
-                    if (textRef.current) textRef.current.innerText = "INITIALIZING...";
-                }
-            }, "<")
-
-            // 4. Ready State
-            .call(() => {
-                setIsReady(true);
-            });
-
-        return () => tl.kill();
+        });
     }, []);
+
+    const handleAck = () => {
+        setHasAcknowledged(true);
+    };
 
     const handleEnter = (startMuted = false) => {
         // Exit Animation
@@ -69,7 +35,7 @@ const LoadingScreen = ({ onComplete }) => {
             <div className="cinema-bar bottom"></div>
 
             <div className="loader-content">
-                <div className="loader-logo-container" style={{ opacity: 0, scale: 0.8, filter: 'blur(10px)' }}>
+                <div className="loader-logo-container" style={{ opacity: 0, scale: 0.8, filter: 'blur(10px)', marginBottom: '20px' }}>
                     <video
                         className="dripping-logo"
                         src="/esconeon.mp4"
@@ -80,23 +46,59 @@ const LoadingScreen = ({ onComplete }) => {
                     />
                 </div>
 
-                {!isReady ? (
-                    <>
-                        <div className="loader-hatch-container" style={{ opacity: 0, display: 'flex', justifyContent: 'center', margin: '2rem 0' }}>
-                            <Hatch
-                                size="28"
-                                stroke="4"
-                                speed="3.5"
-                                color="white"
-                            />
+                {!hasAcknowledged ? (
+                    <div className="warning-container" style={{ textAlign: 'center', maxWidth: '600px', color: '#eaeaea', fontFamily: 'monospace' }}>
+
+                        <h2 style={{ color: '#2dfccc', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '2px', fontSize: '1.5rem' }}>
+                            ⚠ High Performance Required
+                        </h2>
+
+                        <p style={{ marginBottom: '1.5rem', lineHeight: '1.6', fontSize: '0.9rem', color: '#aaa' }}>
+                            This experience requires heavy 3D rendering. <br />
+                            <span style={{ color: '#fff' }}>Please allow 3-5 seconds for the environment to compile.</span>
+                        </p>
+
+                        <div className="hw-instructions" style={{
+                            background: 'rgba(0,0,0,0.6)',
+                            border: '1px solid #333',
+                            padding: '1.5rem',
+                            marginBottom: '2rem',
+                            textAlign: 'left',
+                            fontSize: '0.8rem',
+                            lineHeight: '1.8'
+                        }}>
+                            <strong style={{ color: '#d92b6b', display: 'block', marginBottom: '0.5rem' }}>ENABLE HARDWARE ACCELERATION:</strong>
+                            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                                <li style={{ marginBottom: '0.5rem' }}><b style={{ color: '#fff' }}>Chrome / Edge:</b> Settings {'>'} System {'>'} "Use graphics acceleration when available"</li>
+                                <li style={{ marginBottom: '0.5rem' }}><b style={{ color: '#fff' }}>Firefox:</b> Settings {'>'} General {'>'} Performance {'>'} Uncheck "Recommended" {'>'} Check "Use hardware acceleration"</li>
+                                <li style={{ marginBottom: '0.5rem' }}><b style={{ color: '#fff' }}>Brave:</b> Settings {'>'} System {'>'} "Use graphics acceleration when available"</li>
+                                <li><b style={{ color: '#fff' }}>Opera:</b> Settings {'>'} Browser {'>'} System {'>'} "Use hardware acceleration"</li>
+                            </ul>
                         </div>
-                        <div className="loader-status">
-                            <span className="status-label" ref={textRef}>BOOTING_KP_KERNEL...</span>
-                            <span className="status-percent">{progress}%</span>
-                        </div>
-                    </>
+
+                        <button
+                            onClick={handleAck}
+                            style={{
+                                background: '#d00040', // RED
+                                color: '#fff',
+                                border: 'none',
+                                padding: '1rem 2rem',
+                                fontSize: '1rem',
+                                fontWeight: 'bold',
+                                letterSpacing: '2px',
+                                cursor: 'pointer',
+                                textTransform: 'uppercase',
+                                clipPath: 'polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%)',
+                                transition: 'all 0.3s ease'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.background = '#ff0055'}
+                            onMouseLeave={e => e.currentTarget.style.background = '#d00040'}
+                        >
+                            I Understand - Initialize
+                        </button>
+                    </div>
                 ) : (
-                    <div className="entry-controls-grid">
+                    <div className="entry-controls-grid" style={{ animation: 'fadeIn 0.5s ease-out' }}>
                         <button className="option-card sound-on" onClick={() => handleEnter(false)}>
                             <div className="card-icon">🔊</div>
                             <div className="card-label">SYSTEM_AUDIO</div>
