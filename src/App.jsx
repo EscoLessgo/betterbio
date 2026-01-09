@@ -48,13 +48,21 @@ function App() {
   useEffect(() => {
     trackPageView();
 
-    // Setup Canvas for Dynamic Favicon
+    // Glitch Config
+    const baseTitle = "esco.io";
+    const glitchedTitles = [
+      "3sco.1o", "e$co.io", "esc0.io", "3$c0.10", "ESCO.IO",
+      "es<o.io", "esc[].io", "35c0.10", "e_co.io", "esco.!o"
+    ];
+
+    // Favicon Setup
     const canvas = document.createElement('canvas');
     canvas.width = 32;
     canvas.height = 32;
     const ctx = canvas.getContext('2d');
+    const colors = ['#ff0077', '#00ffff', '#ffff00', '#ffffff', '#00ff00'];
 
-    // Create/Find Link Element
+    // Create/Find Link Element for favicon
     let link = document.querySelector("link[rel~='icon']");
     if (!link) {
       link = document.createElement('link');
@@ -62,46 +70,34 @@ function App() {
       document.getElementsByTagName('head')[0].appendChild(link);
     }
 
-    // Glitch Config
-    const glitchChars = ['e', 's', 'c', 'o', '.', 'i', 'o'];
-    const colors = ['#ff0077', '#00ffff', '#ffff00', '#ffffff', '#00ff00'];
-    const titles = ['esco.io', 'esco.io_', 'esc0.io', 'esco.1o', 'e$co.io'];
-
     let frame = 0;
 
     const interval = setInterval(() => {
-      // 1. Dynamic Title Glitch (Fast)
-      if (frame % 5 === 0) document.title = titles[Math.floor(Math.random() * titles.length)];
+      // 1. HYPER GLITCH TITLE
+      // We can't use color, so we use chaos.
+      // 30% chance to show a corrupted version, 70% chance to show mostly normal but shaky
+      if (Math.random() > 0.3) {
+        document.title = glitchedTitles[Math.floor(Math.random() * glitchedTitles.length)];
+      } else {
+        // Random case
+        document.title = baseTitle.split('').map(c => Math.random() > 0.5 ? c.toUpperCase() : c).join('');
+      }
 
-      // 2. Dynamic Pixellated Favicon (The "Colored Text" effect)
+      // 2. Color Pulse Favicon
       ctx.clearRect(0, 0, 32, 32);
-
-      // Draw background (optional dark mode support)
       ctx.fillStyle = '#000000';
       ctx.fillRect(0, 0, 32, 32);
 
-      // Draw "E" or "S" or full "ESCO" simplified
-      // Since 32px is small, we flash the letters or a simplified block pattern
-
-      // Let's draw "E S" or "C O" alternating with random colors
-      ctx.font = 'bold 24px monospace';
+      ctx.font = 'bold 20px "Courier New"';
+      ctx.fillStyle = colors[frame % colors.length];
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
+      ctx.fillText(baseTitle[frame % baseTitle.length].toUpperCase(), 16, 16);
 
-      // Shadow / Glitch offset
-      ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
-      ctx.fillText('e', 16 + (Math.random() * 4 - 2), 16 + (Math.random() * 4 - 2));
-
-      // Main Character (flashing "e" "s" "c" "o" rapidly)
-      const char = glitchChars[frame % 4];
-      ctx.fillStyle = colors[Math.floor(Math.random() * colors.length)];
-      ctx.fillText(char, 16, 16);
-
-      // Update Favicon
       link.href = canvas.toDataURL('image/png');
 
       frame++;
-    }, 100); // 10FPS updates
+    }, 80); // 12FPS - Very fast
 
     return () => clearInterval(interval);
   }, []);
