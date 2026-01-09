@@ -27,8 +27,31 @@ if (fs.existsSync(distPath)) {
 }
 
 // 3. Admin & API Stubs
+app.use(express.json());
+
+// 3. Admin & API Stubs
 app.get('/admin', (req, res) => res.send('<h1>ADMIN ONLINE</h1>'));
-app.post('/api/collect', (req, res) => res.json({ ok: true }));
+
+// ANALYTICS PROXY: Connects to Central Data Hub if configured
+app.post('/api/collect', async (req, res) => {
+    const hubUrl = process.env.DATA_HUB_URL;
+    if (hubUrl) {
+        try {
+            // Native node fetch (Node 18+)
+            const response = await fetch(hubUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...req.body, source: 'ruckie-portfolio' })
+            });
+            if (response.ok) return res.json({ ok: true, forwarded: true });
+        } catch (e) {
+            console.error("Link to Central Hub failed:", e.message);
+        }
+    }
+    // Fallback: Local logging
+    // console.log('Local Analytics:', req.body);
+    res.json({ ok: true, local: true });
+});
 app.get('/api/stats', (req, res) => res.json({ visits: 0 }));
 
 // 4. Catch-all
