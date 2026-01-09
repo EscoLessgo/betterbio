@@ -1,40 +1,49 @@
 import React from 'react';
 
-const MobileControls = () => {
-    const dispatchKey = (key) => {
-        window.dispatchEvent(new KeyboardEvent('keydown', { key: key, bubbles: true }));
-    };
-
+const MobileControls = ({ onInput }) => {
     return (
         <div className="mobile-controls">
             {/* Directional Pad */}
             <div className="d-pad-container">
                 <div className="d-pad-row">
-                    <button className="d-btn up" onPointerDown={() => dispatchKey('ArrowUp')}>
+                    <button className="d-btn up" onPointerDown={(e) => { e.preventDefault(); onInput('arrowup'); }}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M7 14l5-5 5 5H7z" /></svg>
                     </button>
                 </div>
                 <div className="d-pad-row mid">
-                    <button className="d-btn left" onPointerDown={() => dispatchKey('ArrowLeft')}>
+                    <button className="d-btn left" onPointerDown={(e) => { e.preventDefault(); onInput('arrowleft'); }}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M14 7l-5 5 5 5V7z" /></svg>
                     </button>
                     <div className="d-spacer"></div>
-                    <button className="d-btn right" onPointerDown={() => dispatchKey('ArrowRight')}>
+                    <button className="d-btn right" onPointerDown={(e) => { e.preventDefault(); onInput('arrowright'); }}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M10 17l5-5-5-5v10z" /></svg>
                     </button>
                 </div>
                 <div className="d-pad-row">
-                    <button className="d-btn down" onPointerDown={() => dispatchKey('ArrowDown')}>
+                    <button className="d-btn down" onPointerDown={(e) => { e.preventDefault(); onInput('arrowdown'); }}>
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5H7z" /></svg>
                     </button>
                 </div>
             </div>
 
             {/* Action Button (Separate) */}
-            <button className="action-btn" onPointerDown={() => dispatchKey('Enter')}>
+            <button className="action-btn" onPointerDown={(e) => { e.preventDefault(); onInput('enter'); }}>
                 ENTER
             </button>
 
+            <style jsx>{`
+                .mobile-controls {
+                    position: fixed;
+                    bottom: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    pointer-events: none;
+                    z-index: 10001;
+                    display: none; /* Changed via media query */
+                } 
+                /* ... rest of styles ... */
+            `}</style>
             <style jsx>{`
                 .mobile-controls {
                     position: fixed;
@@ -92,6 +101,7 @@ const MobileControls = () => {
                     backdrop-filter: blur(5px);
                     transition: all 0.1s;
                     touch-action: manipulation;
+                    user-select: none;
                 }
 
                 .d-btn:active {
@@ -122,6 +132,7 @@ const MobileControls = () => {
                     justify-content: center;
                     align-items: center;
                     touch-action: manipulation;
+                    user-select: none;
                 }
 
                 .action-btn:active {

@@ -48,6 +48,23 @@ export const ServerBlade = ({ position = [0, 0, 0], rotation = [0, 0, 0], scale 
                 ease: "power3.out"
             }, "<");
 
+        // 10-Second Interval Refresh Animation (Subtle "Re-boot" check)
+        const interval = setInterval(() => {
+            if (groupRef.current) {
+                gsap.to(groupRef.current.scale, {
+                    x: scale * 1.1,
+                    y: scale * 1.1,
+                    z: scale * 1.1,
+                    yoyo: true,
+                    repeat: 1,
+                    duration: 0.2,
+                    ease: "power2.inOut"
+                });
+            }
+        }, 10000); // 10s interval
+
+        return () => clearInterval(interval);
+
     }, [position, rotation, scale, delay]);
 
     return (

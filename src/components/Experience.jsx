@@ -350,29 +350,29 @@ const NodeElement = ({ node, isActive, isDimmed, isDeploying, onVisit }) => {
 
 const TREE_DATA = {
     root: [
-        { id: 'velarix', position: [-18, 2, 0], label: 'VELARIX', sub: 'SOLUTIONS', color: PCB_BLUE, scale: 1 },
-        { id: 'veroe_fun', position: [0, 4, 2], label: 'ESCO.IO', sub: 'MAIN_HUB', color: PCB_PINK, scale: 1.5 }, // HERO NODE
-        { id: 'veroe_space', position: [18, 2, 0], label: 'QUIETBIN', sub: 'ARCHIVE', color: PCB_GOLD, scale: 1 },
-        { id: 'discord_games', position: [36, 2, 0], label: 'DISCORD', sub: 'GAMES_LAB', color: "#7289da", scale: 1 },
+        { id: 'velarix', position: [-20, 0, 0], label: 'VELARIX', sub: 'SOLUTIONS', color: PCB_BLUE, scale: 1 },    // LEFT
+        { id: 'veroe_fun', position: [0, 10, 2], label: 'ESCO.IO', sub: 'MAIN_HUB', color: PCB_PINK, scale: 1.5 }, // TOP
+        { id: 'veroe_space', position: [20, 0, 0], label: 'QUIETBIN', sub: 'ARCHIVE', color: PCB_GOLD, scale: 1 },  // RIGHT
+        { id: 'discord_games', position: [0, -10, 0], label: 'DISCORD', sub: 'GAMES_LAB', color: "#7289da", scale: 1 }, // BOTTOM
     ],
     velarix: [
-        { id: 'v_root', position: [-18, -3, 0], label: 'MAIN SITE', sub: 'velarixsolutions.nl', url: 'https://velarixsolutions.nl', trunkId: 'velarix' },
-        { id: 'v_crypto', position: [-18, -6, 0], label: 'CRYPTO', sub: 'WEB3_NODES', url: 'https://crypto.velarixsolutions.nl', trunkId: 'velarix' },
-        { id: 'v_find', position: [-18, -9, 0], label: 'FIND', sub: 'SEARCH_ENGINE', url: 'https://find.velarixsolutions.nl', trunkId: 'velarix' },
+        { id: 'v_root', position: [-20, -6, 0], label: 'MAIN SITE', sub: 'velarixsolutions.nl', url: 'https://velarixsolutions.nl', trunkId: 'velarix' },
+        { id: 'v_crypto', position: [-20, -9, 0], label: 'CRYPTO', sub: 'WEB3_NODES', url: 'https://crypto.velarixsolutions.nl', trunkId: 'velarix' },
+        { id: 'v_find', position: [-20, -12, 0], label: 'FIND', sub: 'SEARCH_ENGINE', url: 'https://find.velarixsolutions.nl', trunkId: 'velarix' },
     ],
     veroe_fun: [
-        { id: 'f_escosigns', position: [0, -2, 0], label: 'ESCOSIGNS', sub: 'DESIGN_PORTFOLIO', url: 'https://escosigns.veroe.fun', trunkId: 'veroe_fun' },
-        { id: 'f_spoti', position: [0, -5, 0], label: 'SPOTI_CLONE', sub: 'REQ_AUTH', url: 'https://spoti.veroe.fun', trunkId: 'veroe_fun' },
-        { id: 'f_tnt', position: [0, -8, 0], label: 'TNT_CORE', sub: 'MINECRAFT_MW', url: 'https://tnt.veroe.fun', trunkId: 'veroe_fun' },
-        { id: 'f_fight', position: [0, -11, 0], label: 'FIGHT_CLUB', sub: 'INTERACTIVE', url: 'https://fight.veroe.fun', trunkId: 'veroe_fun' },
+        { id: 'f_escosigns', position: [0, 4, 0], label: 'ESCOSIGNS', sub: 'DESIGN_PORTFOLIO', url: 'https://escosigns.veroe.fun', trunkId: 'veroe_fun' }, // Drops DOWN from top
+        { id: 'f_spoti', position: [0, 1, 0], label: 'SPOTI_CLONE', sub: 'REQ_AUTH', url: 'https://spoti.veroe.fun', trunkId: 'veroe_fun' },
+        { id: 'f_tnt', position: [0, -2, 0], label: 'TNT_CORE', sub: 'MINECRAFT_MW', url: 'https://tnt.veroe.fun', trunkId: 'veroe_fun' },
+        { id: 'f_fight', position: [0, -5, 0], label: 'FIGHT_CLUB', sub: 'INTERACTIVE', url: 'https://fight.veroe.fun', trunkId: 'veroe_fun' },
     ],
     veroe_space: [
-        { id: 's_root', position: [18, -3, 0], label: 'DATA_SHARD', sub: 'veroe.space', url: 'https://veroe.space', trunkId: 'veroe_space' },
+        { id: 's_root', position: [20, -6, 0], label: 'DATA_SHARD', sub: 'veroe.space', url: 'https://veroe.space', trunkId: 'veroe_space' },
     ],
     discord_games: [
-        { id: 'd_tenk', position: [36, -3, 0], label: 'TENK', sub: 'DICE_GAME', url: 'https://discord.com/oauth2/authorize?client_id=1455067365694771364', trunkId: 'discord_games' },
-        { id: 'd_square', position: [36, -6, 0], label: 'SQUARE_UP', sub: 'PUZZLE_LOGIC', url: 'https://discord.com/oauth2/authorize?client_id=1455077926273028258', trunkId: 'discord_games' },
-        { id: 'd_spell', position: [36, -9, 0], label: 'SPELL_OR_FAIL', sub: 'WORD_GAME', url: 'https://discord.com/oauth2/authorize?client_id=1455079703940694081', trunkId: 'discord_games' },
+        { id: 'd_tenk', position: [0, -16, 0], label: 'TENK', sub: 'DICE_GAME', url: 'https://discord.com/oauth2/authorize?client_id=1455067365694771364', trunkId: 'discord_games' },
+        { id: 'd_square', position: [0, -19, 0], label: 'SQUARE_UP', sub: 'PUZZLE_LOGIC', url: 'https://discord.com/oauth2/authorize?client_id=1455077926273028258', trunkId: 'discord_games' },
+        { id: 'd_spell', position: [0, -22, 0], label: 'SPELL_OR_FAIL', sub: 'WORD_GAME', url: 'https://discord.com/oauth2/authorize?client_id=1455079703940694081', trunkId: 'discord_games' },
     ]
 };
 
@@ -503,7 +503,7 @@ const SurgePulse = ({ points, color, speed = 1 }) => {
     );
 };
 
-const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
+const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComplete }, ref) => {
     const [currentMenu, setCurrentMenu] = useState('root');
     const [currentNodeIdx, setCurrentNodeIdx] = useState(0);
     const [previewActive, setPreviewActive] = useState(false);
@@ -524,174 +524,72 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
         }
     }, [isCentering]);
 
-    // Camera Rig State
-    const camRig = useRef({
-        pos: new Vector3(0, 0, 50),
-        target: new Vector3(0, 0, 0)
-    });
+    // Controller Logic
+    const handleInput = (key) => {
+        key = key.toLowerCase();
+        let nextIdx = currentNodeIdx;
 
-    useFrame((state, delta) => {
-        // Safe check
-        if (!activeNodes || !activeNodes[currentNodeIdx]) return;
-        const targetNode = activeNodes[currentNodeIdx];
-
-        // 1. Determine Desired Camera Position
-        const isRoot = currentMenu === 'root';
-        const isPreview = previewActive;
-        const aspect = state.viewport.aspect; // R3F viewport aspect ratio
-        const isMobile = aspect < 1; // Portrait mode
-
-        // Base Z depth
-        let targetZ = isRoot ? 55 : 40;
-
-        // Mobile Calibration: ZOOM OUT (Higher Z) as requested
-        if (isMobile) {
-            targetZ = isRoot ? 110 : 90; // Pull way back to see more context
-        }
-
-        if (isPreview) targetZ = isMobile ? 70 : 30; // Further back for preview too
-
-        // X/Y follows the node slightly, but mostly stays centered on the column/row
-        let targetX = 0;
-        let targetY = 0;
-
-        if (isRoot) {
-            targetX = 0;
-            targetY = isMobile ? 0 : 0; // Tighter center
-        } else {
-            // If in submenu, center on the column parent
-            const parent = TREE_DATA.root.find(n => n.id === currentMenu);
-            if (parent) targetX = parent.position[0];
-            targetY = targetNode.position[1];
-
-            // On mobile, force-lock to the exact node center to keep "orb on screen"
-            if (isMobile) {
-                targetX = targetNode.position[0]; // Strict X Lock
-                targetY = targetNode.position[1]; // Strict Y Lock
+        if (key === 'enter') {
+            const selected = activeNodes[currentNodeIdx];
+            if (TREE_DATA[selected.id]) {
+                setCurrentMenu(selected.id);
+                setCurrentNodeIdx(0);
+                setPreviewActive(false);
+            } else if (selected.url) {
+                if (!previewActive) {
+                    setPreviewActive(true);
+                } else {
+                    window.open(selected.url, '_blank');
+                }
             }
+            return;
         }
 
-        // Shift for Preview Panel
-        if (isPreview) {
-            if (isMobile) {
-                targetX = targetNode.position[0];
-                targetY = targetNode.position[1] + 3; // Slight look up, but keep node in lower view
-                // targetZ is already set to 35 above
-            } else {
-                targetX += 8;
+        if (key === 'w' || key === 'arrowup') {
+            if (currentNodeIdx > 0) nextIdx--;
+            else if (currentMenu !== 'root') {
+                setCurrentMenu('root');
+                setCurrentNodeIdx(TREE_DATA.root.findIndex(n => n.id === currentMenu));
+                return;
             }
-        }
-
-        // 2. Smoothly Interpolate Rig State (The "Cinematic" feel)
-        // Adjusted for smoother, weightier drift
-        const dampFactor = 3.0 * delta; // Slightly reduced for more "floaty" cinematic feel, user requested polish
-
-        // Add subtle procedural sway to targetX/Y for "handheld" feel
-        const time = state.clock.elapsedTime;
-        const swayX = Math.sin(time * 0.5) * 0.5;
-        const swayY = Math.cos(time * 0.4) * 0.5;
-
-        camRig.current.pos.lerp(new Vector3(targetX + swayX * 0.5, targetY + swayY * 0.5, targetZ), dampFactor);
-
-        // Look Target Logic with slight lag/drag
-        let lookX = targetX;
-        let lookY = targetY;
-        // If preview, look slightly between node and panel
-        if (isPreview && !isMobile) lookX -= 4;
-
-        camRig.current.target.lerp(new Vector3(lookX, lookY, 0), dampFactor * 1.5);
-
-        // 3. Apply to Camera
-        if (isCentering) {
-            // Override for opening sequence AND sync rig
-            state.camera.position.lerp(new Vector3(0, 0, 50), 0.05);
-            state.camera.lookAt(0, 0, 0);
-
-            // CRITICAL: Sync Rig to avoid snap-back
-            camRig.current.pos.copy(state.camera.position);
-            camRig.current.target.set(0, 0, 0);
-
-            if (state.camera.position.z >= 49.5 && state.camera.position.x < 0.1) {
-                onCenterComplete();
-            }
-        } else {
-            state.camera.position.copy(camRig.current.pos);
-            state.camera.lookAt(camRig.current.target);
-
-            // Add tiny micro-roll for kinetic realism
-            state.camera.rotation.z = Math.sin(time * 0.2) * 0.005;
-        }
-
-        // Update Bug
-        if (bugCurrentPos.current) {
-            bugCurrentPos.current.lerp(new Vector3(...targetNode.position), dampFactor * 2);
-        }
-    });
-
-    const handleVisit = (url) => { window.open(url, '_blank'); };
-
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            const key = e.key.toLowerCase();
-            let nextIdx = currentNodeIdx;
-
-            if (key === 'enter') {
+        } else if (key === 's' || key === 'arrowdown') {
+            if (currentNodeIdx < activeNodes.length - 1) nextIdx++;
+            else if (currentMenu === 'root') {
                 const selected = activeNodes[currentNodeIdx];
                 if (TREE_DATA[selected.id]) {
                     setCurrentMenu(selected.id);
                     setCurrentNodeIdx(0);
-                    setPreviewActive(false);
-                } else if (selected.url) {
-                    if (!previewActive) {
-                        setPreviewActive(true); // First enter: deploy preview
-                    } else {
-                        handleVisit(selected.url); // Second enter: open site
-                    }
+                    return;
                 }
-                return;
             }
-
-            // Navigation Logic... (Simplified for Grid)
-            if (key === 'w' || key === 'arrowup') {
-                if (currentNodeIdx > 0) nextIdx--;
-                else if (currentMenu !== 'root') {
-                    // Back to root
-                    setCurrentMenu('root');
-                    setCurrentNodeIdx(TREE_DATA.root.findIndex(n => n.id === currentMenu));
-                    return;
-                }
-            } else if (key === 's' || key === 'arrowdown') {
-                if (currentNodeIdx < activeNodes.length - 1) nextIdx++;
-                else if (currentMenu === 'root') {
-                    // Enter selected column
-                    const selected = activeNodes[currentNodeIdx];
-                    if (TREE_DATA[selected.id]) {
-                        setCurrentMenu(selected.id);
-                        setCurrentNodeIdx(0);
-                        return;
-                    }
-                }
-            } else if (key === 'a' || key === 'arrowleft') {
-                if (currentMenu === 'root') nextIdx = (currentNodeIdx - 1 + activeNodes.length) % activeNodes.length;
-                else {
-                    // Back to root
-                    setCurrentMenu('root');
-                    setCurrentNodeIdx(TREE_DATA.root.findIndex(n => n.id === currentMenu));
-                    return;
-                }
-            } else if (key === 'd' || key === 'arrowright') {
-                if (currentMenu === 'root') nextIdx = (currentNodeIdx + 1) % activeNodes.length;
-            } else if (key === 'escape') {
+        } else if (key === 'a' || key === 'arrowleft') {
+            if (currentMenu === 'root') nextIdx = (currentNodeIdx - 1 + activeNodes.length) % activeNodes.length;
+            else {
                 setCurrentMenu('root');
-                setPreviewActive(false);
+                setCurrentNodeIdx(TREE_DATA.root.findIndex(n => n.id === currentMenu));
                 return;
             }
+        } else if (key === 'd' || key === 'arrowright') {
+            if (currentMenu === 'root') nextIdx = (currentNodeIdx + 1) % activeNodes.length;
+        } else if (key === 'escape') {
+            setCurrentMenu('root');
+            setPreviewActive(false);
+            return;
+        }
 
-            if (nextIdx !== currentNodeIdx) {
-                setCurrentNodeIdx(nextIdx);
-                if (onNodeActive) onNodeActive(activeNodes[nextIdx]);
-            }
-        };
+        if (nextIdx !== currentNodeIdx) {
+            setCurrentNodeIdx(nextIdx);
+            if (onNodeActive) onNodeActive(activeNodes[nextIdx]);
+        }
+    };
+
+    // Expose handleInput to parent
+    React.useImperativeHandle(ref, () => ({
+        handleInput
+    }));
+
+    useEffect(() => {
+        const handleKeyDown = (e) => handleInput(e.key);
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [currentNodeIdx, currentMenu, activeNodes, previewActive]);
@@ -704,9 +602,10 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
             <Environment preset="city" blur={1} />
             <EsconeonPopup />
 
-            {/* DEMO HARDWARE - User requested "Real 3D pieces of hardware" + "Fly-in" */}
-            <ServerBlade position={[20, 5, -10]} rotation={[0.5, 0.5, 0]} delay={0.5} />
-            <ServerBlade position={[-20, 8, -15]} rotation={[0.2, -0.5, 0.2]} delay={0.8} />
+            {/* DEMO HARDWARE - User requested "Real 3D pieces of hardware" + "Fly-in" + 10s Refresh Interval */}
+            <ServerBlade position={[20, 5, -10]} rotation={[0.5, 0.5, 0]} delay={0.5} /> {/* Near Quietbin */}
+            <ServerBlade position={[-20, 8, -15]} rotation={[0.2, -0.5, 0.2]} delay={0.8} /> {/* Near Velarix */}
+            <ServerBlade position={[0, -5, -8]} rotation={[-0.2, 0, 0.1]} delay={1.2} /> {/* ABOVE/NEAR Discord Node */}
 
             {/* Render Static Layout Connections */}
             {TREE_DATA.root.map(rootNode => {
@@ -724,23 +623,30 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
             })}
 
             {/* ELECTRICAL MAINS */}
-            {/* Velarix -> Esco */}
+            {/* ELECTRICAL NETWORK - DIAMOND CONFIGURATION */}
+            {/* 1. Velarix (Left) -> Esco (Top) */}
             <ElectricCable
-                start={[-15, 2, 0]}
-                end={[-3, 4, 2]}
+                start={[-20, 0, 0]}
+                end={[-2, 9, 1]}
                 color="#d00040"
             />
-            {/* Esco -> Quietbin */}
+            {/* 2. Esco (Top) -> Quietbin (Right) */}
             <ElectricCable
-                start={[3, 4, 2]}
-                end={[15, 2, 0]}
+                start={[2, 9, 1]}
+                end={[20, 0, 0]}
                 color="#d00040"
             />
-            {/* Quietbin -> Discord Games */}
+            {/* 3. Quietbin (Right) -> Discord (Bottom) */}
             <ElectricCable
-                start={[21, 2, 0]}
-                end={[33, 2, 0]}
+                start={[20, 0, 0]}
+                end={[0, -10, 0]}
                 color="#e8f080"
+            />
+            {/* 4. Discord (Bottom) -> Velarix (Left) */}
+            <ElectricCable
+                start={[0, -10, 0]}
+                end={[-20, 0, 0]}
+                color="#2dfccc"
             />
 
             {/* Render Nodes */}
@@ -792,6 +698,6 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
             <Bug currentPosition={bugCurrentPos.current} />
         </group >
     );
-};
+});
 
 export default Experience;

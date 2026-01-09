@@ -11,14 +11,22 @@ const AudioPlayer = ({ src, isPlaying, initialVolume = 0.5, initialMuted = false
     const [hasPlayedOnce, setHasPlayedOnce] = useState(false);
 
     useEffect(() => {
+        setMuted(initialMuted);
+    }, [initialMuted]);
+
+    useEffect(() => {
         if (audioRef.current) {
             audioRef.current.volume = volume;
+            audioRef.current.muted = muted;
         }
-    }, [volume]);
+    }, [volume, muted]);
 
     useEffect(() => {
         const audio = audioRef.current;
         if (!audio) return;
+
+        // Force sync mute state immediately on mount/src change
+        audio.muted = muted;
 
         const attemptPlay = async () => {
             try {

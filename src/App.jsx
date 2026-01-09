@@ -187,7 +187,8 @@ function App() {
 
       link.href = canvas.toDataURL('image/png');
 
-    }, 80); // 12.5 FPS for that rugged retro feel
+      link.href = canvas.toDataURL('image/png');
+    }, 6000); // 6 Seconds - slowed down significantly for stability
 
     return () => clearInterval(interval);
   }, [isAdmin]);
@@ -199,6 +200,14 @@ function App() {
   };
 
   const handleRecenter = () => setIsCentering(true);
+
+  // Mobile Input Handling
+  const experienceRef = React.useRef(null);
+  const handleMobileInput = (command) => {
+    if (experienceRef.current) {
+      experienceRef.current.handleInput(command);
+    }
+  };
 
   return (
     <div className="app-container">
@@ -231,6 +240,7 @@ function App() {
               {!isLoading && (
                 <Suspense fallback={null}>
                   <Experience
+                    ref={experienceRef}
                     onNodeActive={handleNodeActive}
                     activeView={activeView}
                     isCentering={isCentering}
@@ -255,7 +265,7 @@ function App() {
 
             <NavHint />
             <KeybindOverlay />
-            <MobileControls />
+            <MobileControls onInput={handleMobileInput} />
           </div>
         </>
       )}
