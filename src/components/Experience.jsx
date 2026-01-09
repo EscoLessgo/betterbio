@@ -90,6 +90,8 @@ const PreviewMedia = ({ url }) => {
 };
 
 const PreviewWindow = ({ node, isVisible, trunkColor }) => {
+    const { viewport } = useThree();
+    const isMobile = viewport.aspect < 1;
     const groupRef = useRef();
     const [scale, setScale] = useState(0);
     const hasMedia = !!PREVIEW_DATA[node.id];
@@ -97,7 +99,7 @@ const PreviewWindow = ({ node, isVisible, trunkColor }) => {
     useFrame((state, delta) => {
         const target = isVisible ? 1 : 0;
         // Smoother, fluid expansion using delta
-        const lerpSpeed = 4.0 * delta;
+        const lerpSpeed = 6.0 * delta; // Increased for snappier open
         setScale(MathUtils.lerp(scale, target, lerpSpeed));
 
         if (groupRef.current) {
@@ -110,14 +112,17 @@ const PreviewWindow = ({ node, isVisible, trunkColor }) => {
 
     if (scale < 0.01 && !isVisible) return null;
 
-    const panelPos = [node.position[0] + 10, node.position[1], 5];
+    // Dynamic Panel Position: Mobile = Above Node, Desktop = Right of Node
+    const xOffset = isMobile ? 0 : 10;
+    const yOffset = isMobile ? 6 : 0; // Shift up 6 units on mobile
+    const panelPos = [node.position[0] + xOffset, node.position[1] + yOffset, 5];
 
     return (
         <group position={panelPos} ref={groupRef}>
             <QuadraticBezierLine
-                start={[-9, 0, -6]}
+                start={[isMobile ? 0 : -9, isMobile ? -5 : 0, -6]} // Start from node center (roughly)
                 end={[0, 0, 0]}
-                mid={[-4.5, 2, -3]}
+                mid={[isMobile ? 0 : -4.5, isMobile ? -2 : 2, -3]}
                 color={trunkColor}
                 lineWidth={3}
                 transparent
@@ -451,14 +456,15 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
             targetY = targetNode.position[1];
 
             // On mobile, center strictly on the node we are looking at to key it in view
-            if (isMobile) targetX = 0; // Flatten X to center column in view
+            if (isMobile) targetX = parent ? parent.position[0] : 0; // Keep column X alignment
         }
 
         // Shift for Preview Panel
         if (isPreview) {
             if (isMobile) {
-                targetX = 0;
-                targetY = targetNode.position[1] - 5; // Look down a bit so panel (above) is centered
+                targetX = targetNode.position[0]; // Center on node X
+                targetY = targetNode.position[1] + 6; // Look AT the panel (which is at Y+6)
+                targetZ = 55; // Ensure we are far back enough to see it
             } else {
                 targetX += 8;
             }
@@ -466,7 +472,7 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
 
         // 2. Smoothly Interpolate Rig State (The "Cinematic" feel)
         // Adjusted for smoother, weightier drift
-        const dampFactor = 3.0 * delta;
+        const dampFactor = 5.0 * delta; // Increased stiffness for better tracking
 
         // Add subtle procedural sway to targetX/Y for "handheld" feel
         const time = state.clock.elapsedTime;
@@ -479,9 +485,9 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
         let lookX = targetX;
         let lookY = targetY;
         // If preview, look slightly between node and panel
-        if (isPreview) lookX -= 4;
+        if (isPreview && !isMobile) lookX -= 4;
 
-        camRig.current.target.lerp(new Vector3(lookX, lookY, 0), dampFactor * 1.2);
+        camRig.current.target.lerp(new Vector3(lookX, lookY, 0), dampFactor * 1.5);
 
         // 3. Apply to Camera
         if (isCentering) {
