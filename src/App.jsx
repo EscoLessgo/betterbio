@@ -1,7 +1,6 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import Experience from './components/Experience';
-import Terminal from './components/Terminal';
 import LoadingScreen from './components/LoadingScreen';
 import { trackPageView } from './utils/analytics';
 import './index.css';
@@ -52,7 +51,6 @@ const KeybindOverlay = () => (
 
 function App() {
   const [activeView, setActiveView] = useState(null);
-  const [showTerminal, setShowTerminal] = useState(false);
   const [isCentering, setIsCentering] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -111,11 +109,9 @@ function App() {
   const handleNodeActive = (node) => {
     if (!node) return;
     setActiveView(node);
-    setShowTerminal(true);
     trackPageView(`/node/${node.id || 'unknown'}`);
   };
 
-  const closeTerminal = () => setShowTerminal(false);
   const handleRecenter = () => setIsCentering(true);
 
   return (
@@ -149,12 +145,6 @@ function App() {
       </div>
 
       <div className="ui-layer">
-        <Terminal
-          isOpen={showTerminal}
-          onClose={closeTerminal}
-          view={activeView}
-        />
-
         <div className="top-tools">
           <button className="recenter-btn" onClick={handleRecenter}>
             SYNC_VIEW
