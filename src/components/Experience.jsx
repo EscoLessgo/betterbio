@@ -229,7 +229,7 @@ const EsconeonPopup = () => {
     }, [video]);
 
     return (
-        <group position={[0, 16, 0]} ref={groupRef} scale={[0, 0, 0]}> {/* Shifted up from 12 to 16 */}
+        <group position={[0, 21, 0]} ref={groupRef} scale={[0, 0, 0]}> {/* Shifted WAY up to 21 to clear Top Hardware/Node */}
             {/* Slightly offset Z to pop over the node */}
             <mesh>
                 <planeGeometry args={[14, 8]} />
@@ -659,13 +659,13 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
         <group>
             <Floor />
             <Environment preset="city" blur={1} />
-            <EsconeonPopup />
+            <EsconeonPopup /> {/* Moved inside component via position prop if supported, or manually adjust component default */}
 
             {/* DEMO HARDWARE */}
-            <ServerBlade position={[22, 2, -10]} rotation={[0.5, 0.5, 0]} delay={0.5} /> {/* Right (Quietbin) - Adjusted for spacing */}
-            <ServerBlade position={[-22, 2, -15]} rotation={[0.2, -0.5, 0.2]} delay={0.8} /> {/* Left (Velarix) - Adjusted for spacing */}
-            <ServerBlade position={[0, -6.5, -8]} rotation={[-0.1, 0, 0.1]} delay={1.2} /> {/* Bottom (Discord) - Just ABOVE node (-10), clears UI */}
-            <ServerBlade position={[0, 13.5, -8]} rotation={[0.3, 0, -0.1]} delay={1.4} /> {/* Top (Esco) - Just ABOVE node (10), fully visible */}
+            <ServerBlade position={[24, 0, -10]} rotation={[0.5, 0.5, 0]} delay={0.5} /> {/* Right (Quietbin) - Centered Y, Wider X */}
+            <ServerBlade position={[-24, 0, -15]} rotation={[0.2, -0.5, 0.2]} delay={0.8} /> {/* Left (Velarix) - Centered Y, Wider X */}
+            <ServerBlade position={[0, -14, -12]} rotation={[-0.1, 0, 0.1]} delay={1.2} /> {/* Bottom (Discord) - Below Node (Symmetric Outside) */}
+            <ServerBlade position={[0, 15, -12]} rotation={[0.3, 0, -0.1]} delay={1.4} /> {/* Top (Esco) - Above Node (Symmetric Outside) */}
 
             {/* Render Static Layout Connections */}
             {TREE_DATA.root.map(rootNode => {
