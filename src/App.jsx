@@ -47,6 +47,15 @@ function App() {
 
   useEffect(() => {
     trackPageView();
+
+    // Terminal Title Blinker
+    const titles = ['esco.io', 'esco.io_'];
+    let i = 0;
+    const interval = setInterval(() => {
+      document.title = titles[i % titles.length];
+      i++;
+    }, 800);
+    return () => clearInterval(interval);
   }, []);
 
   const handleNodeActive = (node) => {
