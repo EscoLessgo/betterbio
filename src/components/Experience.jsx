@@ -321,6 +321,15 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
         if (onNodeActive && activeNodes[0]) onNodeActive(activeNodes[0]);
     }, []);
 
+    // Sync View Handler: Reset navigation when centering
+    useEffect(() => {
+        if (isCentering) {
+            setCurrentMenu('root');
+            setCurrentNodeIdx(1); // Default to middle Hero node (ESCO.IO)
+            setPreviewActive(false);
+        }
+    }, [isCentering]);
+
     // Camera Rig State
     const camRig = useRef({
         pos: new Vector3(0, 0, 50),
@@ -378,10 +387,17 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
 
         // 3. Apply to Camera
         if (isCentering) {
-            // Override for opening sequence
+            // Override for opening sequence AND sync rig
             state.camera.position.lerp(new Vector3(0, 0, 50), 0.05);
             state.camera.lookAt(0, 0, 0);
-            if (state.camera.position.z >= 49.5) onCenterComplete();
+
+            // CRITICAL: Sync Rig to avoid snap-back
+            camRig.current.pos.copy(state.camera.position);
+            camRig.current.target.set(0, 0, 0);
+
+            if (state.camera.position.z >= 49.5 && state.camera.position.x < 0.1) {
+                onCenterComplete();
+            }
         } else {
             state.camera.position.copy(camRig.current.pos);
             state.camera.lookAt(camRig.current.target);
