@@ -330,9 +330,9 @@ const NodeElement = ({ node, isActive, isDimmed, isDeploying, onVisit }) => {
                 {/* Main Label - Lowercase & Minimal */}
                 <Text
                     position={[0, 0, 0.22]}
-                    fontSize={0.55}
+                    fontSize={0.85} // INCREASED SIZE (was 0.55)
                     fontWeight="bold"
-                    color={isHighlight ? "#fff" : "#aaa"}
+                    color={isHighlight ? "#fff" : "#ddd"} // BRIGHTER IDLE COLOR (was #aaa)
                     anchorX="center"
                     anchorY="middle"
                 >
@@ -529,7 +529,7 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
         key = key.toLowerCase();
         let nextIdx = currentNodeIdx;
 
-        if (key === 'enter') {
+        if (key === 'enter' || key === ' ') {
             const selected = activeNodes[currentNodeIdx];
             if (TREE_DATA[selected.id]) {
                 setCurrentMenu(selected.id);
@@ -545,36 +545,64 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
             return;
         }
 
-        if (key === 'w' || key === 'arrowup') {
-            if (currentNodeIdx > 0) nextIdx--;
-            else if (currentMenu !== 'root') {
-                setCurrentMenu('root');
-                setCurrentNodeIdx(TREE_DATA.root.findIndex(n => n.id === currentMenu));
-                return;
-            }
-        } else if (key === 's' || key === 'arrowdown') {
-            if (currentNodeIdx < activeNodes.length - 1) nextIdx++;
-            else if (currentMenu === 'root') {
-                const selected = activeNodes[currentNodeIdx];
-                if (TREE_DATA[selected.id]) {
-                    setCurrentMenu(selected.id);
-                    setCurrentNodeIdx(0);
-                    return;
-                }
-            }
-        } else if (key === 'a' || key === 'arrowleft') {
-            if (currentMenu === 'root') nextIdx = (currentNodeIdx - 1 + activeNodes.length) % activeNodes.length;
-            else {
-                setCurrentMenu('root');
-                setCurrentNodeIdx(TREE_DATA.root.findIndex(n => n.id === currentMenu));
-                return;
-            }
-        } else if (key === 'd' || key === 'arrowright') {
-            if (currentMenu === 'root') nextIdx = (currentNodeIdx + 1) % activeNodes.length;
-        } else if (key === 'escape') {
+        if (key === 'escape') {
             setCurrentMenu('root');
             setPreviewActive(false);
             return;
+        }
+
+        const isUp = key === 'w' || key === 'arrowup';
+        const isDown = key === 's' || key === 'arrowdown';
+        const isLeft = key === 'a' || key === 'arrowleft';
+        const isRight = key === 'd' || key === 'arrowright';
+
+        if (currentMenu === 'root') {
+            // DIAMOND NAVIGATION LOGIC
+            // 0: Left (Velarix), 1: Top (Esco), 2: Right (Quietbin), 3: Bottom (Discord)
+
+            if (currentNodeIdx === 0) { // LEFT
+                if (isUp) nextIdx = 1; // -> Top
+                if (isDown) nextIdx = 3; // -> Bottom
+                if (isRight) nextIdx = 1; // -> Top (User pref: "Upper right/left") - let's default 'Right' to Top or Right? 
+                // Natural flow: Right -> Center/Top? Let's go Top (1) or Right (2). 
+                // Given geometry, Right from Left goes across. Let's send to Right (2).
+                if (isRight) nextIdx = 2;
+            }
+            else if (currentNodeIdx === 1) { // TOP
+                if (isLeft) nextIdx = 0; // -> Left
+                if (isRight) nextIdx = 2; // -> Right
+                if (isDown) nextIdx = 3; // -> Bottom
+            }
+            else if (currentNodeIdx === 2) { // RIGHT
+                if (isUp) nextIdx = 1; // -> Top
+                if (isDown) nextIdx = 3; // -> Bottom (User verified: "bottom arrow or s at right -> bottom")
+                if (isLeft) nextIdx = 0; // -> Left (Cross)
+            }
+            else if (currentNodeIdx === 3) { // BOTTOM
+                if (isUp) nextIdx = 1; // -> Top
+                if (isLeft) nextIdx = 0; // -> Left ("upper left of it")
+                if (isRight) nextIdx = 2; // -> Right ("upper right of it")
+            }
+        } else {
+            // SUBMENU LINEAR LOGIC (Vertical List)
+            if (isUp) {
+                if (currentNodeIdx > 0) nextIdx--;
+                else {
+                    // Back to Root (optional, or stay clamped)
+                    // Let's allow backing out if scrolling up past top
+                    // setCurrentMenu('root'); 
+                    // OR stay clamped
+                }
+            } else if (isDown) {
+                if (currentNodeIdx < activeNodes.length - 1) nextIdx++;
+            } else if (isLeft) {
+                setCurrentMenu('root');
+                // Find parent index to select it
+                const parentIdx = TREE_DATA.root.findIndex(n => n.id === currentMenu);
+                if (parentIdx !== -1) setCurrentNodeIdx(parentIdx);
+                else setCurrentNodeIdx(1); // Default Top
+                return;
+            }
         }
 
         if (nextIdx !== currentNodeIdx) {
@@ -755,7 +783,7 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
                 })
             }
 
-            <Bug currentPosition={bugCurrentPos.current} />
+            {/* <Bug currentPosition={bugCurrentPos.current} /> */}
         </group >
     );
 });
