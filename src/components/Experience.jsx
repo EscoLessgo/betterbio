@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Text, Line, Float, QuadraticBezierLine, useTexture, useVideoTexture } from '@react-three/drei';
+import { Text, Line, Float, QuadraticBezierLine, CubicBezierLine, useTexture, useVideoTexture, Environment } from '@react-three/drei';
 import * as THREE from 'three';
 
 const {
@@ -12,6 +12,7 @@ const {
 } = THREE;
 import Bug from './Bug';
 import Floor from './Floor';
+import ServerBlade from './Hardware';
 
 const PCB_BLUE = "#2dfccc";
 const PCB_PINK = "#d92b6b";
@@ -368,21 +369,64 @@ const TREE_DATA = {
     ]
 };
 
-const ConnectionRail = ({ start, end, color }) => {
+const RootCable = ({ start, end, color }) => {
+    // Calculate control points for a heavy "slack" cable look or tensioned curve
+    // We want a nice "S" or "Bridge" curve between the nodes
+    const mid1 = [
+        start[0] + (end[0] - start[0]) * 0.3,
+        start[1],
+        start[2] + (end[2] - start[2]) * 0.3
+    ];
+    const mid2 = [
+        start[0] + (end[0] - start[0]) * 0.7,
+        end[1],
+        end[2] + (end[2] - start[2]) * 0.7
+    ];
+
     return (
         <group>
-            {/* Vertical Drop Line */}
+            <CubicBezierLine
+                start={start}
+                end={end}
+                midA={mid1}
+                midB={mid2}
+                color={color} // Red/Pink from image
+                lineWidth={4}
+                transparent
+                opacity={0.8}
+            />
+            {/* Connection Joint Dots */}
+            <mesh position={start}>
+                <sphereGeometry args={[0.3]} />
+                <meshBasicMaterial color={color} />
+            </mesh>
+            <mesh position={end}>
+                <sphereGeometry args={[0.3]} />
+                <meshBasicMaterial color={color} />
+            </mesh>
+        </group>
+    );
+};
+
+const ConnectionRail = ({ start, end, color }) => {
+    // Pure Vertical Drop for children as seen in image
+    // The image shows a straight line going down through the nodes
+
+    return (
+        <group>
+            {/* Simple Straight Line */}
             <Line
-                points={[start, [start[0], end[1], start[2]], end]}
+                points={[start, end]}
                 color={color}
                 lineWidth={2}
                 transparent
-                opacity={0.3}
+                opacity={0.6}
             />
-            {/* Glowing Emitter at Start */}
+            {/* Glowing Emitter at Start (Node Connection Point) */}
             <mesh position={start}>
                 <sphereGeometry args={[0.15]} />
-                <meshBasicMaterial color={color} />
+                <meshBasicMaterial color="#ff0055" /> {/* Hot Pink Dot */}
+                <pointLight distance={3} intensity={5} color="#ff0055" />
             </mesh>
         </group>
     );
@@ -469,7 +513,7 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
 
         // 2. Smoothly Interpolate Rig State (The "Cinematic" feel)
         // Adjusted for smoother, weightier drift
-        const dampFactor = 5.0 * delta; // Increased stiffness for better tracking
+        const dampFactor = 3.0 * delta; // Slightly reduced for more "floaty" cinematic feel, user requested polish
 
         // Add subtle procedural sway to targetX/Y for "handheld" feel
         const time = state.clock.elapsedTime;
@@ -586,7 +630,12 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
     return (
         <group>
             <Floor />
+            <Environment preset="city" blur={1} />
             <EsconeonPopup />
+
+            {/* DEMO HARDWARE - User requested "Real 3D pieces of hardware" + "Fly-in" */}
+            <ServerBlade position={[20, 5, -10]} rotation={[0.5, 0.5, 0]} delay={0.5} />
+            <ServerBlade position={[-20, 8, -15]} rotation={[0.2, -0.5, 0.2]} delay={0.8} />
 
             {/* Render Static Layout Connections */}
             {TREE_DATA.root.map(rootNode => {
@@ -598,7 +647,6 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
                             start={rootNode.position}
                             end={child.position}
                             color={rootNode.color}
-                            isActive={currentMenu === rootNode.id}
                         />
                         {/* Extra Electric Surge Line */}
                         <LaserPulse
@@ -609,52 +657,68 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
                 ));
             })}
 
+            {/* NEW: ROOT CABLES (The Red Curves connecting the main headers) */}
+            {/* Velarix (Left) -> Esco (Center) */}
+            <RootCable
+                start={[-15, 2, 0]}
+                end={[-3, 4, 2]}
+                color="#d00040"
+            />
+            {/* Esco (Center) -> Quietbin (Right) */}
+            <RootCable
+                start={[3, 4, 2]}
+                end={[15, 2, 0]}
+                color="#d00040"
+            />
+
             {/* Render Nodes */}
-            {Object.entries(TREE_DATA).map(([key, nodes]) => {
-                return nodes.map((node, i) => {
-                    // Always render root nodes. Render children only if their menu is active OR we are in root (partially visible)
-                    const isRoot = key === 'root';
-                    const isChildOfActive = key === currentMenu;
+            {
+                Object.entries(TREE_DATA).map(([key, nodes]) => {
+                    return nodes.map((node, i) => {
+                        // Always render root nodes. Render children only if their menu is active OR we are in root (partially visible)
+                        const isRoot = key === 'root';
+                        const isChildOfActive = key === currentMenu;
 
-                    // Improved Visibility Logic:
-                    // Roots always visible.
-                    // Children visible if their parent is selected.
-                    const isVisible = isRoot || isChildOfActive;
+                        // Improved Visibility Logic:
+                        // Roots always visible.
+                        // Children visible if their parent is selected.
+                        const isVisible = isRoot || isChildOfActive;
 
-                    // Selection Logic
-                    const isSelected = isChildOfActive && i === currentNodeIdx;
-                    // If in root menu, select the root node
-                    const isRootSelected = currentMenu === 'root' && isRoot && i === currentNodeIdx;
+                        // Selection Logic
+                        const isSelected = isChildOfActive && i === currentNodeIdx;
+                        // If in root menu, select the root node
+                        const isRootSelected = currentMenu === 'root' && isRoot && i === currentNodeIdx;
 
-                    const activeState = isSelected || isRootSelected;
+                        const activeState = isSelected || isRootSelected;
 
-                    // Opacity Logic
-                    // If root menu: Roots are opaque, children scale 0
-                    // If sub menu: Parent Root dim, Children opaque
-                    let scale = node.scale || 1;
-                    if (!isRoot && !isChildOfActive) scale = 0;
+                        // Opacity Logic
+                        // If root menu: Roots are opaque, children scale 0
+                        // If sub menu: Parent Root dim, Children opaque
+                        let scale = node.scale || 1;
+                        if (!isRoot && !isChildOfActive) scale = 0;
 
-                    return (
-                        <group key={node.id} scale={[scale, scale, scale]}>
-                            <NodeElement
-                                node={node}
-                                isActive={activeState}
-                                isDimmed={!activeState && isVisible}
-                                isDeploying={isVisible}
-                                onVisit={() => {
-                                    // ... click logic
-                                }}
-                            />
-                            {activeState && node.url && (
-                                <PreviewWindow node={node} isVisible={previewActive} trunkColor={trunkColor} />
-                            )}
-                        </group>
-                    );
-                });
-            })}
+                        return (
+                            <group key={node.id} scale={[scale, scale, scale]}>
+                                <NodeElement
+                                    node={node}
+                                    isActive={activeState}
+                                    isDimmed={!activeState && isVisible}
+                                    isDeploying={isVisible}
+                                    onVisit={() => {
+                                        // ... click logic
+                                    }}
+                                />
+                                {activeState && node.url && (
+                                    <PreviewWindow node={node} isVisible={previewActive} trunkColor={trunkColor} />
+                                )}
+                            </group>
+                        );
+                    });
+                })
+            }
 
             <Bug currentPosition={bugCurrentPos.current} />
-        </group>
+        </group >
     );
 };
 

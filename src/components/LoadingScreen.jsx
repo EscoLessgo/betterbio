@@ -1,49 +1,101 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import gsap from 'gsap';
 
 const LoadingScreen = ({ onComplete }) => {
     const [progress, setProgress] = useState(0);
-    const [loadingText, setLoadingText] = useState('BOOTING_KERNEL...');
+    const containerRef = useRef(null);
+    const barRef = useRef(null);
+    const textRef = useRef(null);
+    const [isReady, setIsReady] = useState(false);
 
     useEffect(() => {
-        const texts = [
-            'INITIALIZING_NEO_DRIVERS...',
-            'SYNCING_MOTHERBOARD_TRACES...',
-            'ALLOCATING_GLASS_BUFFERS...',
-            'ESTABLISHING_VIRTUAL_LINK...',
-            'SYSTEM_READY'
-        ];
+        // Cinematic Sequence
+        const tl = gsap.timeline();
 
-        let currentIdx = 0;
-        const interval = setInterval(() => {
-            setProgress(prev => {
-                if (prev >= 100) {
-                    clearInterval(interval);
-                    setTimeout(onComplete, 300);
-                    return 100;
+        // 1. Initial Blackout & Logo Reveal
+        tl.to('.loader-logo', {
+            opacity: 1,
+            duration: 2,
+            ease: "power2.inOut",
+            filter: "blur(0px)",
+            scale: 1
+        })
+            .to('.loader-bar-container', {
+                width: '300px',
+                opacity: 1,
+                duration: 1
+            }, "-=1")
+
+            // 2. Simulated Loading Progress
+            .to(barRef.current, {
+                width: '100%',
+                duration: 3.5,
+                ease: "expo.out",
+                onUpdate: function () {
+                    // Approximate progress for number display
+                    setProgress(Math.round(this.progress() * 100));
                 }
-                if (prev % 20 === 0) {
-                    setLoadingText(texts[currentIdx]);
-                    currentIdx = Math.min(currentIdx + 1, texts.length - 1);
+            })
+
+            // 3. Text Cycle
+            .to(textRef.current, {
+                text: "SYSTEM_READY",
+                duration: 0.5,
+                onStart: () => {
+                    if (textRef.current) textRef.current.innerText = "INITIALIZING...";
                 }
-                return prev + 1;
+            }, "<")
+
+            // 4. Ready State
+            .call(() => {
+                setIsReady(true);
             });
-        }, 15);
 
-        return () => clearInterval(interval);
-    }, [onComplete]);
+        return () => tl.kill();
+    }, []);
+
+    const handleEnter = (startMuted = false) => {
+        // Exit Animation
+        gsap.to(containerRef.current, {
+            opacity: 0,
+            duration: 1,
+            onComplete: () => onComplete({ muted: startMuted })
+        });
+    };
 
     return (
-        <div className="loading-screen">
+        <div className="loading-screen" ref={containerRef}>
+            {/* Cinematic Letterbox Bars */}
+            <div className="cinema-bar top"></div>
+            <div className="cinema-bar bottom"></div>
+
             <div className="loader-content">
-                <div className="loader-logo">ESCO.IO</div>
-                <div className="loader-bar-container">
-                    <div className="loader-bar" style={{ width: `${progress}%` }}></div>
+                <div className="loader-logo" style={{ opacity: 0, transform: 'scale(1.2)', filter: 'blur(10px)' }}>
+                    ESCO.IO
                 </div>
-                <div className="loader-status">
-                    <span className="status-label">{loadingText}</span>
-                    <span className="status-percent">{progress}%</span>
-                </div>
+
+                {!isReady ? (
+                    <>
+                        <div className="loader-bar-container" style={{ width: 0, opacity: 0 }}>
+                            <div className="loader-bar" ref={barRef} style={{ width: '0%' }}></div>
+                        </div>
+                        <div className="loader-status">
+                            <span className="status-label" ref={textRef}>BOOTING_KP_KERNEL...</span>
+                            <span className="status-percent">{progress}%</span>
+                        </div>
+                    </>
+                ) : (
+                    <div className="entry-controls">
+                        <button className="enter-btn" onClick={() => handleEnter(false)}>
+                            [ INITIALIZE_LINK ]
+                        </button>
+                        <button className="enter-btn muted-btn" onClick={() => handleEnter(true)} style={{ fontSize: '0.8rem', opacity: 0.7, marginTop: '1rem' }}>
+                            [ ENTER_SILENT ]
+                        </button>
+                    </div>
+                )}
             </div>
+
             <div className="loader-grid"></div>
         </div>
     );

@@ -3,6 +3,7 @@ import { Canvas } from '@react-three/fiber';
 import Experience from './components/Experience';
 import LoadingScreen from './components/LoadingScreen';
 import MobileControls from './components/MobileControls';
+import AudioPlayer from './components/AudioPlayer';
 const Dashboard = React.lazy(() => import('./components/Dashboard'));
 import { trackPageView } from './utils/analytics';
 import './index.css';
@@ -74,6 +75,7 @@ function App() {
   const [activeView, setActiveView] = useState(null);
   const [isCentering, setIsCentering] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [startMuted, setStartMuted] = useState(false);
 
   // Check both hash and pathname for admin access
   const checkAdmin = () => window.location.hash === '#admin' || window.location.pathname === '/admin';
@@ -206,7 +208,17 @@ function App() {
         </React.Suspense>
       ) : (
         <>
-          {isLoading && <LoadingScreen onComplete={() => setIsLoading(false)} />}
+          {isLoading && <LoadingScreen onComplete={({ muted }) => {
+            setStartMuted(muted);
+            setIsLoading(false);
+          }} />}
+
+          <AudioPlayer
+            src="/betterbio_music.mp3"
+            isPlaying={!isLoading}
+            initialVolume={0.2}
+            initialMuted={startMuted}
+          />
 
           <BottomTag />
 

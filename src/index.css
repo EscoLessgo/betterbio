@@ -639,3 +639,53 @@ body {
     /* Hide hotkey hints in safe mode on mobile */
   }
 }
+
+/* Loading Screen Enhancements */
+.cinema-bar {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 10vh;
+  background: black;
+  z-index: 10;
+}
+
+.cinema-bar.top {
+  top: 0;
+}
+
+.cinema-bar.bottom {
+  bottom: 0;
+}
+
+.enter-btn {
+  margin-top: 2rem;
+  background: transparent;
+  border: 1px solid var(--accent-cyan);
+  color: var(--accent-cyan);
+  padding: 1rem 2rem;
+  font-family: inherit;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1.2rem;
+  letter-spacing: 2px;
+  animation: flash-btn 2s infinite;
+  text-transform: uppercase;
+}
+
+.enter-btn:hover {
+  background: var(--accent-cyan);
+  color: #000;
+}
+
+@keyframes flash-btn {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
