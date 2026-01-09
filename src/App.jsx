@@ -71,7 +71,7 @@ function App() {
     canvas.width = 32;
     canvas.height = 32;
     const ctx = canvas.getContext('2d');
-    const colors = ['#ff0077', '#00ffff', '#ffff00', '#ffffff', '#00ff00'];
+    const colors = ['#d92b6b', '#2dfccc', '#e8f080', '#ffffff', '#2dfccc'];
 
     // Create/Find Link Element for favicon
     let link = document.querySelector("link[rel~='icon']");
@@ -128,7 +128,7 @@ function App() {
         <Canvas
           camera={{ position: [0, 0, 35], fov: 40 }}
         >
-          <color attach="background" args={['#000103']} />
+          <color attach="background" args={['#030508']} />
 
           {!isLoading && (
             <Suspense fallback={null}>
@@ -142,9 +142,9 @@ function App() {
           )}
 
           <ambientLight intensity={1} />
-          <spotLight position={[20, 30, 20]} angle={0.2} penumbra={1} intensity={100} color="#00ffff" castShadow decay={0} />
-          <pointLight position={[-20, 20, 10]} intensity={50} color="#ff0077" decay={0} />
-          <pointLight position={[20, -20, 10]} intensity={50} color="#00ffff" decay={0} />
+          <spotLight position={[20, 30, 20]} angle={0.2} penumbra={1} intensity={100} color="#2dfccc" castShadow decay={0} />
+          <pointLight position={[-20, 20, 10]} intensity={50} color="#d92b6b" decay={0} />
+          <pointLight position={[20, -20, 10]} intensity={50} color="#2dfccc" decay={0} />
         </Canvas>
       </div>
 

@@ -13,9 +13,9 @@ const {
 import Bug from './Bug';
 import Floor from './Floor';
 
-const PCB_BLUE = "#00ffff";
-const PCB_PINK = "#ff0077";
-const PCB_GOLD = "#ffd700";
+const PCB_BLUE = "#2dfccc";
+const PCB_PINK = "#d92b6b";
+const PCB_GOLD = "#e8f080";
 
 // Consolidated Neural Preview Database
 const PREVIEW_DATA = {
