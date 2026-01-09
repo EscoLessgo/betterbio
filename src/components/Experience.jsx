@@ -596,6 +596,65 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
 
     const trunkColor = TREE_DATA.root.find(n => n.id === currentMenu)?.color || PCB_BLUE;
 
+    // CAMERA RIG - Restored & Updated for Diamond Layout
+    const { camera } = useThree();
+    useFrame((state, delta) => {
+        const isRoot = currentMenu === 'root';
+        const activeNodes = TREE_DATA[currentMenu];
+        const targetNode = activeNodes[currentNodeIdx];
+        const isMobile = state.viewport.aspect < 1;
+        const isPreview = previewActive;
+
+        // Base Z depth
+        let targetZ = isRoot ? 85 : 50; // Increased Zoom Out (was 65)
+
+        // Mobile Calibration: ZOOM OUT (Higher Z) as requested
+        if (isMobile) {
+            targetZ = isRoot ? 150 : 100; // Increased Mobile Zoom Out
+        }
+
+        if (isPreview) targetZ = isMobile ? 80 : 40;
+
+        // X/Y follows the node slightly, but mostly stays centered on the column/row
+        let targetX = 0;
+        let targetY = 0;
+
+        if (isRoot) {
+            // For Diamond, we want to center on the whole group (0,0,0)
+            targetX = 0;
+            targetY = 0;
+        } else {
+            // If in submenu, center on the column parent
+            const parent = TREE_DATA.root.find(n => n.id === currentMenu);
+            if (parent) {
+                targetX = parent.position[0];
+                // For Discord (Bottom, Y=-10), center lower to see children
+                if (parent.id === 'discord_games') targetY = parent.position[1] - 8;
+                else targetY = parent.position[1];
+            }
+
+            // On mobile, force-lock to the exact node center to keep "orb on screen"
+            if (isMobile && targetNode) {
+                targetX = targetNode.position[0];
+                targetY = targetNode.position[1];
+            }
+        }
+
+        // Apply Parallax / Mouse Offset if regular view
+        if (!isMobile && !isPreview) {
+            targetX += (state.mouse.x * 2);
+            targetY += (state.mouse.y * 2);
+        }
+
+        const lerpSpeed = 2.0 * delta;
+
+        state.camera.position.x = MathUtils.lerp(state.camera.position.x, targetX, lerpSpeed);
+        state.camera.position.y = MathUtils.lerp(state.camera.position.y, targetY, lerpSpeed);
+        state.camera.position.z = MathUtils.lerp(state.camera.position.z, targetZ, lerpSpeed);
+
+        state.camera.lookAt(targetX, targetY, 0); // Always look at the calculated center
+    });
+
     return (
         <group>
             <Floor />
