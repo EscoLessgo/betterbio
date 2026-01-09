@@ -428,15 +428,15 @@ const ElectricCable = ({ start, end, color }) => {
                 speed={1.5}
             />
 
-            {/* Joint Nodes */}
-            <mesh position={start}>
+            {/* Joint Nodes - REMOVED per user request ("get rid of these") */}
+            {/* <mesh position={start}>
                 <sphereGeometry args={[0.3]} />
                 <meshStandardMaterial color="#222" roughness={0.4} />
             </mesh>
             <mesh position={end}>
                 <sphereGeometry args={[0.3]} />
                 <meshStandardMaterial color="#222" roughness={0.4} />
-            </mesh>
+            </mesh> */}
         </group>
     );
 };
@@ -466,11 +466,13 @@ const ElectricDrop = ({ start, end, color }) => {
                 speed={2.0}
             />
 
+            {/* Start Orb - REMOVED per user request ("get rid of these")
             <mesh position={start}>
                 <sphereGeometry args={[0.2]} />
                 <meshBasicMaterial color={color} />
                 <pointLight distance={3} intensity={3} color={color} />
-            </mesh>
+            </mesh> 
+            */}
         </group>
     );
 };
@@ -601,12 +603,14 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
                 const parentIdx = TREE_DATA.root.findIndex(n => n.id === currentMenu);
                 if (parentIdx !== -1) setCurrentNodeIdx(parentIdx);
                 else setCurrentNodeIdx(1); // Default Top
+                setPreviewActive(false); // Reset preview
                 return;
             }
         }
 
         if (nextIdx !== currentNodeIdx) {
             setCurrentNodeIdx(nextIdx);
+            setPreviewActive(false); // Reset preview when moving
             if (onNodeActive) onNodeActive(activeNodes[nextIdx]);
         }
     };
