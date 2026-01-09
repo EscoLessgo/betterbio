@@ -46,18 +46,20 @@ const Dashboard = () => {
 
             <div style={{ marginTop: '2rem', display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
                 <div style={{ flex: 1, minWidth: '300px' }}>
-                    <h2 style={{ color: '#fff' }}>TOP_SECTORS</h2>
+                    <h2 style={{ color: '#fff' }}>NODE_TRAFFIC</h2>
                     <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ borderBottom: '1px solid #444' }}>
-                                <th style={{ padding: '0.5rem' }}>PATH</th>
-                                <th style={{ padding: '0.5rem' }}>HITS</th>
+                                <th style={{ padding: '0.5rem' }}>TARGET_ID</th>
+                                <th style={{ padding: '0.5rem' }}>INTERACTIONS</th>
                             </tr>
                         </thead>
                         <tbody>
                             {data.top_pages?.map((p, i) => (
                                 <tr key={i} style={{ background: i % 2 ? 'rgba(255,255,255,0.05)' : 'none' }}>
-                                    <td style={{ padding: '0.5rem' }}>{p.path}</td>
+                                    <td style={{ padding: '0.5rem', color: '#2dfccc' }}>
+                                        {p.path.replace('/node/', '').toUpperCase()}
+                                    </td>
                                     <td style={{ padding: '0.5rem' }}>{p.count}</td>
                                 </tr>
                             ))}
@@ -66,20 +68,22 @@ const Dashboard = () => {
                 </div>
 
                 <div style={{ flex: 1, minWidth: '300px' }}>
-                    <h2 style={{ color: '#fff' }}>LATEST_INCIDENTS</h2>
+                    <h2 style={{ color: '#fff' }}>LIVE_FEED</h2>
                     <table style={{ width: '100%', textAlign: 'left', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
                         <thead>
                             <tr style={{ borderBottom: '1px solid #444' }}>
-                                <th style={{ padding: '0.5rem' }}>TIME</th>
-                                <th style={{ padding: '0.5rem' }}>PATH</th>
-                                <th style={{ padding: '0.5rem' }}>DEVICE</th>
+                                <th style={{ padding: '0.5rem' }}>TIMESTAMP</th>
+                                <th style={{ padding: '0.5rem' }}>ACTION</th>
+                                <th style={{ padding: '0.5rem' }}>TERMINAL</th>
                             </tr>
                         </thead>
                         <tbody>
                             {data.recent_logs?.map((log, i) => (
                                 <tr key={i} style={{ color: '#aaa' }}>
                                     <td style={{ padding: '0.5rem' }}>{new Date(log.timestamp).toLocaleTimeString()}</td>
-                                    <td style={{ padding: '0.5rem', color: '#fff' }}>{log.path}</td>
+                                    <td style={{ padding: '0.5rem', color: '#fff' }}>
+                                        {log.path.replace('/node/', '> ')}
+                                    </td>
                                     <td style={{ padding: '0.5rem' }}>{log.screen}</td>
                                 </tr>
                             ))}
