@@ -56,7 +56,7 @@ const VideoFeed = ({ url }) => {
     }, [video]);
 
     return (
-        <mesh scale={[1, -1, 1]}> {/* Fix texture flip */}
+        <mesh scale={[1, 1, 1]}>
             <planeGeometry args={[13.6, 7]} />
             <meshBasicMaterial>
                 <videoTexture attach="map" args={[video]} encoding={THREE.SRGBColorSpace} />
