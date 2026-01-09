@@ -2,6 +2,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import Experience from './components/Experience';
 import LoadingScreen from './components/LoadingScreen';
+import MobileControls from './components/MobileControls';
 const Dashboard = React.lazy(() => import('./components/Dashboard'));
 import { trackPageView } from './utils/analytics';
 import './index.css';
@@ -242,6 +243,7 @@ function App() {
 
             <NavHint />
             <KeybindOverlay />
+            <MobileControls />
           </div>
         </>
       )}
