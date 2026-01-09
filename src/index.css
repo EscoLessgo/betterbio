@@ -194,26 +194,61 @@ body {
   opacity: 1;
 }
 
-.instruction-box {
-  background: var(--ui-glass);
-  border-left: 3px solid var(--accent-pink);
-  padding: 1rem;
-  backdrop-filter: blur(5px);
+/* KEYBIND UI */
+.key-uigroup {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 0.5rem;
+  background: rgba(3, 5, 8, 0.6);
+  padding: 1rem;
+  border: 1px solid var(--accent-cyan);
+  border-radius: 8px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 0 20px rgba(45, 252, 204, 0.1);
 }
 
-.keybind-img {
-  width: 280px;
-  height: auto;
-  filter: drop-shadow(0 0 10px rgba(0, 255, 255, 0.3));
+.key-cluster {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.key-row {
+  display: flex;
+  gap: 4px;
+}
+
+.key-cap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(45, 252, 204, 0.05);
+  border: 1px solid var(--accent-cyan);
+  border-radius: 4px;
+  color: var(--accent-cyan);
+  font-family: 'Roboto Mono', monospace;
+  font-weight: bold;
+  font-size: 0.8rem;
+  box-shadow: 0 0 5px rgba(45, 252, 204, 0.2);
+  text-shadow: 0 0 5px var(--accent-cyan);
+}
+
+.key-cap.wide {
+  width: auto;
+  padding: 0 16px;
+  border-color: var(--accent-pink);
+  color: var(--accent-pink);
+  text-shadow: 0 0 5px var(--accent-pink);
+  box-shadow: 0 0 5px rgba(217, 43, 107, 0.2);
 }
 
 .instruction-text {
   font-size: 0.6rem;
-  color: var(--accent-cyan);
-  letter-spacing: 1px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
   opacity: 0.8;
   text-transform: uppercase;
 }

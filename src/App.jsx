@@ -38,13 +38,32 @@ const NavHint = () => (
 
 const KeybindOverlay = () => (
   <div className="keybind-overlay" style={{ pointerEvents: 'auto' }}>
-    <div className="instruction-box">
-      <img
-        src="/esco_keybind_instructions_1767870360807.png"
-        alt="Keybinds"
-        className="keybind-img"
-      />
-      <div className="instruction-text">CONTROLS_OVERLAY</div>
+    <div className="key-uigroup">
+      <div className="key-cluster">
+        <div className="key-row">
+          <span className="key-cap">W</span>
+        </div>
+        <div className="key-row">
+          <span className="key-cap">A</span>
+          <span className="key-cap">S</span>
+          <span className="key-cap">D</span>
+        </div>
+      </div>
+
+      {/* Decorative connection line */}
+      <div className="key-connect">
+        <svg width="40" height="20" viewBox="0 0 40 20">
+          <path d="M0,10 L40,10" stroke="var(--accent-cyan)" strokeWidth="1" strokeDasharray="2 2" />
+          <circle cx="20" cy="10" r="2" fill="var(--accent-pink)" />
+        </svg>
+      </div>
+
+      <div className="key-action">
+        <span className="key-cap wide">ENTER ↵</span>
+      </div>
+    </div>
+    <div className="instruction-text" style={{ marginTop: '0.5rem', textAlign: 'center' }}>
+      NAVIGATION_SYSTEM
     </div>
   </div>
 );
