@@ -2,7 +2,7 @@ import React from 'react';
 
 const MobileControls = () => {
     const dispatchKey = (key) => {
-        window.dispatchEvent(new KeyboardEvent('keydown', { key: key }));
+        window.dispatchEvent(new KeyboardEvent('keydown', { key: key, bubbles: true }));
     };
 
     return (
@@ -24,6 +24,7 @@ const MobileControls = () => {
                     right: 2rem;
                     z-index: 10000;
                     display: none; /* Hidden by default, shown via media query in index.css */
+                    pointer-events: auto;
                 }
 
                 @media (max-width: 768px) {
