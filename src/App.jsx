@@ -126,6 +126,13 @@ function App() {
       document.head.appendChild(metaTheme);
     }
 
+    // ADMIN OVERRIDE: Stop glitching if in admin mode
+    if (isAdmin) {
+      document.title = "ESCO // ADMIN";
+      metaTheme.content = "#000000";
+      return;
+    }
+
     let frame = 0;
     let titleSwapTimer = 0;
     let useCrazyTitle = false;
@@ -180,7 +187,7 @@ function App() {
     }, 80); // 12.5 FPS for that rugged retro feel
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isAdmin]);
 
   const handleNodeActive = (node) => {
     if (!node) return;
