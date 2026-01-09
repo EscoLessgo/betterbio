@@ -332,36 +332,69 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
         if (onNodeActive && activeNodes[0]) onNodeActive(activeNodes[0]);
     }, []);
 
-    useFrame((state) => {
+    // Camera Rig State
+    const camRig = useRef({
+        pos: new Vector3(0, 0, 50),
+        target: new Vector3(0, 0, 0)
+    });
+
+    useFrame((state, delta) => {
+        // Safe check
         if (!activeNodes || !activeNodes[currentNodeIdx]) return;
         const targetNode = activeNodes[currentNodeIdx];
 
-        // Smoother Lerp for Bug
-        bugCurrentPos.current.lerp(new Vector3(...targetNode.position), 0.1);
-
-        // Camera Logic - calmer movement
+        // 1. Determine Desired Camera Position
         const isRoot = currentMenu === 'root';
-        let camTargetZ = isRoot ? 50 : 40;
-        if (previewActive) camTargetZ = 55;
+        const isPreview = previewActive;
 
-        // Focus X: If root, center. If submenu, center on that column.
-        let camTargetX = 0;
-        if (!isRoot) {
-            // Find parent column X
+        // Base Z depth
+        let targetZ = isRoot ? 55 : 40;
+        if (isPreview) targetZ = 30; // Closer for preview
+
+        // X/Y follows the node slightly, but mostly stays centered on the column/row
+        let targetX = 0;
+        let targetY = 0;
+
+        if (isRoot) {
+            targetX = 0;
+            targetY = 0;
+        } else {
+            // If in submenu, center on the column parent
             const parent = TREE_DATA.root.find(n => n.id === currentMenu);
-            if (parent) camTargetX = parent.position[0];
+            if (parent) targetX = parent.position[0];
+            targetY = targetNode.position[1];
         }
 
-        // Focus Y
-        const camTargetY = isRoot ? 0 : targetNode.position[1];
+        // Shift for Preview Panel
+        if (isPreview) targetX += 8;
 
-        state.camera.position.lerp(new Vector3(camTargetX, camTargetY, camTargetZ), 0.05);
-        state.camera.lookAt(camTargetX, camTargetY, 0);
+        // 2. Smoothly Interpolate Rig State (The "Cinematic" feel)
+        // Lower factor = smoother, heavier feel. Delta ensures framerate independence.
+        const dampFactor = 2.0 * delta;
 
+        camRig.current.pos.lerp(new Vector3(targetX, targetY, targetZ), dampFactor);
+
+        // Look Target Logic
+        let lookX = targetX;
+        let lookY = targetY;
+        // If preview, look slightly between node and panel
+        if (isPreview) lookX -= 4;
+
+        camRig.current.target.lerp(new Vector3(lookX, lookY, 0), dampFactor);
+
+        // 3. Apply to Camera
         if (isCentering) {
+            // Override for opening sequence
             state.camera.position.lerp(new Vector3(0, 0, 50), 0.05);
+            state.camera.lookAt(0, 0, 0);
             if (state.camera.position.z >= 49.5) onCenterComplete();
+        } else {
+            state.camera.position.copy(camRig.current.pos);
+            state.camera.lookAt(camRig.current.target);
         }
+
+        // Update Bug separately
+        bugCurrentPos.current.lerp(new Vector3(...targetNode.position), dampFactor * 2);
     });
 
     const handleVisit = (url) => { window.open(url, '_blank'); };
