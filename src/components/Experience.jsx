@@ -602,10 +602,11 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
             <Environment preset="city" blur={1} />
             <EsconeonPopup />
 
-            {/* DEMO HARDWARE - User requested "Real 3D pieces of hardware" + "Fly-in" + 10s Refresh Interval */}
-            <ServerBlade position={[20, 5, -10]} rotation={[0.5, 0.5, 0]} delay={0.5} /> {/* Near Quietbin */}
-            <ServerBlade position={[-20, 8, -15]} rotation={[0.2, -0.5, 0.2]} delay={0.8} /> {/* Near Velarix */}
-            <ServerBlade position={[0, -15, -10]} rotation={[-0.2, 0, 0.1]} delay={1.2} /> {/* BELOW Discord Node */}
+            {/* DEMO HARDWARE */}
+            <ServerBlade position={[20, 5, -10]} rotation={[0.5, 0.5, 0]} delay={0.5} /> {/* Right (Quietbin) */}
+            <ServerBlade position={[-20, 8, -15]} rotation={[0.2, -0.5, 0.2]} delay={0.8} /> {/* Left (Velarix) */}
+            <ServerBlade position={[0, -3.5, -10]} rotation={[-0.1, 0, 0.1]} delay={1.2} /> {/* Bottom (Discord) - Lifted UP to avoid UI */}
+            <ServerBlade position={[0, 16, -12]} rotation={[0.3, 0, -0.1]} delay={1.4} /> {/* Top (Esco) - Added for Symmetry */}
 
             {/* Render Static Layout Connections */}
             {TREE_DATA.root.map(rootNode => {
