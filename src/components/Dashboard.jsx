@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { ComposableMap, Geographies, Geography, Marker } from "react-simple-maps";
 import { scaleLinear } from "d3-scale";
+import { Tooltip } from 'react-tooltip';
 
 // GeoJSON for the world map
 const GEO_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
@@ -12,7 +13,6 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(false);
     const [filter, setFilter] = useState('');
     const [selectedLogs, setSelectedLogs] = useState([]);
-    const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
 
     // Auth & Fetch
     const login = async () => {
@@ -88,8 +88,6 @@ const Dashboard = () => {
     };
 
     // --- RENDER HELPERS ---
-
-    // Map Scale logic for heatmap
     const popScale = useMemo(() => scaleLinear().domain([0, 50]).range([2, 10]), []);
 
     if (!isAuthenticated) return (
@@ -115,7 +113,9 @@ const Dashboard = () => {
             background: '#020205', color: '#eee', fontFamily: '"Inter", sans-serif',
             padding: '2rem', overflow: 'auto', zIndex: 9999
         }}>
-            {/* HERADER */}
+            {/* TOOLTIP */}
+            <Tooltip id="geo-tooltip" style={{ backgroundColor: "#d92b6b", color: "#fff", zIndex: 10000 }} />
+
             <div style={{ maxWidth: '1600px', margin: '0 auto' }}>
                 <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
                     <div>
@@ -144,13 +144,31 @@ const Dashboard = () => {
                             <Geographies geography={GEO_URL}>
                                 {({ geographies }) =>
                                     geographies.map((geo) => (
-                                        <Geography key={geo.rsmKey} geography={geo} fill="#1a1a24" stroke="#000" strokeWidth={0.5} />
+                                        <Geography
+                                            key={geo.rsmKey}
+                                            geography={geo}
+                                            fill="#1a1a24"
+                                            stroke="#000"
+                                            strokeWidth={0.5}
+                                            data-tooltip-id="geo-tooltip"
+                                            data-tooltip-content={geo.properties.name}
+                                            style={{
+                                                default: { outline: "none" },
+                                                hover: { fill: "#2a2a35", outline: "none" },
+                                                pressed: { outline: "none" },
+                                            }}
+                                        />
                                     ))
                                 }
                             </Geographies>
                             {data?.map_points?.map((point, i) => (
-                                <Marker key={i} coordinates={[point.lon, point.lat]}>
-                                    <circle r={popScale(point.count)} fill="#d92b6b" stroke="#fff" strokeWidth={1} style={{ opacity: 0.8 }} />
+                                <Marker
+                                    key={i}
+                                    coordinates={[point.lon, point.lat]}
+                                    data-tooltip-id="geo-tooltip"
+                                    data-tooltip-content={`${point.city}, ${point.country} (${point.count} Hits)`}
+                                >
+                                    <circle r={popScale(point.count)} fill="#d92b6b" stroke="#fff" strokeWidth={1} style={{ opacity: 0.8, cursor: 'pointer' }} />
                                 </Marker>
                             ))}
                         </ComposableMap>
@@ -187,7 +205,7 @@ const Dashboard = () => {
                 </div>
 
                 {/* TABLE */}
-                <div style={{ background: '#0a0a12', border: '1px solid #333', borderRadius: '8px', overflow: 'hidden' }}>
+                <div style={{ background: '#0a0a12', border: '1px solid #333', borderRadius: '8px', overflow: 'auto' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                         <thead style={{ background: '#111', color: '#888', textAlign: 'left' }}>
                             <tr>
