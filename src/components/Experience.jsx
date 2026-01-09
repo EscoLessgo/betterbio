@@ -424,10 +424,18 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
         // 1. Determine Desired Camera Position
         const isRoot = currentMenu === 'root';
         const isPreview = previewActive;
+        const aspect = state.viewport.aspect; // R3F viewport aspect ratio
+        const isMobile = aspect < 1; // Portrait mode
 
         // Base Z depth
         let targetZ = isRoot ? 55 : 40;
-        if (isPreview) targetZ = 30; // Closer for preview
+
+        // Mobile Calibration
+        if (isMobile) {
+            targetZ = isRoot ? 90 : 60; // Pull way back on mobile to fit width
+        }
+
+        if (isPreview) targetZ = isMobile ? 50 : 30; // Closer for preview
 
         // X/Y follows the node slightly, but mostly stays centered on the column/row
         let targetX = 0;
@@ -435,16 +443,26 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
 
         if (isRoot) {
             targetX = 0;
-            targetY = 0;
+            targetY = isMobile ? 10 : 0; // Shift up slightly on mobile
         } else {
             // If in submenu, center on the column parent
             const parent = TREE_DATA.root.find(n => n.id === currentMenu);
             if (parent) targetX = parent.position[0];
             targetY = targetNode.position[1];
+
+            // On mobile, center strictly on the node we are looking at to key it in view
+            if (isMobile) targetX = 0; // Flatten X to center column in view
         }
 
         // Shift for Preview Panel
-        if (isPreview) targetX += 8;
+        if (isPreview) {
+            if (isMobile) {
+                targetX = 0;
+                targetY = targetNode.position[1] - 5; // Look down a bit so panel (above) is centered
+            } else {
+                targetX += 8;
+            }
+        }
 
         // 2. Smoothly Interpolate Rig State (The "Cinematic" feel)
         // Adjusted for smoother, weightier drift
