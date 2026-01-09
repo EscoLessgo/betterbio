@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
 import gsap from 'gsap';
+import { Hatch } from 'ldrs/react'; // Import Hatch
 
 const LoadingScreen = ({ onComplete }) => {
     const [progress, setProgress] = useState(0);
     const containerRef = useRef(null);
-    const barRef = useRef(null);
     const textRef = useRef(null);
     const [isReady, setIsReady] = useState(false);
 
@@ -21,15 +21,13 @@ const LoadingScreen = ({ onComplete }) => {
             scale: 1,
             rotate: 0
         })
-            .to('.loader-bar-container', {
-                width: '300px',
+            .to('.loader-hatch-container', { // Animate the container of the hatch instead
                 opacity: 1,
                 duration: 1
             }, "-=1")
 
-            // 2. Simulated Loading Progress
-            .to(barRef.current, {
-                width: '100%',
+            // 2. Simulated Loading Progress (Logic only, no bar width)
+            .to({}, { // Animate dummy object for timing
                 duration: 3.5,
                 ease: "expo.out",
                 onUpdate: function () {
@@ -84,8 +82,13 @@ const LoadingScreen = ({ onComplete }) => {
 
                 {!isReady ? (
                     <>
-                        <div className="loader-bar-container" style={{ width: 0, opacity: 0 }}>
-                            <div className="loader-bar" ref={barRef} style={{ width: '0%' }}></div>
+                        <div className="loader-hatch-container" style={{ opacity: 0, display: 'flex', justifyContent: 'center', margin: '2rem 0' }}>
+                            <Hatch
+                                size="28"
+                                stroke="4"
+                                speed="3.5"
+                                color="white"
+                            />
                         </div>
                         <div className="loader-status">
                             <span className="status-label" ref={textRef}>BOOTING_KP_KERNEL...</span>
