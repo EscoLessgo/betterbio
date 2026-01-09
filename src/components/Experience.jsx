@@ -435,12 +435,12 @@ const Experience = ({ onNodeActive, isCentering, onCenterComplete }) => {
         // Base Z depth
         let targetZ = isRoot ? 55 : 40;
 
-        // Mobile Calibration: ZOOM IN (Lower Z) instead of out
+        // Mobile Calibration: ZOOM OUT (Higher Z) as requested
         if (isMobile) {
-            targetZ = isRoot ? 65 : 45; // Closer, tighter framing
+            targetZ = isRoot ? 110 : 90; // Pull way back to see more context
         }
 
-        if (isPreview) targetZ = isMobile ? 35 : 30; // Close inspection for preview
+        if (isPreview) targetZ = isMobile ? 70 : 30; // Further back for preview too
 
         // X/Y follows the node slightly, but mostly stays centered on the column/row
         let targetX = 0;
