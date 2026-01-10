@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Text, Line, Float, QuadraticBezierLine, CubicBezierLine, Environment } from '@react-three/drei';
+import { Text, Line, Float, QuadraticBezierLine, CubicBezierLine, Environment, Stars, Sparkles } from '@react-three/drei';
 import * as THREE from 'three';
 
 const {
@@ -275,7 +275,7 @@ const NodeElement = ({ node, isActive, isDimmed, isDeploying, onVisit }) => {
             onPointerOver={() => { setHovered(true); document.body.style.cursor = 'pointer'; }}
             onPointerOut={() => { setHovered(false); document.body.style.cursor = 'auto'; }}
         >
-            <Float speed={isActive ? 4 : 2} rotationIntensity={0.2} floatIntensity={0.5}>
+            <Float speed={isActive ? 2 : 1} rotationIntensity={0.1} floatIntensity={0.2}>
                 {/* Clean Glass Panel */}
                 <mesh position={[0, 0, 0]}>
                     <boxGeometry args={[6, 1.8, 0.2]} />
@@ -670,7 +670,7 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
             }
         }
 
-        const lerpSpeed = 2.0 * delta;
+        const lerpSpeed = 0.8 * delta; // REDUCED from 2.0 for smoother, headache-free movement
 
         state.camera.position.x = MathUtils.lerp(state.camera.position.x, targetX, lerpSpeed);
         state.camera.position.y = MathUtils.lerp(state.camera.position.y, targetY, lerpSpeed);
@@ -684,6 +684,10 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
             <Floor />
             <Environment preset="city" blur={1} />
             {/* EsconeonPopup Removed for cleaner aesthetic */}
+
+            {/* ATMOSPHERE & BACKGROUND */}
+            <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
+            <Sparkles count={200} scale={[40, 40, 40]} size={4} speed={0.4} opacity={0.5} color="#2dfccc" />
 
             {/* DEMO HARDWARE */}
             <ServerBlade position={[24, 0, -10]} rotation={[0.5, 0.5, 0]} delay={0.5} /> {/* Right (Quietbin) - Centered Y, Wider X */}

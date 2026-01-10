@@ -228,9 +228,9 @@ app.get('/api/stats', async (req, res) => {
 // --- STATIC FILES & FALLBACK ---
 const distPath = path.join(process.cwd(), 'dist');
 if (!fs.existsSync(distPath)) try { fs.mkdirSync(distPath, { recursive: true }); } catch (e) { }
-const indexPath = path.join(distPath, 'index.html');
-if (!fs.existsSync(indexPath)) try { fs.writeFileSync(indexPath, `<!DOCTYPE html><html><head><meta http-equiv="refresh" content="5"></head><body><h1>DEPLOYING...</h1></body></html>`); } catch (e) { }
 
+// CRITICAL FIX: Explicitly serve assets to prevent "text/html" MIME errors
+app.use('/assets', express.static(path.join(distPath, 'assets')));
 app.use(express.static(distPath));
 
 // Handle client-side routing
