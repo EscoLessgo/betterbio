@@ -28,19 +28,24 @@ const AudioPlayer = ({ src, isPlaying, initialVolume = 0.5, initialMuted = false
         // Force sync mute state immediately on mount/src change
         audio.muted = muted;
 
+        let isMounted = true;
+
         const runAttempt = () => {
+            if (!isMounted) return;
             const attemptPlay = async () => {
                 try {
                     if (isPlaying && !hasPlayedOnce && status !== 'PLAYING') {
-                        await audio.play();
-                        setStatus('PLAYING');
+                        if (audio && isMounted) {
+                            await audio.play();
+                            if (isMounted) setStatus('PLAYING');
+                        }
                     } else if (!isPlaying || hasPlayedOnce) {
-                        audio.pause();
-                        setStatus(hasPlayedOnce ? 'ENDED' : 'PAUSED');
+                        if (audio) audio.pause();
+                        if (isMounted) setStatus(hasPlayedOnce ? 'ENDED' : 'PAUSED');
                     }
                 } catch (err) {
                     console.warn("Audio Playback Blocked/Failed:", err);
-                    setStatus('BLOCKED');
+                    if (isMounted) setStatus('BLOCKED');
                 }
             };
             attemptPlay();
@@ -48,9 +53,10 @@ const AudioPlayer = ({ src, isPlaying, initialVolume = 0.5, initialMuted = false
 
         if (delay > 0 && isPlaying) {
             const timer = setTimeout(runAttempt, delay);
-            return () => clearTimeout(timer);
+            return () => { isMounted = false; clearTimeout(timer); };
         } else {
             runAttempt();
+            return () => { isMounted = false; };
         }
     }, [isPlaying, hasPlayedOnce, src]); // Retrigger on src change
 
