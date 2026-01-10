@@ -11,14 +11,16 @@ import CautionBanner from './components/CautionBanner';
 import './index.css';
 
 const BottomTag = () => (
-  <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', textAlign: 'right', pointerEvents: 'none', zIndex: 10 }}>
+  // Moved up to avoid covering by 'Live Preview' or other corner elements
+  <div style={{ position: 'fixed', bottom: '8rem', right: '2rem', textAlign: 'right', pointerEvents: 'none', zIndex: 99999 }}>
     <img
       src="/logo.png"
       alt="esco.io"
       style={{
         height: '80px',
         filter: 'drop-shadow(0 0 10px rgba(45, 252, 204, 0.5))',
-        mixBlendMode: 'screen' // Blends black background if present, or just looks cool
+        mixBlendMode: 'screen',
+        opacity: 0.9
       }}
     />
     <div className="system-status" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginTop: '0.5rem', gap: '0.2rem' }}>
