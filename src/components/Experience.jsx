@@ -641,19 +641,18 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
             targetX = 0;
             targetY = 0;
         } else {
-            // If in submenu, center on the column parent
-            const parent = TREE_DATA.root.find(n => n.id === currentMenu);
-            if (parent) {
-                targetX = parent.position[0];
-                // For Discord (Bottom, Y=-10), center lower to see children
-                if (parent.id === 'discord_games') targetY = parent.position[1] - 8;
-                else targetY = parent.position[1];
-            }
-
-            // On mobile, force-lock to the exact node center to keep "orb on screen"
-            if (isMobile && targetNode) {
+            // SUBMENU: Center explicitly on the ACTIVE NODE to ensure visibility
+            // This fixes the issue where deep list items were rendered too low/high
+            if (targetNode) {
                 targetX = targetNode.position[0];
                 targetY = targetNode.position[1];
+            } else {
+                // Fallback to parent if no node active (rare)
+                const parent = TREE_DATA.root.find(n => n.id === currentMenu);
+                if (parent) {
+                    targetX = parent.position[0];
+                    targetY = parent.position[1];
+                }
             }
         }
 
@@ -663,14 +662,11 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
             targetY += (state.mouse.y * 2);
         } else if (isPreview && targetNode) {
             // CAMERA OPTIMIZATION: Shift logic
-            // If preview is active, we need to center the camera between the Node and the PreviewWindow
-            // PC: Preview is to the RIGHT (x+10)
-            // Mobile: Preview is ABOVE (y+6)
-
             if (isMobile) {
-                targetY += 4; // Shift up to see the screen above the node
+                targetY += 5; // Shift up to see screen above
             } else {
-                targetX += 6; // Shift right to balance node (left) and screen (right)
+                targetX += 6; // Shift right to balance Node (left) and Screen (right)
+                // targetY remains centered on the node's Y
             }
         }
 
