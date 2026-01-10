@@ -11,7 +11,15 @@ import './index.css';
 
 const BottomTag = () => (
   <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', textAlign: 'right', pointerEvents: 'none', zIndex: 10 }}>
-    <div className="logo glitch-text" data-text="esco.io" style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-2px' }}>esco.io</div>
+    <img
+      src="/logo.png"
+      alt="esco.io"
+      style={{
+        height: '80px',
+        filter: 'drop-shadow(0 0 10px rgba(45, 252, 204, 0.5))',
+        mixBlendMode: 'screen' // Blends black background if present, or just looks cool
+      }}
+    />
     <div className="system-status" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', marginTop: '0.5rem', gap: '0.2rem' }}>
       <span className="status-bit pulse" style={{ fontSize: '0.8rem', opacity: 0.7 }}>neural_link_established</span>
       <span className="status-bit" style={{ fontSize: '0.8rem', opacity: 0.5 }}>core_v1.8.0</span>
