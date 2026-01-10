@@ -4,6 +4,7 @@ import Experience from './components/Experience';
 import LoadingScreen from './components/LoadingScreen';
 import MobileControls from './components/MobileControls';
 import AudioPlayer from './components/AudioPlayer';
+import CursorTrail from './components/CursorTrail';
 const Dashboard = React.lazy(() => import('./components/Dashboard'));
 import { trackPageView } from './utils/analytics';
 import CautionBanner from './components/CautionBanner';
@@ -324,6 +325,7 @@ function App() {
             <NavHint />
             <KeybindOverlay />
             <MobileControls onInput={handleMobileInput} />
+            <CursorTrail />
           </div>
         </>
       )}
