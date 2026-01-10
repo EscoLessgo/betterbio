@@ -31,19 +31,7 @@ const MobileControls = ({ onInput }) => {
                 ENTER
             </button>
 
-            <style jsx>{`
-                .mobile-controls {
-                    position: fixed;
-                    bottom: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    pointer-events: none;
-                    z-index: 10001;
-                    display: none; /* Changed via media query */
-                } 
-                /* ... rest of styles ... */
-            `}</style>
+
             <style jsx>{`
                 .mobile-controls {
                     position: fixed;

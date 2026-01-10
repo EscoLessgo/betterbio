@@ -10,7 +10,7 @@ const {
     TextureLoader,
     SRGBColorSpace
 } = THREE;
-import Bug from './Bug';
+
 import Floor from './Floor';
 import ServerBlade from './Hardware';
 
@@ -213,79 +213,7 @@ const PreviewWindow = ({ node, isVisible, trunkColor }) => {
     );
 };
 
-const EsconeonPopup = () => {
-    const groupRef = useRef();
-    const [mounted, setMounted] = useState(false);
 
-    useEffect(() => {
-        const timer = setTimeout(() => setMounted(true), 100);
-        return () => clearTimeout(timer);
-    }, []);
-
-    useFrame((state, delta) => {
-        if (groupRef.current) {
-            const target = mounted ? 1 : 0;
-            const lerpSpeed = 3.0 * delta;
-
-            groupRef.current.scale.lerp(new Vector3().setScalar(target), lerpSpeed);
-
-            groupRef.current.children.forEach(child => {
-                if (child.material) {
-                    child.material.transparent = true;
-                    // Check if it's the main video mesh map or just material
-                    // We just lerp global opacity
-                    child.material.opacity = MathUtils.lerp(child.material.opacity, target, lerpSpeed);
-                }
-            });
-        }
-    });
-
-    const [video] = useState(() => {
-        const vid = document.createElement('video');
-        vid.src = '/esconeon.mp4';
-        vid.crossOrigin = 'Anonymous';
-        vid.loop = true;
-        vid.muted = true;
-        vid.playsInline = true;
-        vid.autoplay = true;
-        return vid;
-    });
-
-    useEffect(() => {
-        const attemptPlay = () => {
-            if (video.paused) {
-                video.play().catch(e => console.warn("Video play failed", e));
-            }
-        };
-        attemptPlay();
-        // Fallback for browser autoplay policies
-        const onInteraction = () => {
-            attemptPlay();
-            window.removeEventListener('click', onInteraction);
-            window.removeEventListener('keydown', onInteraction);
-        };
-        window.addEventListener('click', onInteraction);
-        window.addEventListener('keydown', onInteraction);
-
-        return () => {
-            window.removeEventListener('click', onInteraction);
-            window.removeEventListener('keydown', onInteraction);
-            video.pause();
-        };
-    }, [video]);
-
-    return (
-        <group position={[0, 21, 0]} ref={groupRef} scale={[0, 0, 0]}> {/* Shifted WAY up to 21 to clear Top Hardware/Node */}
-            {/* Slightly offset Z to pop over the node */}
-            <mesh>
-                <planeGeometry args={[14, 8]} />
-                <meshBasicMaterial side={THREE.DoubleSide} transparent opacity={0}>
-                    <videoTexture attach="map" args={[video]} colorSpace={THREE.SRGBColorSpace} />
-                </meshBasicMaterial>
-            </mesh>
-        </group>
-    );
-};
 
 const LaserPulse = ({ points, color }) => {
     const meshRef = useRef();
@@ -474,15 +402,6 @@ const ElectricCable = ({ start, end, color }) => {
                 speed={1.5}
             />
 
-            {/* Joint Nodes - REMOVED per user request ("get rid of these") */}
-            {/* <mesh position={start}>
-                <sphereGeometry args={[0.3]} />
-                <meshStandardMaterial color="#222" roughness={0.4} />
-            </mesh>
-            <mesh position={end}>
-                <sphereGeometry args={[0.3]} />
-                <meshStandardMaterial color="#222" roughness={0.4} />
-            </mesh> */}
         </group>
     );
 };
@@ -512,13 +431,7 @@ const ElectricDrop = ({ start, end, color }) => {
                 speed={2.0}
             />
 
-            {/* Start Orb - REMOVED per user request ("get rid of these")
-            <mesh position={start}>
-                <sphereGeometry args={[0.2]} />
-                <meshBasicMaterial color={color} />
-                <pointLight distance={3} intensity={3} color={color} />
-            </mesh> 
-            */}
+
         </group>
     );
 };
@@ -557,7 +470,7 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
     const [previewActive, setPreviewActive] = useState(false);
 
     const activeNodes = TREE_DATA[currentMenu];
-    const bugCurrentPos = useRef(new Vector3(...activeNodes[0].position));
+
 
     useEffect(() => {
         if (onNodeActive && activeNodes[0]) onNodeActive(activeNodes[0]);
@@ -748,6 +661,17 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
         if (!isMobile && !isPreview) {
             targetX += (state.mouse.x * 2);
             targetY += (state.mouse.y * 2);
+        } else if (isPreview && targetNode) {
+            // CAMERA OPTIMIZATION: Shift logic
+            // If preview is active, we need to center the camera between the Node and the PreviewWindow
+            // PC: Preview is to the RIGHT (x+10)
+            // Mobile: Preview is ABOVE (y+6)
+
+            if (isMobile) {
+                targetY += 4; // Shift up to see the screen above the node
+            } else {
+                targetX += 6; // Shift right to balance node (left) and screen (right)
+            }
         }
 
         const lerpSpeed = 2.0 * delta;
@@ -857,7 +781,7 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
                 })
             }
 
-            {/* <Bug currentPosition={bugCurrentPos.current} /> */}
+
         </group >
     );
 });

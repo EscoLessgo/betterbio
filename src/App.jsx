@@ -198,7 +198,7 @@ function App() {
 
       link.href = canvas.toDataURL('image/png');
 
-      link.href = canvas.toDataURL('image/png');
+
     }, 6000); // 6 Seconds - slowed down significantly for stability
 
     return () => clearInterval(interval);
