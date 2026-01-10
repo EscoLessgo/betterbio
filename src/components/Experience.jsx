@@ -396,55 +396,47 @@ const ElectricCable = ({ start, end, color }) => {
 
     useFrame((state, delta) => {
         if (materialRef.current) {
-            materialRef.current.dashOffset -= delta * 2; // Fast flow
+            // High speed "Shooting" effect
+            materialRef.current.dashOffset -= delta * 15;
         }
     });
 
     return (
         <group>
-            {/* 1. OUTER GLOW (Thick, static, low opacity) */}
+            {/* 1. Base Wire (Subtle Structure) */}
             <CubicBezierLine
                 start={start}
                 end={end}
                 midA={mid1}
                 midB={mid2}
                 color={color}
-                lineWidth={8}
+                lineWidth={3}
                 transparent
-                opacity={0.15}
+                opacity={0.1}
             />
 
-            {/* 2. INNER ENERGY STREAM (Dashed, Animated) */}
+            {/* 2. THE ENERGY BOLT (Single Pulse) */}
             <CubicBezierLine
                 start={start}
                 end={end}
                 midA={mid1}
                 midB={mid2}
-                color="#fff" // Bright core
-                lineWidth={2}
+                color={color} // Inherit neon
+                lineWidth={6} // Thick beam
                 dashed
-                dashScale={5}
-                dashSize={1}
-                gapSize={1}
+                dashScale={1}
+                dashSize={6} // Long beam
+                gapSize={30} // Huge gap (single shot look)
             >
                 <meshBasicMaterial
                     attach="material"
                     color={color}
                     ref={materialRef}
                     transparent
-                    opacity={0.8}
-                    dashSize={1}
-                    gapSize={1}
+                    opacity={1}
+                    toneMapped={false} // BLOOM INTENSITY
                 />
             </CubicBezierLine>
-
-            {/* 3. The Surge Pulse (With Trail) */}
-            <SurgePulse
-                points={[start, mid1, mid2, end]}
-                color={color}
-                speed={2.5}
-            />
-
         </group>
     );
 };
@@ -452,49 +444,53 @@ const ElectricCable = ({ start, end, color }) => {
 const ElectricDrop = ({ start, end, color }) => {
     const materialRef = useRef();
 
+    // Create a slight curve for the drop (Hanging cable feel)
+    const mid = [
+        (start[0] + end[0]) / 2,
+        (start[1] + end[1]) / 2 - 2, // Sag down by 2 units
+        (start[2] + end[2]) / 2
+    ];
+
     useFrame((state, delta) => {
         if (materialRef.current) {
-            materialRef.current.dashOffset -= delta * 1.5;
+            materialRef.current.dashOffset -= delta * 10;
         }
     });
 
     return (
         <group>
-            {/* Outer Glow */}
-            <Line
-                points={[start, end]}
+            {/* Structure */}
+            <QuadraticBezierLine
+                start={start}
+                end={end}
+                mid={mid}
                 color={color}
-                lineWidth={6}
+                lineWidth={2}
                 transparent
                 opacity={0.1}
             />
-            {/* Animated Dashed Core */}
-            <Line
-                points={[start, end]}
+
+            {/* Energy Flow */}
+            <QuadraticBezierLine
+                start={start}
+                end={end}
+                mid={mid}
                 color={color}
-                lineWidth={2}
+                lineWidth={4}
                 dashed
-                dashScale={4}
-                dashSize={1}
-                gapSize={1}
+                dashScale={1}
+                dashSize={4}
+                gapSize={20}
             >
-                <lineDashedMaterial
+                <meshBasicMaterial
                     attach="material"
                     color={color}
                     ref={materialRef}
                     transparent
-                    opacity={0.9}
-                    dashSize={1}
-                    gapSize={1}
+                    opacity={1}
+                    toneMapped={false}
                 />
-            </Line>
-
-            {/* Vertical Surge */}
-            <SurgePulse
-                points={[start, [(start[0] + end[0]) / 2, (start[1] + end[1]) / 2, (start[2] + end[2]) / 2], end]}
-                color={color}
-                speed={2.0}
-            />
+            </QuadraticBezierLine>
         </group>
     );
 };
