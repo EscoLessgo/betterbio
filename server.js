@@ -3,28 +3,81 @@ require('dotenv').config();
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const { Pool } = require('pg');
 const UAParser = require('ua-parser-js');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 const ADMIN_PASS = process.env.ADMIN_PASS || 'Poncholove20!!';
 
-// --- IN-MEMORY DATABASE ---
-// This replaces the PostgreSQL database. Data is lost on server restart.
-const memoryDb = {
-    logs: [], // Stores all page view events
-    stats: {
-        total_views: 0,
-        unique_visitors: new Set(),
-        countries: new Set()
-    }
-};
+// --- DATABASE SETUP (PostgreSQL) ---
+let pool = null;
+let dbConnected = false;
+
+if (process.env.DATABASE_URL) {
+    console.log('🔌 Found DATABASE_URL, attempting connection...');
+    pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false }, // Required for Railway/Heroku
+        connectionTimeoutMillis: 5000 // Fail fast if unreachable
+    });
+
+    pool.on('error', (err) => {
+        console.error('❌ Unexpected DB Error:', err);
+        dbConnected = false;
+    });
+
+    // Initial Connection Test & Schema Migration
+    (async () => {
+        try {
+            const client = await pool.connect();
+            console.log('✅ Connected to PostgreSQL');
+            dbConnected = true;
+
+            // Schema Migration
+            await client.query(`
+                CREATE TABLE IF NOT EXISTS page_views (
+                    id SERIAL PRIMARY KEY,
+                    path TEXT,
+                    referrer TEXT,
+                    screen TEXT,
+                    timestamp TIMESTAMPTZ DEFAULT NOW(),
+                    ip TEXT,
+                    city TEXT,
+                    country TEXT,
+                    isp TEXT,
+                    browser TEXT,
+                    os TEXT,
+                    device TEXT,
+                    lat TEXT,
+                    lon TEXT,
+                    meta JSONB
+                );
+            `);
+            // Ensure columns exist (for older schemas)
+            const columns = ['ip', 'city', 'country', 'isp', 'browser', 'os', 'device', 'lat', 'lon'];
+            for (const col of columns) {
+                await client.query(`ALTER TABLE page_views ADD COLUMN IF NOT EXISTS ${col} TEXT`);
+            }
+
+            console.log('✅ DB Schema Verified');
+            client.release();
+        } catch (err) {
+            console.error('❌ Failed to connect to DB:', err.message);
+            dbConnected = false;
+        }
+    })();
+} else {
+    console.warn('⚠️ No DATABASE_URL found. Analytics will drop to limited mode (or fail).');
+}
 
 app.enable('trust proxy');
 app.use(cors());
 app.use(express.json());
 
-app.get('/health', (req, res) => res.send('OK'));
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', db: dbConnected });
+});
 
 // --- AUTH MIDDLEWARE ---
 const requireAuth = (req, res, next) => {
@@ -45,7 +98,10 @@ app.post('/api/auth', (req, res) => {
 app.post('/api/signal', async (req, res) => {
     const { path, referrer, screen, meta } = req.body || {};
 
+    // Get IP
     const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
+
+    // Parse User Agent
     const ua = UAParser(req.headers['user-agent']);
     const browser = `${ua.browser.name || 'Unknown'} ${ua.browser.version || ''}`.trim();
     const os = `${ua.os.name || 'Unknown'} ${ua.os.version || ''}`.trim();
@@ -53,7 +109,7 @@ app.post('/api/signal', async (req, res) => {
 
     let city = 'Unknown', country = 'Unknown', isp = 'Unknown', lat = null, lon = null;
 
-    // IP Geolocation (only if valid IP)
+    // IP Geolocation
     if (ip && ip.length > 6 && !ip.startsWith('127') && !ip.startsWith('::1')) {
         try {
             const geoRes = await fetch(`http://ip-api.com/json/${ip}?fields=status,city,country,isp,lat,lon`);
@@ -62,176 +118,115 @@ app.post('/api/signal', async (req, res) => {
                 city = geo.city;
                 country = geo.country;
                 isp = geo.isp;
-                lat = geo.lat; // Keep as number
-                lon = geo.lon; // Keep as number
+                lat = String(geo.lat);
+                lon = String(geo.lon);
             }
-        } catch (e) { /* ignore */ }
+        } catch (e) { /* ignore geo fail */ }
     }
 
-    const newLog = {
-        id: Date.now() + Math.random().toString(36).substr(2, 9),
-        path,
-        referrer,
-        screen,
-        ip,
-        city,
-        country,
-        isp,
-        browser,
-        os,
-        device,
-        lat,
-        lon,
-        meta,
-        timestamp: new Date().toISOString()
-    };
-
-    // Store in memory
-    memoryDb.logs.unshift(newLog); // Add to beginning for easier recent retrieval
-
-    // Update simple stats
-    memoryDb.stats.total_views++;
-    memoryDb.stats.unique_visitors.add(ip);
-    if (country !== 'Unknown') memoryDb.stats.countries.add(country);
-
-    // Limit memory usage (keep last 5000 logs)
-    if (memoryDb.logs.length > 5000) {
-        memoryDb.logs = memoryDb.logs.slice(0, 5000);
+    if (pool && dbConnected) {
+        try {
+            await pool.query(
+                `INSERT INTO page_views 
+                (path, referrer, screen, ip, city, country, isp, browser, os, device, lat, lon, meta) 
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`,
+                [path, referrer, screen, ip, city, country, isp, browser, os, device, lat, lon, meta ? JSON.stringify(meta) : null]
+            );
+            return res.json({ ok: true });
+        } catch (e) {
+            console.error('Insert Error:', e.message);
+            return res.status(500).json({ error: 'DB Insert Failed' });
+        }
+    } else {
+        console.warn('Signal received but DB not connected.');
+        return res.json({ ok: true, saved: false, warn: 'No DB' });
     }
-
-    res.json({ ok: true });
 });
 
 // --- DASHBOARD DATA ---
-app.get('/api/dashboard', requireAuth, (req, res) => {
-    const { filter } = req.query;
+app.get('/api/dashboard', requireAuth, async (req, res) => {
+    if (!pool || !dbConnected) return res.status(503).json({ error: 'DB_DISCONNECTED' });
 
-    let filteredLogs = memoryDb.logs;
+    try {
+        const { filter } = req.query;
 
-    // Filter logic
-    if (filter) {
-        const lowerFilter = filter.toLowerCase();
-        filteredLogs = filteredLogs.filter(log =>
-            (log.path && log.path.toLowerCase().includes(lowerFilter)) ||
-            (log.city && log.city.toLowerCase().includes(lowerFilter)) ||
-            (log.country && log.country.toLowerCase().includes(lowerFilter)) ||
-            (log.ip && log.ip.includes(lowerFilter)) ||
-            (log.browser && log.browser.toLowerCase().includes(lowerFilter)) ||
-            (log.os && log.os.toLowerCase().includes(lowerFilter))
-        );
-    }
+        // Base Stats
+        const statsQuery = `SELECT COUNT(*) as total, COUNT(DISTINCT ip) as visitors, COUNT(DISTINCT country) as countries FROM page_views`;
 
-    // Aggregations
-    const topCitiesMap = {};
-    const topIspsMap = {};
-    const browsersMap = {};
-    const mapPointsMap = {}; // Key: "lat,lon"
+        // Maps/Lists
+        const topCitiesQuery = `SELECT city, country, COUNT(*) as count FROM page_views WHERE city != 'Unknown' GROUP BY city, country ORDER BY count DESC LIMIT 5`;
+        const topIspsQuery = `SELECT isp, COUNT(*) as count FROM page_views WHERE isp != 'Unknown' GROUP BY isp ORDER BY count DESC LIMIT 5`;
+        const browsersQuery = `SELECT browser, COUNT(*) as count FROM page_views WHERE browser != 'Unknown' GROUP BY browser ORDER BY count DESC LIMIT 5`;
+        const mapQuery = `SELECT lat, lon, city, country, COUNT(*) as count FROM page_views WHERE lat IS NOT NULL GROUP BY lat, lon, city, country`;
 
-    memoryDb.logs.forEach(log => {
-        if (log.city !== 'Unknown') {
-            const key = `${log.city}||${log.country}`;
-            topCitiesMap[key] = (topCitiesMap[key] || 0) + 1;
+        // Filtered Logs
+        let logQuery = `SELECT * FROM page_views`;
+        let params = [];
+        if (filter) {
+            logQuery += ` WHERE (path ILIKE $1 OR city ILIKE $1 OR country ILIKE $1 OR ip ILIKE $1)`;
+            params.push(`%${filter}%`);
         }
-        if (log.isp !== 'Unknown') {
-            topIspsMap[log.isp] = (topIspsMap[log.isp] || 0) + 1;
-        }
-        if (log.browser !== 'Unknown') {
-            browsersMap[log.browser] = (browsersMap[log.browser] || 0) + 1;
-        }
-        if (log.lat && log.lon) {
-            const key = `${log.lat},${log.lon}`;
-            if (!mapPointsMap[key]) {
-                mapPointsMap[key] = { lat: log.lat, lon: log.lon, city: log.city, country: log.country, count: 0 };
-            }
-            mapPointsMap[key].count++;
-        }
-    });
+        logQuery += ` ORDER BY id DESC LIMIT 100`;
 
-    const getTop5 = (map) => Object.entries(map)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 5)
-        .map(([k, count]) => {
-            if (k.includes('||')) {
-                const [city, country] = k.split('||');
-                return { city, country, count };
-            }
-            return { name: k, count }; // for simpler keys
+        const [stats, topCities, topIsps, browsers, recent, mapData] = await Promise.all([
+            pool.query(statsQuery),
+            pool.query(topCitiesQuery),
+            pool.query(topIspsQuery),
+            pool.query(browsersQuery),
+            pool.query(logQuery, params),
+            pool.query(mapQuery)
+        ]);
+
+        res.json({
+            stats: {
+                total_views: parseInt(stats.rows[0]?.total || 0),
+                unique_visitors: parseInt(stats.rows[0]?.visitors || 0),
+                countries: parseInt(stats.rows[0]?.countries || 0)
+            },
+            top_cities: topCities.rows,
+            top_isps: topIsps.rows,
+            browsers: browsers.rows,
+            recent_logs: recent.rows,
+            map_points: mapData.rows
         });
 
-    const topCities = getTop5(topCitiesMap);
-
-    // Fix format for ISP and Browser to match frontend expectation if it's generic
-    // Frontend expects { isp: '...', count: ... } and { browser: '...', count: ... }
-    const topIsps = Object.entries(topIspsMap)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 5)
-        .map(([isp, count]) => ({ isp, count }));
-
-    const browsers = Object.entries(browsersMap)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 5)
-        .map(([browser, count]) => ({ browser, count }));
-
-    const mapPoints = Object.values(mapPointsMap);
-
-    res.json({
-        stats: {
-            total_views: memoryDb.stats.total_views,
-            unique_visitors: memoryDb.stats.unique_visitors.size,
-            countries: memoryDb.stats.countries.size
-        },
-        top_cities: topCities,
-        top_isps: topIsps,
-        browsers: browsers,
-        recent_logs: filteredLogs.slice(0, 100), // First 100
-        map_points: mapPoints
-    });
+    } catch (e) {
+        console.error('Dashboard Error:', e);
+        res.status(500).json({ error: 'Query Failed: ' + e.message });
+    }
 });
 
 // --- DELETE LOGS ---
-app.delete('/api/logs', requireAuth, (req, res) => {
+app.delete('/api/logs', requireAuth, async (req, res) => {
     const { ids, all } = req.body;
+    if (!pool || !dbConnected) return res.status(503).json({ error: 'DB_DISCONNECTED' });
 
-    if (all) {
-        memoryDb.logs = [];
-        memoryDb.stats.total_views = 0;
-        memoryDb.stats.unique_visitors = new Set();
-        memoryDb.stats.countries = new Set();
-        return res.json({ success: true, message: 'All logs cleared' });
+    try {
+        if (all) {
+            await pool.query('DELETE FROM page_views');
+            return res.json({ success: true, message: 'All logs cleared' });
+        }
+        if (ids && Array.isArray(ids) && ids.length > 0) {
+            await pool.query('DELETE FROM page_views WHERE id = ANY($1)', [ids]);
+            return res.json({ success: true, message: `Deleted ${ids.length} logs` });
+        }
+        return res.status(400).json({ error: 'Invalid request' });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
     }
-
-    if (ids && Array.isArray(ids)) {
-        memoryDb.logs = memoryDb.logs.filter(log => !ids.includes(log.id));
-        // Note: Not recalculating total_views/visitors exactly to avoid complexity, 
-        // but ideally we should rebuild stats if we want perfection.
-        // For now, let's leave stats monotonic or just rebuild them.
-
-        // Rebuild stats for accuracy
-        const newStats = {
-            total_views: memoryDb.logs.length,
-            unique_visitors: new Set(),
-            countries: new Set()
-        };
-        memoryDb.logs.forEach(log => {
-            newStats.unique_visitors.add(log.ip);
-            if (log.country !== 'Unknown') newStats.countries.add(log.country);
-        });
-        memoryDb.stats = newStats;
-
-        return res.json({ success: true, message: `Deleted ${ids.length} logs` });
-    }
-
-    return res.status(400).json({ error: 'Invalid request' });
 });
 
 // --- PUBLIC STATS ---
-app.get('/api/stats', (req, res) => {
-    res.json({ visits: memoryDb.stats.total_views });
+app.get('/api/stats', async (req, res) => {
+    if (!pool || !dbConnected) return res.json({ visits: 0 });
+    try {
+        const result = await pool.query('SELECT COUNT(*) as visits FROM page_views');
+        res.json({ visits: parseInt(result.rows[0]?.visits || 0) });
+    } catch (e) { res.json({ visits: 0 }); }
 });
 
 // --- STATIC FILES & FALLBACK ---
 const distPath = path.join(process.cwd(), 'dist');
-// Create dist/index.html if missing for dev safety
 if (!fs.existsSync(distPath)) try { fs.mkdirSync(distPath, { recursive: true }); } catch (e) { }
 const indexPath = path.join(distPath, 'index.html');
 if (!fs.existsSync(indexPath)) try { fs.writeFileSync(indexPath, `<!DOCTYPE html><html><head><meta http-equiv="refresh" content="5"></head><body><h1>DEPLOYING...</h1></body></html>`); } catch (e) { }

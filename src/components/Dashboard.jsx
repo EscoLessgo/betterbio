@@ -46,6 +46,10 @@ const Dashboard = () => {
                     setIsAuthenticated(false);
                     return null;
                 }
+                if (res.status === 503) {
+                    throw new Error('DB_DISCONNECTED');
+                }
+                if (!res.ok) throw new Error('FETCH_FAILED');
                 return res.json();
             })
             .then(data => {
@@ -57,7 +61,7 @@ const Dashboard = () => {
             })
             .catch((e) => {
                 console.error(e);
-                setError('SERVER_CONNECTION_FAILED');
+                setError(e.message === 'DB_DISCONNECTED' ? 'DATABASE_DISCONNECTED' : 'SERVER_CONNECTION_FAILED');
                 setLoading(false);
             });
     };
@@ -108,6 +112,14 @@ const Dashboard = () => {
                 style={{ background: '#111', border: '1px solid #d92b6b', padding: '1rem', color: '#fff', fontSize: '1.2rem', textAlign: 'center', outline: 'none' }}
             />
             <button onClick={login} style={{ marginTop: '1rem', background: '#d92b6b', border: 'none', padding: '0.5rem 2rem', fontWeight: 'bold', cursor: 'pointer' }}>ENTER</button>
+        </div>
+    );
+
+    if (error === 'DATABASE_DISCONNECTED') return (
+        <div style={{ height: '100vh', background: '#020205', color: 'red', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+            <h1>⚠️ DATABASE ERROR</h1>
+            <p>The server is running, but cannot connect to PostgreSQL.</p>
+            <p style={{ fontSize: '0.8rem', marginTop: '0.5rem' }}>Check: DATABASE_URL in Railway Variables</p>
         </div>
     );
 
