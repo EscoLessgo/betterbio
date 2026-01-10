@@ -207,7 +207,10 @@ function App() {
       link.href = canvas.toDataURL('image/png');
 
 
-    }, 6000); // 6 Seconds - slowed down significantly for stability
+      link.href = canvas.toDataURL('image/png');
+
+
+    }, 100); // RESTORED SPEED: 100ms for fast glitch effect
 
     return () => clearInterval(interval);
   }, [isAdmin]);
