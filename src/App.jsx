@@ -82,8 +82,8 @@ function App() {
   const [bgMusic] = useState(() => {
     const playlist = [
       '/betterbio_music.mp3',
-      // '/2biomusic.mp3',
-      // '/3biomusic.mp3'
+      '/2biomusic.mp3',
+      '/3biomusic.mp3'
     ];
     return playlist[Math.floor(Math.random() * playlist.length)];
   });
@@ -236,13 +236,13 @@ function App() {
             setIsLoading(false);
           }} />}
 
-          {/* <AudioPlayer
+          <AudioPlayer
             src={bgMusic}
             isPlaying={!isLoading}
             initialVolume={0.2}
             initialMuted={startMuted}
             delay={1000} // Custom delay to prevent race conditions crash
-          /> */}
+          />
 
           <BottomTag />
 

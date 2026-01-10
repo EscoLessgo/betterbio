@@ -21,26 +21,26 @@ const PCB_GOLD = "#ffaa00";
 // Consolidated Neural Preview Database
 const PREVIEW_DATA = {
     // VEROE.FUN CLUSTER
-    'f_escosigns': '/thumbnail.png',
-    'f_spoti': '/thumbnail.png',
-    'f_tnt': '/thumbnail.png',
-    'f_fight': '/thumbnail.png',
-    'f_more': '/thumbnail.png',
+    'f_escosigns': '/uploaded_image_0_1767873499613.png',
+    'f_spoti': '/uploaded_image_1_1767873499613.png',
+    'f_tnt': '/uploaded_image_2_1767873499613.png',
+    'f_fight': '/uploaded_image_3_1767873499613.png',
+    'f_more': '/uploaded_image_4_1767873499613.png',
 
     // VELARIXSOLUTIONS.NL CLUSTER
-    'v_root': '/thumbnail.png',
-    'v_404': '/thumbnail.png',
-    'v_crypto': '/thumbnail.png',
-    'v_find': '/thumbnail.png',
-    'v_inlet': '/thumbnail.png',
+    'v_root': '/uploaded_image_0_1767876226767.png',
+    'v_404': '/uploaded_image_1_1767876226767.png',
+    'v_crypto': '/uploaded_image_2_1767876226767.png',
+    'v_find': '/uploaded_image_3_1767876226767.png',
+    'v_inlet': '/uploaded_image_4_1767876226767.png',
 
     // DATA SHARDS
-    's_root': '/thumbnail.png',
+    's_root': '/quietembed.mp4',
 
     // DISCORD GAMES
-    'd_tenk': '/thumbnail.png',
-    'd_square': '/thumbnail.png',
-    'd_spell': '/thumbnail.png'
+    'd_tenk': '/Ten-K.png',
+    'd_square': '/square_up.png',
+    'd_spell': '/spell-or-fail.png'
 };
 
 const VideoFeed = ({ url }) => {
