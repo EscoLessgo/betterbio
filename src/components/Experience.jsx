@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Text, Line, Float, QuadraticBezierLine, CubicBezierLine, Environment, Stars, Sparkles } from '@react-three/drei';
+import { Text, Line, Float, QuadraticBezierLine, CubicBezierLine, Environment, Stars, Sparkles, Trail } from '@react-three/drei';
 import * as THREE from 'three';
 
 const {
@@ -234,33 +234,55 @@ const LaserPulse = ({ points, color }) => {
     );
 };
 
-const NodeElement = ({ node, isActive, isDimmed, isDeploying, onVisit }) => {
+const NodeElement = ({ node, isActive, isDimmed, isDeploying, onVisit, delay = 0 }) => {
     const groupRef = useRef();
     const [hovered, setHovered] = useState(false);
 
+    // INTRO ANIMATION STATE
+    const [introFinished, setIntroFinished] = useState(false);
+    const posRef = useRef(new Vector3(node.position[0], node.position[1] + 50, node.position[2] - 50)); // Start high and far
+
     useFrame((state, delta) => {
-        if (groupRef.current) {
+        // 1. INTRO SEQUENCE
+        if (!introFinished) {
             const time = state.clock.elapsedTime;
-            const targetScale = isDeploying ? 1 : 0;
-            const hoverScale = hovered ? 1.15 : 1.0;
+            if (time > delay) {
+                // Fly in
+                posRef.current.lerp(new Vector3(...node.position), 3.0 * delta); // Fast fly-in
+                if (posRef.current.distanceTo(new Vector3(...node.position)) < 0.1) {
+                    setIntroFinished(true);
+                }
+            }
+        }
 
-            // Smooth scaling with delta
-            const lerpSpeed = 5.0 * delta;
-            groupRef.current.scale.lerp(new Vector3().setScalar(targetScale * hoverScale), lerpSpeed);
-
-            const zTarget = isActive ? 8 : 0;
-            groupRef.current.position.z = MathUtils.lerp(groupRef.current.position.z, zTarget, lerpSpeed);
-
-            if (isActive || hovered) {
-                // Premium organic floating motion
-                groupRef.current.rotation.y = Math.sin(time * 0.8) * 0.08;
-                groupRef.current.rotation.x = Math.cos(time * 0.7) * 0.05;
-                groupRef.current.position.y = node.position[1] + Math.sin(time * 1.5) * 0.1; // Bobbing
+        if (groupRef.current) {
+            // Sync group to the animated position ref (for Trail) or final node position
+            if (!introFinished) {
+                groupRef.current.position.copy(posRef.current);
             } else {
-                // Return to rest
-                groupRef.current.rotation.y = MathUtils.lerp(groupRef.current.rotation.y, 0, lerpSpeed);
-                groupRef.current.rotation.x = MathUtils.lerp(groupRef.current.rotation.x, 0, lerpSpeed);
-                groupRef.current.position.y = MathUtils.lerp(groupRef.current.position.y, node.position[1], lerpSpeed);
+                // 2. IDLE / INTERACTION STATE (Normal behavior)
+                const time = state.clock.elapsedTime;
+                const targetScale = isDeploying ? 1 : 0;
+                const hoverScale = hovered ? 1.15 : 1.0;
+
+                // Smooth scaling with delta
+                const lerpSpeed = 5.0 * delta;
+                groupRef.current.scale.lerp(new Vector3().setScalar(targetScale * hoverScale), lerpSpeed);
+
+                const zTarget = isActive ? 8 : 0;
+                groupRef.current.position.z = MathUtils.lerp(groupRef.current.position.z, zTarget, lerpSpeed);
+
+                if (isActive || hovered) {
+                    // Premium organic floating motion
+                    groupRef.current.rotation.y = Math.sin(time * 0.8) * 0.08;
+                    groupRef.current.rotation.x = Math.cos(time * 0.7) * 0.05;
+                    groupRef.current.position.y = node.position[1] + Math.sin(time * 1.5) * 0.1; // Bobbing
+                } else {
+                    // Return to rest
+                    groupRef.current.rotation.y = MathUtils.lerp(groupRef.current.rotation.y, 0, lerpSpeed);
+                    groupRef.current.rotation.x = MathUtils.lerp(groupRef.current.rotation.x, 0, lerpSpeed);
+                    groupRef.current.position.y = MathUtils.lerp(groupRef.current.position.y, node.position[1], lerpSpeed);
+                }
             }
         }
     });
@@ -268,14 +290,22 @@ const NodeElement = ({ node, isActive, isDimmed, isDeploying, onVisit }) => {
     const isHighlight = isActive || hovered;
 
     return (
-        <group
-            position={node.position}
-            ref={groupRef}
-            onClick={(e) => { e.stopPropagation(); onVisit(node); }}
-            onPointerOver={() => { setHovered(true); document.body.style.cursor = 'pointer'; }}
-            onPointerOut={() => { setHovered(false); document.body.style.cursor = 'auto'; }}
-        >
-            <Float speed={isActive ? 2 : 1} rotationIntensity={0.1} floatIntensity={0.2}>
+        <group ref={groupRef}>
+            {/* TRAIL EFFECT FOR ENTRANCE */}
+            {!introFinished && (
+                <Trail
+                    width={2}
+                    length={8}
+                    color={node.color}
+                    attenuation={(t) => t * t}
+                >
+                    <mesh visible={false}>
+                        <sphereGeometry args={[0.1]} />
+                    </mesh>
+                </Trail>
+            )}
+
+            <Float speed={isActive ? 2 : 1} rotationIntensity={0.1} floatIntensity={0.2} enabled={introFinished}>
                 {/* Clean Glass Panel */}
                 <mesh position={[0, 0, 0]}>
                     <boxGeometry args={[6, 1.8, 0.2]} />
@@ -450,16 +480,16 @@ const SurgePulse = ({ points, color, speed = 1 }) => {
             meshRef.current.position.copy(pos);
             // Flickering intensity
             meshRef.current.material.opacity = 0.8 + Math.random() * 0.2;
-            const scale = 1 + Math.random() * 0.5;
+            const scale = 1.5 + Math.random() * 0.5; // LARGER PULSE
             meshRef.current.scale.setScalar(scale);
         }
     });
 
     return (
         <mesh ref={meshRef}>
-            <sphereGeometry args={[0.2, 8, 8]} />
+            <sphereGeometry args={[0.3, 16, 16]} /> {/* BIGGER GEOMETRY */}
             <meshBasicMaterial color={color} transparent />
-            <pointLight distance={5} intensity={8} color={color} decay={2} />
+            <pointLight distance={8} intensity={15} color={color} decay={1} /> {/* BRIGHTER LIGHT */}
         </mesh>
     );
 };
@@ -776,6 +806,7 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
                                     isDimmed={!activeState && isVisible}
                                     isDeploying={isVisible}
                                     onVisit={activateNode}
+                                    delay={isRoot ? i * 0.3 : 0} // STAGGERED ENTRANCE 0.3s apart
                                 />
                                 {activeState && node.url && (
                                     <PreviewWindow node={node} isVisible={previewActive} trunkColor={trunkColor} />
