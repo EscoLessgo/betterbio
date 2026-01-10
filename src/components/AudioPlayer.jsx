@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState } from 'react';
 import { Html } from '@react-three/drei'; // Not needed if outside canvas
 import './AudioPlayer.css'; // We'll create some basic styles or inline them
 
-const AudioPlayer = ({ src, isPlaying, initialVolume = 0.5, initialMuted = false }) => {
+const AudioPlayer = ({ src, isPlaying, initialVolume = 0.5, initialMuted = false, delay = 0 }) => {
     const audioRef = useRef(null);
     const [volume, setVolume] = useState(initialVolume);
     const [muted, setMuted] = useState(initialMuted);
@@ -28,22 +28,30 @@ const AudioPlayer = ({ src, isPlaying, initialVolume = 0.5, initialMuted = false
         // Force sync mute state immediately on mount/src change
         audio.muted = muted;
 
-        const attemptPlay = async () => {
-            try {
-                if (isPlaying && !hasPlayedOnce && status !== 'PLAYING') {
-                    await audio.play();
-                    setStatus('PLAYING');
-                } else if (!isPlaying || hasPlayedOnce) {
-                    audio.pause();
-                    setStatus(hasPlayedOnce ? 'ENDED' : 'PAUSED');
+        const runAttempt = () => {
+            const attemptPlay = async () => {
+                try {
+                    if (isPlaying && !hasPlayedOnce && status !== 'PLAYING') {
+                        await audio.play();
+                        setStatus('PLAYING');
+                    } else if (!isPlaying || hasPlayedOnce) {
+                        audio.pause();
+                        setStatus(hasPlayedOnce ? 'ENDED' : 'PAUSED');
+                    }
+                } catch (err) {
+                    console.warn("Audio Playback Blocked/Failed:", err);
+                    setStatus('BLOCKED');
                 }
-            } catch (err) {
-                console.warn("Audio Playback Blocked/Failed:", err);
-                setStatus('BLOCKED');
-            }
+            };
+            attemptPlay();
         };
 
-        attemptPlay();
+        if (delay > 0 && isPlaying) {
+            const timer = setTimeout(runAttempt, delay);
+            return () => clearTimeout(timer);
+        } else {
+            runAttempt();
+        }
     }, [isPlaying, hasPlayedOnce, src]); // Retrigger on src change
 
     const handleEnded = () => {
@@ -75,6 +83,10 @@ const AudioPlayer = ({ src, isPlaying, initialVolume = 0.5, initialMuted = false
                 src={src}
                 loop={false}
                 onEnded={handleEnded}
+                onError={(e) => {
+                    console.warn("Audio Context Error:", e);
+                    setStatus('BLOCKED');
+                }}
             />
 
             <div className="audio-controls">

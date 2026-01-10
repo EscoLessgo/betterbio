@@ -43,47 +43,25 @@ const PREVIEW_DATA = {
     'd_spell': '/discord_spell.png'
 };
 
-// Robust Video Feed using manual element
 const VideoFeed = ({ url }) => {
-    const [video] = useState(() => {
-        const vid = document.createElement('video');
-        vid.src = url;
-        vid.crossOrigin = 'Anonymous';
-        vid.loop = true;
-        vid.muted = true;
-        vid.playsInline = true;
-        vid.autoplay = true;
-        return vid;
-    });
-
-    const [error, setError] = useState(false);
+    // Force re-creation of video element when URL changes
+    const [video] = useState(() => document.createElement('video'));
 
     useEffect(() => {
+        video.src = url;
+        video.crossOrigin = 'Anonymous';
+        video.loop = true;
+        video.muted = true;
+        video.playsInline = true;
+        video.autoplay = true;
+        video.load();
+
         const playPromise = video.play();
         if (playPromise !== undefined) {
-            playPromise.catch(e => {
-                console.warn("Autoplay failed", e);
-                // Don't set error immediately for autoplay block, only for source issues
-            });
+            playPromise.catch(() => { }); // Ignore autoplay errors
         }
-
-        video.onerror = () => {
-            console.warn("Video Load Failed:", url);
-            setError(true);
-        };
-
         return () => video.pause();
-    }, [video, url]);
-
-    if (error) {
-        return (
-            <mesh>
-                <planeGeometry args={[13.6, 7]} />
-                <meshBasicMaterial color="#220000" />
-                <Text fontSize={0.5} color="red" position={[0, 0, 0.1]}>VIDEO_LOST</Text>
-            </mesh>
-        );
-    }
+    }, [url, video]);
 
     return (
         <mesh scale={[1, 1, 1]}>
@@ -100,6 +78,7 @@ const SafeImageFeed = ({ url }) => {
     const [error, setError] = useState(false);
 
     useEffect(() => {
+        let isMounted = true;
         setError(false);
         setTexture(null);
 
@@ -107,15 +86,22 @@ const SafeImageFeed = ({ url }) => {
         loader.load(
             url,
             (tex) => {
-                tex.colorSpace = SRGBColorSpace;
+                if (!isMounted) return;
+                try {
+                    if (SRGBColorSpace) tex.colorSpace = SRGBColorSpace;
+                } catch (e) {
+                    console.warn("ColorSpace error ignored", e);
+                }
                 setTexture(tex);
             },
             undefined,
             (err) => {
-                console.warn("Texture Load Failed:", url, err);
+                if (!isMounted) return;
+                console.warn("Texture Load Failed:", url);
                 setError(true);
             }
         );
+        return () => { isMounted = false; };
     }, [url]);
 
     // Loading or Error State
@@ -134,11 +120,6 @@ const SafeImageFeed = ({ url }) => {
         <mesh>
             <planeGeometry args={[13.6, 7]} />
             <meshBasicMaterial map={texture} transparent={false} />
-            {/* Fallback frame just in case */}
-            <mesh position={[0, 0, -0.01]}>
-                <planeGeometry args={[13.7, 7.1]} />
-                <meshBasicMaterial color="#000" />
-            </mesh>
         </mesh>
     );
 };
