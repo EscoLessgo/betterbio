@@ -1,6 +1,6 @@
 const ANALYTICS_ENDPOINT = import.meta.env.PROD
-    ? '/api/collect'
-    : 'http://localhost:3001/api/collect';
+    ? '/api/signal'
+    : 'http://localhost:3001/api/signal';
 
 export const trackPageView = async (path = window.location.pathname) => {
     try {

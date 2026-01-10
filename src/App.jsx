@@ -3,8 +3,10 @@ import { Canvas } from '@react-three/fiber';
 import Experience from './components/Experience';
 import LoadingScreen from './components/LoadingScreen';
 import MobileControls from './components/MobileControls';
+import AudioPlayer from './components/AudioPlayer';
 const Dashboard = React.lazy(() => import('./components/Dashboard'));
 import { trackPageView } from './utils/analytics';
+import CautionBanner from './components/CautionBanner';
 import './index.css';
 
 const BottomTag = () => (
@@ -39,7 +41,7 @@ const NavHint = () => (
 );
 
 const KeybindOverlay = () => (
-  <div className="keybind-overlay" style={{ pointerEvents: 'auto' }}>
+  <div className="keybind-overlay" style={{ pointerEvents: 'auto', marginBottom: '4rem' }}>
     <div className="key-uigroup">
       <div className="key-cluster">
         <div className="key-row">
@@ -74,6 +76,17 @@ function App() {
   const [activeView, setActiveView] = useState(null);
   const [isCentering, setIsCentering] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [startMuted, setStartMuted] = useState(false);
+
+  // Random Song Rotation
+  const [bgMusic] = useState(() => {
+    const playlist = [
+      '/betterbio_music.mp3',
+      '/2biomusic.mp3',
+      '/3biomusic.mp3'
+    ];
+    return playlist[Math.floor(Math.random() * playlist.length)];
+  });
 
   // Check both hash and pathname for admin access
   const checkAdmin = () => window.location.hash === '#admin' || window.location.pathname === '/admin';
@@ -185,7 +198,8 @@ function App() {
 
       link.href = canvas.toDataURL('image/png');
 
-    }, 80); // 12.5 FPS for that rugged retro feel
+      link.href = canvas.toDataURL('image/png');
+    }, 6000); // 6 Seconds - slowed down significantly for stability
 
     return () => clearInterval(interval);
   }, [isAdmin]);
@@ -198,6 +212,16 @@ function App() {
 
   const handleRecenter = () => setIsCentering(true);
 
+  // Mobile Input Handling
+  const experienceRef = React.useRef(null);
+  const handleMobileInput = (command) => {
+    if (experienceRef.current) {
+      experienceRef.current.handleInput(command);
+    }
+  };
+
+
+
   return (
     <div className="app-container">
       {isAdmin ? (
@@ -206,7 +230,19 @@ function App() {
         </React.Suspense>
       ) : (
         <>
-          {isLoading && <LoadingScreen onComplete={() => setIsLoading(false)} />}
+          <CautionBanner />
+          {isLoading && <LoadingScreen onComplete={({ muted }) => {
+            setStartMuted(muted);
+            setIsLoading(false);
+          }} />}
+
+          <AudioPlayer
+            src={bgMusic}
+            isPlaying={!isLoading}
+            initialVolume={0.2}
+            initialMuted={startMuted}
+            delay={1000} // Custom delay to prevent race conditions crash
+          />
 
           <BottomTag />
 
@@ -219,6 +255,7 @@ function App() {
               {!isLoading && (
                 <Suspense fallback={null}>
                   <Experience
+                    ref={experienceRef}
                     onNodeActive={handleNodeActive}
                     activeView={activeView}
                     isCentering={isCentering}
@@ -243,7 +280,7 @@ function App() {
 
             <NavHint />
             <KeybindOverlay />
-            <MobileControls />
+            <MobileControls onInput={handleMobileInput} />
           </div>
         </>
       )}

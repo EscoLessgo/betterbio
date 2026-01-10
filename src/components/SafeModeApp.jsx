@@ -149,7 +149,7 @@ const SafeModeApp = () => {
                     }}>
                         <h2 style={{
                             fontSize: '2rem',
-                            color: domain.includes('VEROE') ? '#ff0077' : domain.includes('VELARIX') ? '#00ffff' : '#ffd700',
+                            color: domain.includes('VEROE') ? '#ff0077' : domain.includes('VELARIX') ? '#00ffff' : '#ffaa00',
                             borderBottom: '2px solid #333',
                             paddingBottom: '2rem',
                             marginBottom: '3rem',

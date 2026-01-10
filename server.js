@@ -45,6 +45,7 @@ if (process.env.DATABASE_URL) {
     console.warn('⚠️ No DATABASE_URL. Analytics disabled.');
 }
 
+app.enable('trust proxy');
 app.use(cors());
 app.use(express.json());
 
@@ -66,7 +67,7 @@ app.post('/api/auth', (req, res) => {
 });
 
 // 3. Collection Endpoint
-app.post('/api/collect', async (req, res) => {
+app.post('/api/signal', async (req, res) => {
     const { path, referrer, screen, meta } = req.body || {};
 
     const ip = (req.headers['x-forwarded-for'] || req.socket.remoteAddress || '').split(',')[0].trim();
