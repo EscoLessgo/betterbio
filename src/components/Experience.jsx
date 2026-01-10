@@ -688,7 +688,9 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
     };
 
     // CAMERA RIG - Restored & Updated for Diamond Layout
-    const { camera } = useThree();
+    // SMOOTHER CAMERA ROTATION
+    const focusTarget = useRef(new Vector3(0, 0, 0));
+
     useFrame((state, delta) => {
         const isRoot = currentMenu === 'root';
         const activeNodes = TREE_DATA[currentMenu];
@@ -697,31 +699,21 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
         const isPreview = previewActive;
 
         // Base Z depth
-        let targetZ = isRoot ? 85 : 50; // Increased Zoom Out (was 65)
-
-        // Mobile Calibration: ZOOM OUT (Higher Z) as requested
-        if (isMobile) {
-            targetZ = isRoot ? 150 : 100; // Increased Mobile Zoom Out
-        }
-
+        let targetZ = isRoot ? 85 : 50;
+        if (isMobile) targetZ = isRoot ? 150 : 100;
         if (isPreview) targetZ = isMobile ? 80 : 40;
 
-        // X/Y follows the node slightly, but mostly stays centered on the column/row
         let targetX = 0;
         let targetY = 0;
 
         if (isRoot) {
-            // For Diamond, we want to center on the whole group (0,0,0)
             targetX = 0;
             targetY = 0;
         } else {
-            // SUBMENU: Center explicitly on the ACTIVE NODE to ensure visibility
-            // This fixes the issue where deep list items were rendered too low/high
             if (targetNode) {
                 targetX = targetNode.position[0];
                 targetY = targetNode.position[1];
             } else {
-                // Fallback to parent if no node active (rare)
                 const parent = TREE_DATA.root.find(n => n.id === currentMenu);
                 if (parent) {
                     targetX = parent.position[0];
@@ -737,10 +729,10 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
         } else if (isPreview && targetNode) {
             // CAMERA OPTIMIZATION: Shift logic
             if (isMobile) {
-                targetY += 6; // Shift up even more for mobile
+                targetY += 6;
             } else {
-                targetX += 8; // Shift further right to fully frame the window
-                targetY += 1; // Slight lift
+                targetX += 8;
+                targetY += 1;
             }
         }
 
@@ -751,11 +743,12 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
         state.camera.position.y = MathUtils.lerp(state.camera.position.y, targetY, lerpSpeed);
         state.camera.position.z = MathUtils.lerp(state.camera.position.z, targetZ, lerpSpeed);
 
-        // LOOKAT INTERPOLATION (Smoother rotation)
-        // Instead of snapping lookAt, we lerp the orbit controls buffer or manually lerp the quaternion?
-        // Simple lookAt every frame is "snappy" if position changes fast. 
-        // With slow position lerp, lookAt should be fine.
-        state.camera.lookAt(targetX, targetY, 0);
+        // SOFT FOCUS: Lerp the LookAt target too
+        focusTarget.current.x = MathUtils.lerp(focusTarget.current.x, targetX, lerpSpeed * 2); // Rotate slightly faster than move
+        focusTarget.current.y = MathUtils.lerp(focusTarget.current.y, targetY, lerpSpeed * 2);
+        focusTarget.current.z = MathUtils.lerp(focusTarget.current.z, 0, lerpSpeed * 2);
+
+        state.camera.lookAt(focusTarget.current);
     });
 
     return (
