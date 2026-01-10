@@ -236,13 +236,13 @@ function App() {
             setIsLoading(false);
           }} />}
 
-          <AudioPlayer
+          {/* <AudioPlayer
             src={bgMusic}
             isPlaying={!isLoading}
             initialVolume={0.2}
             initialMuted={startMuted}
             delay={1000} // Custom delay to prevent race conditions crash
-          />
+          /> */}
 
           <BottomTag />
 
