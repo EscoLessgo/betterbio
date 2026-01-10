@@ -11,6 +11,7 @@ const Dashboard = () => {
     const [password, setPassword] = useState('');
     const [data, setData] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     const [filter, setFilter] = useState('');
     const [selectedLogs, setSelectedLogs] = useState([]);
     const [mapState, setMapState] = useState({ coordinates: [0, 0], zoom: 1 });
@@ -54,7 +55,11 @@ const Dashboard = () => {
                 }
                 setLoading(false);
             })
-            .catch(() => setLoading(false));
+            .catch((e) => {
+                console.error(e);
+                setError('SERVER_CONNECTION_FAILED');
+                setLoading(false);
+            });
     };
 
     useEffect(() => {
@@ -106,6 +111,14 @@ const Dashboard = () => {
         </div>
     );
 
+    if (error) return (
+        <div style={{ height: '100vh', background: '#020205', color: 'red', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+            <h1>⚠️ SYSTEM_OFFLINE</h1>
+            <p>Ensure 'node server.js' is running.</p>
+            <button onClick={() => window.location.reload()} style={{ padding: '0.5rem 1rem', marginTop: '1rem', cursor: 'pointer' }}>RETRY</button>
+        </div>
+    );
+
     if (loading && !data) return <div style={{ color: '#0f0', padding: '2rem', fontFamily: 'monospace' }}>UPDATING_STREAMS...</div>;
 
     return (
@@ -146,7 +159,7 @@ const Dashboard = () => {
                         textAlign: 'center',
                         fontWeight: 'bold'
                     }}>
-                        ⚠️ DATABASE DISCONNECTED: ANALYTICS ARE OFFLINE. (Check DATABASE_URL in Railway)
+                        ⚠️ ANALYTICS SERVICE ERROR: UNABLE TO FETCH DATA.
                     </div>
                 )}
 

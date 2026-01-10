@@ -9,6 +9,11 @@ export default defineConfig({
   define: {
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production')
   },
+  server: {
+    proxy: {
+      '/api': 'http://localhost:3001'
+    }
+  },
   build: {
     outDir: 'dist',
     minify: false, // Disabled to resolve Three.js 'bt is undefined' errors caused by mangling

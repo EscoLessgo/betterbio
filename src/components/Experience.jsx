@@ -763,7 +763,7 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
         <group>
             <Floor />
             <Environment preset="city" blur={1} />
-            <EsconeonPopup /> {/* Moved inside component via position prop if supported, or manually adjust component default */}
+            {/* EsconeonPopup Removed for cleaner aesthetic */}
 
             {/* DEMO HARDWARE */}
             <ServerBlade position={[24, 0, -10]} rotation={[0.5, 0.5, 0]} delay={0.5} /> {/* Right (Quietbin) - Centered Y, Wider X */}
