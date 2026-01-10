@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Text, Line, Float, QuadraticBezierLine, CubicBezierLine, useTexture, useVideoTexture, Environment } from '@react-three/drei';
+import { Text, Line, Float, QuadraticBezierLine, CubicBezierLine, Environment } from '@react-three/drei';
 import * as THREE from 'three';
 
 const {

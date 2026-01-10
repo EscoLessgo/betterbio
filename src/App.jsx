@@ -82,8 +82,8 @@ function App() {
   const [bgMusic] = useState(() => {
     const playlist = [
       '/betterbio_music.mp3',
-      '/2biomusic.mp3',
-      '/3biomusic.mp3'
+      // '/2biomusic.mp3',
+      // '/3biomusic.mp3'
     ];
     return playlist[Math.floor(Math.random() * playlist.length)];
   });

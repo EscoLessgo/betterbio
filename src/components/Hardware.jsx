@@ -1,6 +1,6 @@
 
 import React, { useRef, useLayoutEffect } from 'react';
-import { useGLTF, RoundedBox, useTexture } from '@react-three/drei';
+import { useGLTF, RoundedBox } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import gsap from 'gsap';
