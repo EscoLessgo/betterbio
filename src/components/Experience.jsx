@@ -663,20 +663,25 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
         } else if (isPreview && targetNode) {
             // CAMERA OPTIMIZATION: Shift logic
             if (isMobile) {
-                targetY += 5; // Shift up to see screen above
+                targetY += 6; // Shift up even more for mobile
             } else {
-                targetX += 6; // Shift right to balance Node (left) and Screen (right)
-                // targetY remains centered on the node's Y
+                targetX += 8; // Shift further right to fully frame the window
+                targetY += 1; // Slight lift
             }
         }
 
-        const lerpSpeed = 0.8 * delta; // REDUCED from 2.0 for smoother, headache-free movement
+        // ULTRA SMOOTH LERP for "Headache Free" movement
+        const lerpSpeed = 0.5 * delta;
 
         state.camera.position.x = MathUtils.lerp(state.camera.position.x, targetX, lerpSpeed);
         state.camera.position.y = MathUtils.lerp(state.camera.position.y, targetY, lerpSpeed);
         state.camera.position.z = MathUtils.lerp(state.camera.position.z, targetZ, lerpSpeed);
 
-        state.camera.lookAt(targetX, targetY, 0); // Always look at the calculated center
+        // LOOKAT INTERPOLATION (Smoother rotation)
+        // Instead of snapping lookAt, we lerp the orbit controls buffer or manually lerp the quaternion?
+        // Simple lookAt every frame is "snappy" if position changes fast. 
+        // With slow position lerp, lookAt should be fine.
+        state.camera.lookAt(targetX, targetY, 0);
     });
 
     return (
