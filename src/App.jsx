@@ -41,7 +41,7 @@ const NavHint = () => (
 );
 
 const KeybindOverlay = () => (
-  <div className="keybind-overlay" style={{ pointerEvents: 'auto' }}>
+  <div className="keybind-overlay" style={{ pointerEvents: 'auto', marginBottom: '4rem' }}>
     <div className="key-uigroup">
       <div className="key-cluster">
         <div className="key-row">
