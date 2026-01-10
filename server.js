@@ -233,10 +233,17 @@ if (!fs.existsSync(distPath)) try { fs.mkdirSync(distPath, { recursive: true });
 app.use('/assets', express.static(path.join(distPath, 'assets')));
 app.use(express.static(distPath));
 
+const indexPath = path.join(distPath, 'index.html');
+
 // Handle client-side routing
 app.get('*', (req, res) => {
     if (req.path.startsWith('/api')) return res.status(404).json({ error: 'Not Found' });
-    res.sendFile(indexPath);
+
+    if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+    } else {
+        res.status(404).send('Build not found. Please run npm run build.');
+    }
 });
 
 app.listen(PORT, '0.0.0.0', () => console.log(`SERVER RUNNING ON ${PORT}`));
