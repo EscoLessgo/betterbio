@@ -135,6 +135,21 @@ const Dashboard = () => {
                     </div>
                 </header>
 
+                {/* DB ERROR WARNING */}
+                {(data?.error || data?.mock) && (
+                    <div style={{
+                        background: 'rgba(255, 0, 0, 0.2)',
+                        border: '1px solid red',
+                        color: 'red',
+                        padding: '1rem',
+                        marginBottom: '2rem',
+                        textAlign: 'center',
+                        fontWeight: 'bold'
+                    }}>
+                        ⚠️ DATABASE DISCONNECTED: ANALYTICS ARE OFFLINE. (Check DATABASE_URL in Railway)
+                    </div>
+                )}
+
                 {/* VISUALS ROW */}
                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
 
