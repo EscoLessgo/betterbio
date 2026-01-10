@@ -290,7 +290,12 @@ const NodeElement = ({ node, isActive, isDimmed, isDeploying, onVisit, delay = 0
     const isHighlight = isActive || hovered;
 
     return (
-        <group ref={groupRef}>
+        <group
+            ref={groupRef}
+            onClick={(e) => { e.stopPropagation(); onVisit(node); }}
+            onPointerOver={() => { setHovered(true); document.body.style.cursor = 'pointer'; }}
+            onPointerOut={() => { setHovered(false); document.body.style.cursor = 'auto'; }}
+        >
             {/* TRAIL EFFECT FOR ENTRANCE */}
             {!introFinished && (
                 <Trail
