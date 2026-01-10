@@ -842,6 +842,7 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
                         return (
                             <group key={node.id} scale={[scale, scale, scale]}>
                                 <NodeElement
+                                    node={node}
                                     isActive={activeState}
                                     isDimmed={!activeState && isVisible}
                                     isDeploying={isVisible}
