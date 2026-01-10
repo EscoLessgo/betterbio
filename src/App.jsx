@@ -244,13 +244,45 @@ function App() {
             delay={1000} // Custom delay to prevent race conditions crash
           />
 
+          {/* BACKGROUND VIDEO (Below Canvas) */}
+          <div className="video-background">
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              src="/background_main.mp4"
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                width: '100vw',
+                height: '100vh',
+                objectFit: 'cover',
+                zIndex: -1,
+                opacity: 0.6 // Blend with site darkness
+              }}
+            />
+            {/* Overlay Gradient for readability */}
+            <div style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              background: 'radial-gradient(circle at center, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.95) 100%)',
+              zIndex: -1
+            }} />
+          </div>
+
           <BottomTag />
 
           <div className="canvas-container">
             <Canvas
+              gl={{ alpha: true }} // Transparent canvas to show video
               camera={{ position: [0, 0, 35], fov: 40 }}
             >
-              <color attach="background" args={['#030508']} />
+              {/* REMOVED: <color attach="background" args={['#030508']} /> to allow video see-through */}
 
               {!isLoading && (
                 <Suspense fallback={null}>
