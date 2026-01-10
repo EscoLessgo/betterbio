@@ -392,44 +392,57 @@ const ElectricCable = ({ start, end, color }) => {
         end[2] + (end[2] - start[2]) * 0.7
     ];
 
-    // Points for the surge curve calculation
-    // Using simple interpolation for the Surge, or distinct beziers
+    const materialRef = useRef();
 
-    // We render the Physical Wire + a Surge that travels it
-    // To make sure surge follows the wire, we need points. 
-    // CubicBezierLine uses a curve internally, let's approximate simply for the pulse visual or just overlay.
+    useFrame((state, delta) => {
+        if (materialRef.current) {
+            materialRef.current.dashOffset -= delta * 2; // Fast flow
+        }
+    });
 
     return (
         <group>
-            {/* 1. The Physical Dark Wire */}
-            <CubicBezierLine
-                start={start}
-                end={end}
-                midA={mid1}
-                midB={mid2}
-                color="#111" // Dark rubber/tech casing
-                lineWidth={6}
-                transparent
-                opacity={1}
-            />
-
-            {/* 2. The Inner Core Wire (Thin colored line) */}
+            {/* 1. OUTER GLOW (Thick, static, low opacity) */}
             <CubicBezierLine
                 start={start}
                 end={end}
                 midA={mid1}
                 midB={mid2}
                 color={color}
-                lineWidth={1}
+                lineWidth={8}
                 transparent
-                opacity={0.3}
+                opacity={0.15}
             />
 
-            {/* 3. The Surge Pulse */}
+            {/* 2. INNER ENERGY STREAM (Dashed, Animated) */}
+            <CubicBezierLine
+                start={start}
+                end={end}
+                midA={mid1}
+                midB={mid2}
+                color="#fff" // Bright core
+                lineWidth={2}
+                dashed
+                dashScale={5}
+                dashSize={1}
+                gapSize={1}
+            >
+                <meshBasicMaterial
+                    attach="material"
+                    color={color}
+                    ref={materialRef}
+                    transparent
+                    opacity={0.8}
+                    dashSize={1}
+                    gapSize={1}
+                />
+            </CubicBezierLine>
+
+            {/* 3. The Surge Pulse (With Trail) */}
             <SurgePulse
                 points={[start, mid1, mid2, end]}
                 color={color}
-                speed={1.5}
+                speed={2.5}
             />
 
         </group>
@@ -437,22 +450,44 @@ const ElectricCable = ({ start, end, color }) => {
 };
 
 const ElectricDrop = ({ start, end, color }) => {
+    const materialRef = useRef();
+
+    useFrame((state, delta) => {
+        if (materialRef.current) {
+            materialRef.current.dashOffset -= delta * 1.5;
+        }
+    });
+
     return (
         <group>
-            {/* Physical Vertical Wire */}
-            <Line
-                points={[start, end]}
-                color="#111"
-                lineWidth={4}
-            />
-            {/* Vibrancy Core */}
+            {/* Outer Glow */}
             <Line
                 points={[start, end]}
                 color={color}
-                lineWidth={1}
+                lineWidth={6}
                 transparent
-                opacity={0.4}
+                opacity={0.1}
             />
+            {/* Animated Dashed Core */}
+            <Line
+                points={[start, end]}
+                color={color}
+                lineWidth={2}
+                dashed
+                dashScale={4}
+                dashSize={1}
+                gapSize={1}
+            >
+                <lineDashedMaterial
+                    attach="material"
+                    color={color}
+                    ref={materialRef}
+                    transparent
+                    opacity={0.9}
+                    dashSize={1}
+                    gapSize={1}
+                />
+            </Line>
 
             {/* Vertical Surge */}
             <SurgePulse
@@ -460,8 +495,6 @@ const ElectricDrop = ({ start, end, color }) => {
                 color={color}
                 speed={2.0}
             />
-
-
         </group>
     );
 };
@@ -486,11 +519,22 @@ const SurgePulse = ({ points, color, speed = 1 }) => {
     });
 
     return (
-        <mesh ref={meshRef}>
-            <sphereGeometry args={[0.3, 16, 16]} /> {/* BIGGER GEOMETRY */}
-            <meshBasicMaterial color={color} transparent />
-            <pointLight distance={8} intensity={15} color={color} decay={1} /> {/* BRIGHTER LIGHT */}
-        </mesh>
+        <group>
+            <mesh ref={meshRef}>
+                <sphereGeometry args={[0.3, 16, 16]} />
+                <meshBasicMaterial color={color} transparent />
+                <pointLight distance={8} intensity={15} color={color} decay={1} />
+            </mesh>
+
+            {/* ELECTRIC TRAIL BEHIND SURGE */}
+            <Trail
+                width={1.5}
+                length={4} // Short, snappy trail
+                color={color}
+                attenuation={(t) => t} // Linear fade
+                target={meshRef} // Follow the sphere
+            />
+        </group>
     );
 };
 
