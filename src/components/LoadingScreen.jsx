@@ -56,6 +56,8 @@ const LoadingScreen = ({ onComplete }) => {
                         <p style={{ marginBottom: '1.5rem', lineHeight: '1.6', fontSize: '0.9rem', color: '#aaa' }}>
                             This experience requires heavy 3D rendering. <br />
                             <span style={{ color: '#fff' }}>Please allow 3-5 seconds for the environment to compile.</span>
+                            <br /><br />
+                            <span style={{ color: '#ffcc00', fontWeight: 'bold' }}>NOTE: EXPECT MOMENTARY STUTTERING/FREEZING ON LOAD.</span>
                         </p>
 
                         <div className="hw-instructions" style={{

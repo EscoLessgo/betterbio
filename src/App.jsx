@@ -6,6 +6,7 @@ import MobileControls from './components/MobileControls';
 import AudioPlayer from './components/AudioPlayer';
 const Dashboard = React.lazy(() => import('./components/Dashboard'));
 import { trackPageView } from './utils/analytics';
+import CautionBanner from './components/CautionBanner';
 import './index.css';
 
 const BottomTag = () => (
@@ -76,6 +77,16 @@ function App() {
   const [isCentering, setIsCentering] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [startMuted, setStartMuted] = useState(false);
+
+  // Random Song Rotation
+  const [bgMusic] = useState(() => {
+    const playlist = [
+      '/betterbio_music.mp3',
+      '/2biomusic.mp3',
+      '/3biomusic.mp3'
+    ];
+    return playlist[Math.floor(Math.random() * playlist.length)];
+  });
 
   // Check both hash and pathname for admin access
   const checkAdmin = () => window.location.hash === '#admin' || window.location.pathname === '/admin';
@@ -209,6 +220,8 @@ function App() {
     }
   };
 
+
+
   return (
     <div className="app-container">
       {isAdmin ? (
@@ -217,13 +230,14 @@ function App() {
         </React.Suspense>
       ) : (
         <>
+          <CautionBanner />
           {isLoading && <LoadingScreen onComplete={({ muted }) => {
             setStartMuted(muted);
             setIsLoading(false);
           }} />}
 
           <AudioPlayer
-            src="/betterbio_music.mp3"
+            src={bgMusic}
             isPlaying={!isLoading}
             initialVolume={0.2}
             initialMuted={startMuted}

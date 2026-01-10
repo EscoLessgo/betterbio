@@ -16,11 +16,15 @@ import ServerBlade from './Hardware';
 
 const PCB_BLUE = "#2dfccc";
 const PCB_PINK = "#d92b6b";
-const PCB_GOLD = "#e8f080";
+const PCB_GOLD = "#ffaa00";
 
 // Consolidated Neural Preview Database
 const PREVIEW_DATA = {
     // VEROE.FUN CLUSTER
+    'f_escosigns': '/uploaded_image_0_1767873499613.png',
+    'f_spoti': '/uploaded_image_1_1767873499613.png',
+    'f_tnt': '/uploaded_image_2_1767873499613.png',
+    'f_fight': '/uploaded_image_3_1767873499613.png',
     'f_more': '/uploaded_image_4_1767873499613.png',
 
     // VELARIXSOLUTIONS.NL CLUSTER
@@ -34,9 +38,9 @@ const PREVIEW_DATA = {
     's_root': '/quietembed.mp4',
 
     // DISCORD GAMES
-    'd_tenk': '/uploaded_image_0_1767980870604.jpg',
-    'd_square': '/uploaded_image_1_1767980870604.png',
-    'd_spell': '/uploaded_image_2_1767980870604.jpg'
+    'd_tenk': '/discord_tenk.png',
+    'd_square': '/discord_squareup.png',
+    'd_spell': '/discord_spell.png'
 };
 
 // Robust Video Feed using manual element
@@ -52,10 +56,34 @@ const VideoFeed = ({ url }) => {
         return vid;
     });
 
+    const [error, setError] = useState(false);
+
     useEffect(() => {
-        video.play().catch(e => console.warn("Autoplay failed", e));
+        const playPromise = video.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(e => {
+                console.warn("Autoplay failed", e);
+                // Don't set error immediately for autoplay block, only for source issues
+            });
+        }
+
+        video.onerror = () => {
+            console.warn("Video Load Failed:", url);
+            setError(true);
+        };
+
         return () => video.pause();
-    }, [video]);
+    }, [video, url]);
+
+    if (error) {
+        return (
+            <mesh>
+                <planeGeometry args={[13.6, 7]} />
+                <meshBasicMaterial color="#220000" />
+                <Text fontSize={0.5} color="red" position={[0, 0, 0.1]}>VIDEO_LOST</Text>
+            </mesh>
+        );
+    }
 
     return (
         <mesh scale={[1, 1, 1]}>
@@ -67,26 +95,63 @@ const VideoFeed = ({ url }) => {
     );
 };
 
-const ImageFeed = ({ url }) => {
-    const texture = useTexture(url);
-    texture.colorSpace = SRGBColorSpace;
+const SafeImageFeed = ({ url }) => {
+    const [texture, setTexture] = useState(null);
+    const [error, setError] = useState(false);
+
+    useEffect(() => {
+        setError(false);
+        setTexture(null);
+
+        const loader = new TextureLoader();
+        loader.load(
+            url,
+            (tex) => {
+                tex.colorSpace = SRGBColorSpace;
+                setTexture(tex);
+            },
+            undefined,
+            (err) => {
+                console.warn("Texture Load Failed:", url, err);
+                setError(true);
+            }
+        );
+    }, [url]);
+
+    // Loading or Error State
+    if (error || !texture) {
+        return (
+            <mesh>
+                <planeGeometry args={[13.6, 7]} />
+                <meshBasicMaterial color={error ? "#330000" : "#111"} transparent opacity={0.8} />
+                {error && <Text fontSize={0.5} color="red" position={[0, 0, 0.1]}>IMG_ERR</Text>}
+                {!error && <Text fontSize={0.5} color="#444" position={[0, 0, 0.1]}>LOADING...</Text>}
+            </mesh>
+        );
+    }
+
     return (
         <mesh>
             <planeGeometry args={[13.6, 7]} />
             <meshBasicMaterial map={texture} transparent={false} />
+            {/* Fallback frame just in case */}
+            <mesh position={[0, 0, -0.01]}>
+                <planeGeometry args={[13.7, 7.1]} />
+                <meshBasicMaterial color="#000" />
+            </mesh>
         </mesh>
     );
 };
 
 const PreviewMedia = ({ url }) => {
-    const isVideo = url.endsWith('.mp4');
+    const isVideo = url && url.endsWith('.mp4');
     return (
         <group position={[0, -0.25, 0.16]}>
             <mesh>
                 <planeGeometry args={[13.6, 7]} />
                 <meshBasicMaterial color="#000" transparent opacity={0.6} />
             </mesh>
-            {isVideo ? <VideoFeed url={url} /> : <ImageFeed url={url} />}
+            {isVideo ? <VideoFeed url={url} /> : <SafeImageFeed url={url} />}
         </group>
     );
 };
@@ -151,8 +216,8 @@ const PreviewWindow = ({ node, isVisible, trunkColor }) => {
                 LINK_FEED: {(node?.url || 'system_node').replace('https://', '')}
             </Text>
 
-            {hasMedia ? (
-                <PreviewMedia url={PREVIEW_DATA[node.id]} />
+            {true ? (
+                <PreviewMedia url={PREVIEW_DATA[node.id] || '/thumbnail.png'} />
             ) : (
                 <Text position={[0, -0.25, 0.16]} fontSize={0.3} color="#444">NO_VIBE_FEED</Text>
             )}
@@ -297,7 +362,7 @@ const NodeElement = ({ node, isActive, isDimmed, isDeploying, onVisit }) => {
         <group
             position={node.position}
             ref={groupRef}
-            onClick={(e) => { e.stopPropagation(); if (node.url) onVisit(node.url); }}
+            onClick={(e) => { e.stopPropagation(); onVisit(node); }}
             onPointerOver={() => { setHovered(true); document.body.style.cursor = 'pointer'; }}
             onPointerOut={() => { setHovered(false); document.body.style.cursor = 'auto'; }}
         >
@@ -628,6 +693,32 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
 
     const trunkColor = TREE_DATA.root.find(n => n.id === currentMenu)?.color || PCB_BLUE;
 
+    // Helper to activate a specific node/menu via click
+    const activateNode = (node) => {
+        // If it's a menu root (has children in TREE_DATA)
+        if (TREE_DATA[node.id]) {
+            setCurrentMenu(node.id);
+            setCurrentNodeIdx(0);
+            setPreviewActive(false);
+            return;
+        }
+
+        // If 'node' is in the current menu, select it
+        const idx = activeNodes.findIndex(n => n.id === node.id);
+        if (idx !== -1) {
+            if (idx !== currentNodeIdx) {
+                setCurrentNodeIdx(idx);
+                setPreviewActive(false);
+            } else {
+                // Already selected, trigger 'Enter' behavior
+                if (node.url) {
+                    if (!previewActive) setPreviewActive(true);
+                    else window.open(node.url, '_blank');
+                }
+            }
+        }
+    };
+
     // CAMERA RIG - Restored & Updated for Diamond Layout
     const { camera } = useThree();
     useFrame((state, delta) => {
@@ -770,13 +861,10 @@ const Experience = React.forwardRef(({ onNodeActive, isCentering, onCenterComple
                         return (
                             <group key={node.id} scale={[scale, scale, scale]}>
                                 <NodeElement
-                                    node={node}
                                     isActive={activeState}
                                     isDimmed={!activeState && isVisible}
                                     isDeploying={isVisible}
-                                    onVisit={() => {
-                                        // ... click logic
-                                    }}
+                                    onVisit={activateNode}
                                 />
                                 {activeState && node.url && (
                                     <PreviewWindow node={node} isVisible={previewActive} trunkColor={trunkColor} />
