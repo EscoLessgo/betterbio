@@ -27,18 +27,23 @@ const CautionBanner = () => {
         }}>
             <style>{`
                 @keyframes slideInLeft { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+                @keyframes heavyFlash { 
+                    0%, 100% { opacity: 1; } 
+                    50% { opacity: 0.5; color: #ff0040; } 
+                }
             `}</style>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.8rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
                 <strong style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.5rem',
+                    gap: '0.8rem',
                     textTransform: 'uppercase',
-                    letterSpacing: '1px',
-                    fontSize: '0.9rem'
+                    letterSpacing: '2px',
+                    fontSize: '1.4rem',
+                    fontWeight: 900 // EXTRA BOLD
                 }}>
-                    <span style={{ fontSize: '1.2em' }}>⚠️</span> Performance Warning
+                    <span style={{ fontSize: '1.5em' }}>⚠️</span> ATTENTION
                 </strong>
                 <button
                     onClick={() => setVisible(false)}
@@ -47,22 +52,34 @@ const CautionBanner = () => {
                         border: 'none',
                         color: 'inherit',
                         cursor: 'pointer',
-                        fontSize: '1.2rem',
+                        fontSize: '2rem',
                         padding: '0 0.5rem',
                         lineHeight: 1,
-                        marginTop: '-4px'
+                        marginTop: '-10px'
                     }}
                 >
                     ×
                 </button>
             </div>
 
-            <div style={{ fontWeight: 500, opacity: 0.9, marginBottom: '0.8rem' }}>
-                YOU WILL PROBABLY STUTTER OR FREEZE MOMENTARILY WHILE THE SITE LOADS. I'M NEW TO REACT THREE/FIBER SO CUT ME SOME SLACK :)
+            <div style={{
+                fontWeight: 900,
+                fontSize: '1.1rem',
+                marginBottom: '1rem',
+                animation: 'heavyFlash 1s infinite alternate-reverse' // BLINKING
+            }}>
+                THIS EXPERIENCE REQUIRES HEAVY 3D RENDERING. <br />
+                PLEASE ALLOW 3-5 SECONDS FOR THE ENVIRONMENT TO COMPILE.
             </div>
 
-            <div style={{ textAlign: 'right', fontStyle: 'italic', opacity: 0.7 }}>
-                - esco
+            <div style={{
+                fontWeight: 'bold',
+                color: '#ffaa00',
+                borderTop: '2px solid #ffcc00',
+                paddingTop: '1rem',
+                marginTop: '1rem'
+            }}>
+                NOTE: EXPECT MOMENTARY STUTTERING/FREEZING ON LOAD.
             </div>
         </div>
     );
